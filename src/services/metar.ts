@@ -134,9 +134,26 @@ function normalizeItem(item: NoaaMetarItem): NormalizedMetar {
   if (typeof item.altim === "number") qnh = Math.round(item.altim);
   if (qnh == null) qnh = parsed.qnhHpa;
 
-  // Observation time
+  // Observation time — parse exact time from raw METAR "ddHHMMZ" group
+  // (API's reportTime is often rounded to the nearest hour)
   let observedAt: string | null = null;
-  if (item.reportTime) {
+  const obsMatch = raw.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+  if (obsMatch) {
+    const dd = parseInt(obsMatch[1], 10);
+    const hh = parseInt(obsMatch[2], 10);
+    const mm = parseInt(obsMatch[3], 10);
+
+    // Year/month context from API (raw METAR only has day+time)
+    const ref = item.reportTime
+      ? new Date(item.reportTime)
+      : item.obsTime
+        ? new Date(item.obsTime * 1000)
+        : new Date();
+
+    observedAt = new Date(
+      Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), dd, hh, mm, 0),
+    ).toISOString();
+  } else if (item.reportTime) {
     observedAt = item.reportTime;
   } else if (item.obsTime) {
     observedAt = new Date(item.obsTime * 1000).toISOString();
