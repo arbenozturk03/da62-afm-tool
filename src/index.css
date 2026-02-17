@@ -1,0 +1,88 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* App theme tokens (dark default) */
+  --border-color: #444;
+  --text-muted: #999;
+  --text-secondary: #aaa;
+  --panel-bg: #2a2a2a;
+  --panel-border: #444;
+  --diagram-bg: #1e2e1e;
+  --result-bg: #1a2a3a;
+  --result-border: #1976d2;
+  --gravel-color: #bcaaa4;
+  --hw-tw-color: #aaa;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+
+    --border-color: #ccc;
+    --text-muted: #999;
+    --text-secondary: #666;
+    --panel-bg: #f8f9fa;
+    --panel-border: #ccc;
+    --diagram-bg: #eef2ee;
+    --result-bg: #e3f2fd;
+    --result-border: #1976d2;
+    --gravel-color: #795548;
+    --hw-tw-color: #666;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

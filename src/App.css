@@ -1,0 +1,97 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+}
+
+/* ── App header: logo + tabs in one row ────────────── */
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px 12px 0;
+  max-width: 480px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+/* ── TAI Logo (inline SVG) ─────────────────────────── */
+.tai-logo {
+  height: 40px !important;
+  width: auto !important;
+  max-height: 40px;
+  flex-shrink: 0;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Dark mode: white text */
+.tai-logo .tai-text {
+  fill: #ffffff;
+}
+
+/* Light mode: dark text */
+@media (prefers-color-scheme: light) {
+  .tai-logo .tai-text {
+    fill: #333;
+  }
+}
+
+/* ── Page navigation tabs ──────────────────────────── */
+.page-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: -1px;
+}
+
+.page-nav button {
+  padding: 8px 20px;
+  text-align: center;
+  border: 1px solid var(--panel-border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: var(--panel-bg);
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.5;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.page-nav button:hover {
+  opacity: 0.8;
+}
+
+.page-nav button.active {
+  opacity: 1;
+  background: var(--result-bg);
+  border-color: var(--result-border);
+}
+
+.page-nav button:first-child {
+  border-top-right-radius: 0;
+  margin-right: -1px;
+}
+
+.page-nav button:last-child {
+  border-top-left-radius: 0;
+}
+
+/* ── Mobile ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 8px 12px 0;
+    gap: 10px;
+  }
+  .tai-logo {
+    height: 36px !important;
+    max-height: 36px;
+    margin-bottom: 5px;
+  }
+  .page-nav button {
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+}
