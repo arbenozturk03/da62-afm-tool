@@ -102,7 +102,7 @@ export async function fetchMetarJson(
 
   // The response can arrive in two shapes:
   //  1) Raw NOAA array  – used in dev via Vite proxy
-  //  2) Wrapped object { ids, latest, fallbackHoursUsed } – Netlify function
+  //  2) Wrapped object { ids, latest, hoursUsed } – Netlify function
   let item: NoaaMetarItem | null = null;
 
   if (Array.isArray(data)) {
