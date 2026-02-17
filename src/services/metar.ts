@@ -51,7 +51,11 @@ interface NoaaMetarItem {
 export async function fetchMetarJson(
   icao: string,
 ): Promise<NormalizedMetar | null> {
-  const url = `${API_BASE}?ids=${encodeURIComponent(icao.toUpperCase())}&format=json`;
+  // "hours=3" ensures the NOAA API returns observations from the last 3 h.
+  // In dev (Vite proxy → NOAA directly) this prevents empty results for
+  // airports that report infrequently.  In production the Netlify function
+  // has its own progressive fallback and ignores this parameter.
+  const url = `${API_BASE}?ids=${encodeURIComponent(icao.toUpperCase())}&format=json&hours=3`;
 
   let res: Response;
   try {
@@ -96,9 +100,31 @@ export async function fetchMetarJson(
     );
   }
 
-  if (!Array.isArray(data) || data.length === 0) return null;
+  // The response can arrive in two shapes:
+  //  1) Raw NOAA array  – used in dev via Vite proxy
+  //  2) Wrapped object { ids, latest, fallbackHoursUsed } – Netlify function
+  let item: NoaaMetarItem | null = null;
 
-  return normalizeItem(data[0] as NoaaMetarItem);
+  if (Array.isArray(data)) {
+    // Shape 1: raw NOAA array (dev proxy) — sort newest-first
+    if (data.length === 0) return null;
+    data.sort(
+      (a: NoaaMetarItem, b: NoaaMetarItem) =>
+        (b.obsTime ?? 0) - (a.obsTime ?? 0),
+    );
+    item = data[0] as NoaaMetarItem;
+  } else if (
+    data &&
+    typeof data === "object" &&
+    "latest" in (data as Record<string, unknown>)
+  ) {
+    // Shape 2: Netlify function wrapper
+    item = (data as { latest: NoaaMetarItem | null }).latest;
+  }
+
+  if (!item) return null;
+
+  return normalizeItem(item);
 }
 
 // ── Normalize ─────────────────────────────────────────────────
