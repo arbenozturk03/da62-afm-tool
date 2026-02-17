@@ -4,6 +4,11 @@
  * Shows the raw METAR string, observation time, decoded values,
  * and source attribution.  Provides Refresh and "Use METAR values"
  * buttons.
+ *
+ * Freshness tiers (based on observation age):
+ *   0 – 75 min   → Green  (fresh)
+ *   75 min – 3 h  → Orange (caution)
+ *   > 3 h         → Red    (stale) + warning banner
  */
 
 import type { NormalizedMetar } from "./services/metar";
@@ -16,6 +21,71 @@ interface MetarCardProps {
   onRefresh: () => void;
   onApplyValues: () => void;
   hasDirtyFields: boolean;
+}
+
+// ── Freshness tiers ───────────────────────────────────────────
+
+type FreshnessTier = "fresh" | "caution" | "stale";
+
+interface Freshness {
+  tier: FreshnessTier;
+  color: string;
+  borderColor: string;
+  bgTint: string;
+  ageMin: number;
+  label: string;
+}
+
+const FRESH_MIN = 75;       // minutes
+const CAUTION_MIN = 180;    // 3 hours
+
+function getFreshness(observedAt: string | null): Freshness {
+  if (!observedAt) {
+    return {
+      tier: "stale",
+      color: "#ef5350",
+      borderColor: "#ef5350",
+      bgTint: "rgba(239,83,80,0.08)",
+      ageMin: Infinity,
+      label: "Unknown age",
+    };
+  }
+
+  const ageMs = Date.now() - new Date(observedAt).getTime();
+  const ageMin = Math.max(0, Math.round(ageMs / 60_000));
+
+  if (ageMin <= FRESH_MIN) {
+    return {
+      tier: "fresh",
+      color: "#66bb6a",
+      borderColor: "#66bb6a",
+      bgTint: "rgba(102,187,106,0.08)",
+      ageMin,
+      label: `${ageMin} min ago`,
+    };
+  }
+  if (ageMin <= CAUTION_MIN) {
+    return {
+      tier: "caution",
+      color: "#ffa726",
+      borderColor: "#ffa726",
+      bgTint: "rgba(255,167,38,0.08)",
+      ageMin,
+      label: ageMin < 120
+        ? `${ageMin} min ago`
+        : `${(ageMin / 60).toFixed(1)} h ago`,
+    };
+  }
+
+  const ageH = ageMin / 60;
+  return {
+    tier: "stale",
+    color: "#ef5350",
+    borderColor: "#ef5350",
+    bgTint: "rgba(239,83,80,0.08)",
+    ageMin,
+    label: ageH < 24 ? `${ageH.toFixed(1)} h ago` : `${Math.round(ageH)} h ago`,
+  };
 }
 
 /** Format ISO date → compact UTC string for pilots */
@@ -48,17 +118,20 @@ export default function MetarCard({
   // Hide entirely when no airport is selected
   if (!icao || icao === "CUSTOM") return null;
 
-  // Border / background colours based on state
+  // Freshness tier (only meaningful when we have a METAR)
+  const freshness = metar ? getFreshness(metar.observedAt) : null;
+
+  // Border / background colours — freshness-aware when METAR is present
   const borderColor = error && !metar
     ? "#c62828"
-    : metar
-      ? "var(--result-border)"
+    : freshness
+      ? freshness.borderColor
       : "var(--panel-border)";
 
   const bgColor = error && !metar
     ? "rgba(198,40,40,0.08)"
-    : metar
-      ? "var(--result-bg)"
+    : freshness
+      ? freshness.bgTint
       : "var(--panel-bg)";
 
   return (
@@ -134,8 +207,30 @@ export default function MetarCard({
       )}
 
       {/* ── METAR content ───────────────────────────────────── */}
-      {metar && !loading && (
+      {metar && !loading && freshness && (
         <>
+          {/* Stale data warning */}
+          {freshness.tier === "stale" && (
+            <div
+              style={{
+                padding: "6px 10px",
+                borderRadius: 4,
+                backgroundColor: "rgba(239,83,80,0.12)",
+                border: "1px solid rgba(239,83,80,0.3)",
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span style={{ fontSize: 14, lineHeight: 1 }}>⚠</span>
+              <span style={{ color: "#ef5350", fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>
+                METAR data is stale ({freshness.label}).
+                Weather values may no longer be accurate — verify before use.
+              </span>
+            </div>
+          )}
+
           {/* Raw METAR text */}
           <div
             style={{
@@ -153,14 +248,14 @@ export default function MetarCard({
             {metar.rawText || "—"}
           </div>
 
-          {/* Decoded summary */}
+          {/* Decoded summary — colored by freshness tier */}
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
               gap: "4px 14px",
               fontSize: 12,
-              color: "var(--text-secondary)",
+              color: freshness.color,
               marginBottom: 6,
             }}
           >
@@ -186,15 +281,40 @@ export default function MetarCard({
             )}
           </div>
 
-          {/* Obs time + source */}
+          {/* Obs time + freshness badge + source */}
           <div
             style={{
               fontSize: 11,
               color: "var(--text-muted)",
               marginBottom: hasDirtyFields ? 6 : 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexWrap: "wrap",
             }}
           >
-            Obs: {fmtUtc(metar.observedAt)} · Source: NOAA AviationWeather
+            <span>Obs: {fmtUtc(metar.observedAt)}</span>
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "1px 6px",
+                borderRadius: 3,
+                backgroundColor: freshness.color,
+                color: "#fff",
+                letterSpacing: 0.3,
+                lineHeight: "16px",
+              }}
+            >
+              {freshness.tier === "fresh"
+                ? "FRESH"
+                : freshness.tier === "caution"
+                  ? "CAUTION"
+                  : "STALE"}
+            </span>
+            <span style={{ opacity: 0.7 }}>{freshness.label}</span>
+            <span>· Source: NOAA AviationWeather</span>
           </div>
 
           {/* "Use METAR values" button — only when user has overridden */}
