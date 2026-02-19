@@ -8,9 +8,9 @@ import Modal from "./Modal";
 const SVG_W = 1063;
 const SVG_H = 3792;
 
-/* Crop: nose tip to just past rear seats */
+/* Crop: nose tip to rear seats, tail cut for mobile size */
 const CROP_Y = 50;
-const CROP_H = 3150;
+const CROP_H = 2750;
 const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 
 /* ── Zone definitions ─────────────────────────────────────── */
