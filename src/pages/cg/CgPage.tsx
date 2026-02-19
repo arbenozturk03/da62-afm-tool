@@ -126,7 +126,7 @@ export default function CgPage() {
 
       <div className="cg-layout" style={{ gap: 16, alignItems: "flex-start" as const }}>
         {/* Left: Cabin SVG */}
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, display: "flex", justifyContent: "center" }}>
           <CabinSvg />
           <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, textAlign: "center" }}>
             Click a zone to enter weight
