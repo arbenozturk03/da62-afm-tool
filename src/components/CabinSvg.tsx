@@ -23,7 +23,6 @@ interface SeatZone {
   w: number;
   h: number;
   max?: number;
-  section: "nose" | "cabin" | "rear";
 }
 
 interface BagZone {
@@ -35,39 +34,41 @@ interface BagZone {
   w: number;
   h: number;
   max: number;
-  section: "nose" | "cabin" | "rear";
 }
 
 /* ── Zone data ── */
 
 const SEATS: SeatZone[] = [
-  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 400, cy: 1450, w: 240, h: 220, section: "cabin" },
-  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 700, cy: 1450, w: 240, h: 220, section: "cabin" },
-  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 360, cy: 1850, w: 200, h: 220, section: "cabin" },
-  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 550, cy: 1850, w: 200, h: 220, section: "cabin" },
-  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 750, cy: 1850, w: 200, h: 220, section: "cabin" },
-  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 450, cy: 2280, w: 220, h: 220, section: "rear" },
-  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 650, cy: 2280, w: 220, h: 220, section: "rear" },
+  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 400, cy: 1450, w: 240, h: 220 },
+  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 700, cy: 1450, w: 240, h: 220 },
+  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 360, cy: 1850, w: 200, h: 220 },
+  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 550, cy: 1850, w: 200, h: 220 },
+  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 750, cy: 1850, w: 200, h: 220 },
+  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 450, cy: 2280, w: 220, h: 220 },
+  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 650, cy: 2280, w: 220, h: 220 },
 ];
 
 const BAGS: BagZone[] = [
-  { id: "blh", label: "Left Cargo", stateKey: "lhNoseKg", cx: 400, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.lhNose, section: "nose" },
-  { id: "brh", label: "Right Cargo", stateKey: "rhNoseKg", cx: 688, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.rhNose, section: "nose" },
-  { id: "brf", label: "Rear Baggage", stateKey: "rearFKg", cx: 550, cy: 2280, w: 300, h: 220, max: aircraftConfig.baggageLimits.rearF, section: "rear" },
+  { id: "blh", label: "Left Cargo", stateKey: "lhNoseKg", cx: 400, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.lhNose },
+  { id: "brh", label: "Right Cargo", stateKey: "rhNoseKg", cx: 688, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.rhNose },
+  { id: "brf", label: "Rear Baggage", stateKey: "rearFKg", cx: 550, cy: 2280, w: 300, h: 220, max: aircraftConfig.baggageLimits.rearF },
 ];
 
+/* Label card sizes */
 const CARD_W = 200;
 const CARD_H = 70;
 const CARD_RX = 12;
 
-/* Section scroll targets (SVG y-coordinates) */
+/* Bigger baggage cards */
+const BAG_CARD_W = 260;
+const BAG_CARD_H = 90;
+
+/* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 1300 },
+  { id: "cabin", label: "Cabin", targetY: 1500 },
   { id: "rear", label: "Rear", targetY: 2100 },
 ] as const;
-
-const ZOOM_PRESETS = [1.0, 1.5, 2.0];
 
 /* ── Component ── */
 
@@ -75,8 +76,7 @@ export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
-  const [zoom, setZoom] = useState(1.4);
-  const [activeSection, setActiveSection] = useState("cabin");
+  const [activeSection, setActiveSection] = useState("nose");
   const viewportRef = useRef<HTMLDivElement>(null);
   const svgContentRef = useRef<HTMLDivElement>(null);
 
@@ -103,7 +103,6 @@ export default function CabinSvg() {
 
   const disabledSeatIds = new Set(isCargoMode ? ["s6l", "s7r"] : []);
 
-  /* Quick-jump: scroll the viewport so the target SVG-y is centered */
   const jumpTo = (sectionId: string) => {
     const vp = viewportRef.current;
     const content = svgContentRef.current;
@@ -115,18 +114,11 @@ export default function CabinSvg() {
 
     const svgYNorm = (section.targetY - CROP_Y) / CROP_H;
     const contentH = content.scrollHeight;
-    const targetScroll = svgYNorm * contentH - vp.clientHeight / 2;
+    const targetScroll = svgYNorm * contentH - vp.clientHeight / 3;
 
     vp.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
   };
 
-  const cycleZoom = () => {
-    const idx = ZOOM_PRESETS.indexOf(zoom);
-    const next = idx === -1 || idx === ZOOM_PRESETS.length - 1 ? ZOOM_PRESETS[0] : ZOOM_PRESETS[idx + 1];
-    setZoom(next);
-  };
-
-  /* Track which section is visible while scrolling */
   const handleScroll = () => {
     const vp = viewportRef.current;
     const content = svgContentRef.current;
@@ -148,7 +140,6 @@ export default function CabinSvg() {
         display: "flex",
         justifyContent: "center",
         gap: 0,
-        marginBottom: 6,
         borderRadius: 8,
         overflow: "hidden",
         border: "1px solid var(--panel-border)",
@@ -194,11 +185,7 @@ export default function CabinSvg() {
       >
         <div
           ref={svgContentRef}
-          style={{
-            width: `${zoom * 100}%`,
-            margin: "0 auto",
-            transformOrigin: "top center",
-          }}
+          style={{ width: "100%", margin: "0 auto" }}
         >
           <svg
             viewBox={VIEW_BOX}
@@ -273,8 +260,8 @@ export default function CabinSvg() {
               const v = val(b.stateKey);
               const x = b.cx - b.w / 2;
               const y = b.cy - b.h / 2;
-              const cardX = b.cx - CARD_W / 2;
-              const cardY = b.cy - CARD_H / 2;
+              const cardX = b.cx - BAG_CARD_W / 2;
+              const cardY = b.cy - BAG_CARD_H / 2;
 
               return (
                 <g
@@ -294,22 +281,38 @@ export default function CabinSvg() {
                   />
                   <rect
                     x={cardX} y={cardY}
-                    width={CARD_W} height={CARD_H}
+                    width={BAG_CARD_W} height={BAG_CARD_H}
                     rx={CARD_RX} ry={CARD_RX}
                     fill="rgba(20,20,25,0.82)"
                     stroke={v > 0 ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.08)"}
-                    strokeWidth={1}
+                    strokeWidth={1.5}
                   />
-                  <text x={cardX + 14} y={cardY + 28} fontSize={18} fill="#888" pointerEvents="none">🧳</text>
+                  {/* Label */}
                   <text
-                    x={cardX + 42} y={cardY + 30}
-                    fontSize={19} fontWeight={600}
-                    fill={v > 0 ? "#4ade80" : "#888"}
+                    x={cardX + BAG_CARD_W / 2} y={cardY + 24}
+                    textAnchor="middle"
+                    fontSize={18} fontWeight={700}
+                    fill={v > 0 ? "#4ade80" : "#aaa"}
+                    pointerEvents="none"
+                  >
+                    {b.label}
+                  </text>
+                  {/* Weight */}
+                  <text
+                    x={cardX + BAG_CARD_W / 2} y={cardY + 52}
+                    textAnchor="middle"
+                    fontSize={22} fontWeight={700}
+                    fill={v > 0 ? "#4ade80" : "#666"}
                     pointerEvents="none"
                   >
                     {v.toFixed(1)} kg
                   </text>
-                  <text x={cardX + 14} y={cardY + 55} fontSize={13} fill="#555" pointerEvents="none">
+                  {/* Max */}
+                  <text
+                    x={cardX + BAG_CARD_W / 2} y={cardY + 76}
+                    textAnchor="middle"
+                    fontSize={14} fill="#555" pointerEvents="none"
+                  >
                     max {b.max} kg
                   </text>
                 </g>
@@ -317,35 +320,6 @@ export default function CabinSvg() {
             })}
           </svg>
         </div>
-      </div>
-
-      {/* Zoom controls — fixed bottom-right of viewport */}
-      <div style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        gap: 4,
-        marginTop: 4,
-        paddingRight: 4,
-      }}>
-        <span style={{ fontSize: 11, color: "var(--text-muted)", marginRight: 4 }}>
-          {zoom.toFixed(1)}x
-        </span>
-        <button
-          onClick={() => setZoom((z) => Math.max(0.8, z - 0.2))}
-          style={zoomBtnStyle}
-          aria-label="Zoom out"
-        >−</button>
-        <button
-          onClick={() => setZoom((z) => Math.min(2.5, z + 0.2))}
-          style={zoomBtnStyle}
-          aria-label="Zoom in"
-        >+</button>
-        <button
-          onClick={cycleZoom}
-          style={{ ...zoomBtnStyle, fontSize: 11, width: "auto", padding: "0 8px" }}
-          aria-label="Reset zoom"
-        >Reset</button>
       </div>
 
       {editingZone && (
@@ -360,19 +334,3 @@ export default function CabinSvg() {
     </>
   );
 }
-
-const zoomBtnStyle: React.CSSProperties = {
-  width: 30,
-  height: 30,
-  borderRadius: 6,
-  border: "1px solid var(--panel-border)",
-  background: "var(--panel-bg)",
-  color: "var(--text-muted)",
-  fontSize: 16,
-  fontWeight: 700,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 0,
-};
