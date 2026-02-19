@@ -1,5 +1,5 @@
 #root {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0;
   text-align: left;
@@ -11,7 +11,7 @@
   align-items: flex-end;
   justify-content: space-between;
   padding: 10px 12px 0;
-  max-width: 480px;
+  max-width: 1440px;
   margin: 0 auto;
   border-bottom: 1px solid var(--panel-border);
 }
@@ -45,8 +45,9 @@
   margin-bottom: -1px;
 }
 
+.page-nav a,
 .page-nav button {
-  padding: 8px 20px;
+  padding: 8px 16px;
   text-align: center;
   border: 1px solid var(--panel-border);
   border-bottom: none;
@@ -54,29 +55,40 @@
   background: var(--panel-bg);
   color: inherit;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   opacity: 0.5;
   transition: opacity 0.2s, background 0.2s;
+  text-decoration: none;
 }
 
+.page-nav a:hover,
 .page-nav button:hover {
   opacity: 0.8;
 }
 
+.page-nav a.active,
 .page-nav button.active {
   opacity: 1;
   background: var(--result-bg);
   border-color: var(--result-border);
 }
 
-.page-nav button:first-child {
-  border-top-right-radius: 0;
+.page-nav a:not(:last-child),
+.page-nav button:not(:last-child) {
   margin-right: -1px;
 }
 
-.page-nav button:last-child {
+.page-nav a:first-child {
+  border-top-right-radius: 0;
+}
+
+.page-nav a:last-child {
   border-top-left-radius: 0;
+}
+
+.page-nav a:not(:first-child):not(:last-child) {
+  border-radius: 0;
 }
 
 /* ── Mobile ────────────────────────────────────────── */

@@ -14,6 +14,7 @@ import { parseMetarRawText } from "../utils/metarParse";
 // In dev, Vite proxies /api/metar → https://aviationweather.gov/api/data/metar
 // This avoids CORS issues since the NOAA API has no Access-Control headers.
 const API_BASE = "/api/metar";
+const HOURS = 24;
 
 // ── Public types ──────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ interface NoaaMetarItem {
   rawOb?: string;
   reportTime?: string;
   obsTime?: number;
+  receiptTime?: string;
   temp?: number | null;
   dewp?: number | null;
   wdir?: number | string | null;
@@ -51,11 +53,8 @@ interface NoaaMetarItem {
 export async function fetchMetarJson(
   icao: string,
 ): Promise<NormalizedMetar | null> {
-  // "hours=3" ensures the NOAA API returns observations from the last 3 h.
-  // In dev (Vite proxy → NOAA directly) this prevents empty results for
-  // airports that report infrequently.  In production the Netlify function
-  // has its own progressive fallback and ignores this parameter.
-  const url = `${API_BASE}?ids=${encodeURIComponent(icao.toUpperCase())}&format=json&hours=3`;
+  // Match production behavior: fetch last 24 hours and pick latest.
+  const url = `${API_BASE}?ids=${encodeURIComponent(icao.toUpperCase())}&format=json&hours=${HOURS}`;
 
   let res: Response;
   try {
@@ -107,10 +106,11 @@ export async function fetchMetarJson(
 
   if (Array.isArray(data)) {
     // Shape 1: raw NOAA array (dev proxy) — sort newest-first
+    // using reportTime as primary key, then obsTime/receiptTime fallback.
     if (data.length === 0) return null;
     data.sort(
       (a: NoaaMetarItem, b: NoaaMetarItem) =>
-        (b.obsTime ?? 0) - (a.obsTime ?? 0),
+        toEpochMs(b) - toEpochMs(a),
     );
     item = data[0] as NoaaMetarItem;
   } else if (
@@ -125,6 +125,19 @@ export async function fetchMetarJson(
   if (!item) return null;
 
   return normalizeItem(item);
+}
+
+function toEpochMs(item: NoaaMetarItem): number {
+  if (item.reportTime) {
+    const t = Date.parse(item.reportTime);
+    if (!Number.isNaN(t)) return t;
+  }
+  if (typeof item.obsTime === "number") return item.obsTime * 1000;
+  if (item.receiptTime) {
+    const t = Date.parse(item.receiptTime);
+    if (!Number.isNaN(t)) return t;
+  }
+  return 0;
 }
 
 // ── Normalize ─────────────────────────────────────────────────
