@@ -32,24 +32,12 @@ interface NoseBagZone {
   max: number;
 }
 
-/**
- * Coordinates in the ORIGINAL (pre-rotation) SVG space.
- * viewBox = "0 0 3406.606 581.918"
- *
- * Nose → RIGHT (high x)   Tail → LEFT (low x)
- * LH  → TOP (low y)       RH  → BOTTOM (high y)
- *
- * After -90° CCW rotation the nose points UP.
- */
-
 const SEAT_ZONES: Zone[] = [
   { id: "seat_1_left", label: "Seat 1 (L)", x: 1975, y: 76, w: 275, h: 174, type: "seat", stateKey: "seat1" },
   { id: "seat_2_right", label: "Seat 2 (R)", x: 1975, y: 337, w: 275, h: 174, type: "seat", stateKey: "seat2" },
-
   { id: "seat_3_left", label: "Seat 3 (L)", x: 1598, y: 35, w: 275, h: 170, type: "seat", stateKey: "seat3" },
   { id: "seat_4_middle", label: "Seat 4 (M)", x: 1598, y: 205, w: 275, h: 170, type: "seat", stateKey: "seat4" },
   { id: "seat_5_right", label: "Seat 5 (R)", x: 1598, y: 375, w: 275, h: 170, type: "seat", stateKey: "seat5" },
-
   { id: "seat_6_left", label: "Seat 6 (L)", x: 1218, y: 122, w: 275, h: 174, type: "seat", stateKey: "seat6" },
   { id: "seat_7_right", label: "Seat 7 (R)", x: 1218, y: 296, w: 275, h: 174, type: "seat", stateKey: "seat7" },
 ];
@@ -78,14 +66,14 @@ const VB_Y_START = ORIG_W - CROP_X_MAX;
 const VIEW_BOX = `0 ${VB_Y_START} ${ORIG_H} ${CROP_RANGE}`;
 const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
 
-/* ── Seat style helpers ───────────────────────────────────── */
+/* ── Dark-cockpit seat palette ────────────────────────────── */
 
-const SEAT_COLORS = {
-  empty:        { fill: "rgba(255,255,255,0.03)", stroke: "rgba(255,255,255,0.08)" },
-  emptyHover:   { fill: "rgba(56,189,248,0.10)",  stroke: "rgba(56,189,248,0.35)" },
-  filled:       { fill: "rgba(34,211,238,0.12)",   stroke: "rgba(34,211,238,0.30)" },
-  filledHover:  { fill: "rgba(34,211,238,0.20)",   stroke: "rgba(34,211,238,0.50)" },
-  disabled:     { fill: "rgba(50,50,50,0.30)",      stroke: "rgba(255,255,255,0.05)" },
+const SEAT = {
+  empty:       { fill: "rgba(0,0,0,0.35)",       stroke: "rgba(255,255,255,0.04)" },
+  emptyHover:  { fill: "rgba(0,0,0,0.22)",       stroke: "rgba(56,189,248,0.20)" },
+  filled:      { fill: "rgba(22,101,52,0.35)",   stroke: "rgba(34,197,94,0.25)" },
+  filledHover: { fill: "rgba(22,101,52,0.50)",   stroke: "rgba(34,197,94,0.45)" },
+  disabled:    { fill: "rgba(0,0,0,0.45)",        stroke: "rgba(255,255,255,0.02)" },
 };
 
 /* ── Component ────────────────────────────────────────────── */
@@ -151,12 +139,11 @@ export default function CabinSvg() {
     return state[zone.stateKey] as number;
   };
 
-  const seatStyle = (zone: Zone, isHover: boolean) => {
-    const disabled = disabledZoneIds.has(zone.id);
-    if (disabled) return SEAT_COLORS.disabled;
+  const seatColors = (zone: Zone, isHover: boolean) => {
+    if (disabledZoneIds.has(zone.id)) return SEAT.disabled;
     const val = zoneValue(zone);
-    if (val > 0) return isHover ? SEAT_COLORS.filledHover : SEAT_COLORS.filled;
-    return isHover ? SEAT_COLORS.emptyHover : SEAT_COLORS.empty;
+    if (val > 0) return isHover ? SEAT.filledHover : SEAT.filled;
+    return isHover ? SEAT.emptyHover : SEAT.empty;
   };
 
   if (svgError) {
@@ -177,8 +164,8 @@ export default function CabinSvg() {
         >
           <defs>
             <filter id="seat-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur" />
-              <feFlood floodColor="#38bdf8" floodOpacity="0.35" result="color" />
+              <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+              <feFlood floodColor="#22c55e" floodOpacity="0.25" result="color" />
               <feComposite in="color" in2="blur" operator="in" result="glow" />
               <feMerge>
                 <feMergeNode in="glow" />
@@ -217,7 +204,6 @@ export default function CabinSvg() {
                     onMouseLeave={() => setHovered(null)}
                     onClick={() => handleNoseBagClick(nb)}
                   />
-
                   <circle
                     cx={nb.labelX}
                     cy={nb.labelY}
@@ -257,14 +243,13 @@ export default function CabinSvg() {
               );
             })}
 
-            {/* ── Rect-based zones (seats, rear bag, nav) ── */}
+            {/* ── Rect-based zones (seats, rear bag) ── */}
             {visibleRectZones.map((zone) => {
               const isHover = hovered === zone.id;
               const disabled = disabledZoneIds.has(zone.id);
               const val = zoneValue(zone);
-              const colors = seatStyle(zone, isHover);
-              const hasFill = val > 0;
-              const useGlow = hasFill && !disabled;
+              const c = seatColors(zone, isHover);
+              const useGlow = val > 0 && !disabled;
 
               return (
                 <g key={zone.id} filter={useGlow ? "url(#seat-glow)" : undefined}>
@@ -275,8 +260,8 @@ export default function CabinSvg() {
                     height={zone.h}
                     rx={14}
                     ry={14}
-                    fill={colors.fill}
-                    stroke={colors.stroke}
+                    fill={c.fill}
+                    stroke={c.stroke}
                     strokeWidth={isHover ? 2.5 : 1.5}
                     style={{
                       cursor: disabled ? "not-allowed" : "pointer",
@@ -293,7 +278,7 @@ export default function CabinSvg() {
                       y={zone.y + zone.h / 2}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fill="rgba(224,242,254,0.95)"
+                      fill="rgba(187,247,208,0.90)"
                       fontSize={26}
                       fontWeight={600}
                       pointerEvents="none"
