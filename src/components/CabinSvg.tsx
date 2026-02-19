@@ -1,129 +1,83 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
-import { NOSE_BAG_LH, NOSE_BAG_RH } from "./baggagePaths";
 import Modal from "./Modal";
+
+/* ── cabin_2.svg: viewBox = "0 0 1063 3792", nose-up, no rotation needed ── */
+
+const SVG_W = 1063;
+const SVG_H = 3792;
+
+/* Crop to cabin area only (skip tail & nose cone extremes) */
+const CROP_Y = 400;
+const CROP_H = 2800;
+const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 
 /* ── Zone definitions ─────────────────────────────────────── */
 
-type ZoneType = "seat" | "baggage" | "navigate";
-
-interface Zone {
+interface SeatZone {
   id: string;
   label: string;
-  x: number;
-  y: number;
+  stateKey: keyof AircraftState;
+  cx: number;   // center x of seat in SVG coords
+  cy: number;   // center y of seat in SVG coords
   w: number;
   h: number;
-  type: ZoneType;
-  stateKey?: keyof AircraftState;
-  navTo?: string;
   max?: number;
 }
 
-interface NoseBagZone {
+interface BagZone {
   id: string;
   label: string;
-  d: string;
-  labelX: number;
-  labelY: number;
   stateKey: keyof AircraftState;
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
   max: number;
 }
 
-const SEAT_ZONES: Zone[] = [
-  { id: "seat_1_left", label: "Seat 1 (L)", x: 1975, y: 76, w: 275, h: 174, type: "seat", stateKey: "seat1" },
-  { id: "seat_2_right", label: "Seat 2 (R)", x: 1975, y: 337, w: 275, h: 174, type: "seat", stateKey: "seat2" },
-  { id: "seat_3_left", label: "Seat 3 (L)", x: 1598, y: 35, w: 275, h: 170, type: "seat", stateKey: "seat3" },
-  { id: "seat_4_middle", label: "Seat 4 (M)", x: 1598, y: 205, w: 275, h: 170, type: "seat", stateKey: "seat4" },
-  { id: "seat_5_right", label: "Seat 5 (R)", x: 1598, y: 375, w: 275, h: 170, type: "seat", stateKey: "seat5" },
-  { id: "seat_6_left", label: "Seat 6 (L)", x: 1218, y: 122, w: 275, h: 174, type: "seat", stateKey: "seat6" },
-  { id: "seat_7_right", label: "Seat 7 (R)", x: 1218, y: 296, w: 275, h: 174, type: "seat", stateKey: "seat7" },
+/*
+ * cabin_2.svg is 1063 wide × 3792 tall, nose UP.
+ * Approximate seat centers from the SVG layout:
+ *   Row 1 (front): ~y 1700,  left ~x 310, right ~x 750
+ *   Row 2 (mid):   ~y 2150,  left ~x 220, mid ~x 530, right ~x 840
+ *   Row 3 (rear):  ~y 2650,  left ~x 340, right ~x 720
+ */
+
+const SEATS: SeatZone[] = [
+  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 310, cy: 1700, w: 280, h: 250 },
+  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 750, cy: 1700, w: 280, h: 250 },
+
+  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 220, cy: 2150, w: 250, h: 250 },
+  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 530, cy: 2150, w: 250, h: 250 },
+  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 840, cy: 2150, w: 250, h: 250 },
+
+  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 340, cy: 2650, w: 280, h: 250 },
+  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 720, cy: 2650, w: 280, h: 250 },
 ];
 
-const NOSE_BAG_ZONES: NoseBagZone[] = [
-  { id: "bag_lh_nose", label: "LH Nose", d: NOSE_BAG_LH, labelX: 3030, labelY: 160, stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
-  { id: "bag_rh_nose", label: "RH Nose", d: NOSE_BAG_RH, labelX: 3030, labelY: 415, stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+const BAGS: BagZone[] = [
+  { id: "blh", label: "LH Nose", stateKey: "lhNoseKg", cx: 310, cy: 820, w: 250, h: 200, max: aircraftConfig.baggageLimits.lhNose },
+  { id: "brh", label: "RH Nose", stateKey: "rhNoseKg", cx: 750, cy: 820, w: 250, h: 200, max: aircraftConfig.baggageLimits.rhNose },
+  { id: "brf", label: "Rear Cargo", stateKey: "rearFKg", cx: 530, cy: 2650, w: 350, h: 250, max: aircraftConfig.baggageLimits.rearF },
 ];
 
-const RECT_BAGGAGE_ZONES: Zone[] = [
-  { id: "bag_rear_f", label: "Rear Cargo F", x: 1218, y: 122, w: 275, h: 348, type: "baggage", stateKey: "rearFKg", max: aircraftConfig.baggageLimits.rearF },
-];
-
-const NAV_ZONES: Zone[] = [];
-
-/* ── Rotation / crop ──────────────────────────────────────── */
-
-const ORIG_W = 3406.606;
-const ORIG_H = 581.918;
-
-const CROP_X_MIN = 1050;
-const CROP_X_MAX = 3350;
-const CROP_RANGE = CROP_X_MAX - CROP_X_MIN;
-const VB_Y_START = ORIG_W - CROP_X_MAX;
-
-const VIEW_BOX = `0 ${VB_Y_START} ${ORIG_H} ${CROP_RANGE}`;
-const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
-
-/* ── Dark-cockpit seat palette ────────────────────────────── */
-
-const SEAT = {
-  empty:       { fill: "rgba(0,0,0,0.35)",       stroke: "rgba(255,255,255,0.04)" },
-  emptyHover:  { fill: "rgba(0,0,0,0.30)",       stroke: "rgba(255,255,255,0.08)" },
-  filled:      { fill: "rgba(22,101,52,0.35)",   stroke: "rgba(34,197,94,0.25)" },
-  filledHover: { fill: "rgba(22,101,52,0.45)",   stroke: "rgba(34,197,94,0.35)" },
-  disabled:    { fill: "rgba(0,0,0,0.45)",        stroke: "rgba(255,255,255,0.02)" },
-};
+/* ── Label card dimensions (SVG units) ── */
+const CARD_W = 200;
+const CARD_H = 70;
+const CARD_RX = 12;
 
 /* ── Component ────────────────────────────────────────────── */
 
 export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
-  const navigate = useNavigate();
   const [hovered, setHovered] = useState<string | null>(null);
-  const [editingZone, setEditingZone] = useState<Zone | NoseBagZone | null>(null);
-  const [svgError, setSvgError] = useState(false);
+  const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
+  const [debugClicks, setDebugClicks] = useState<{x: number; y: number}[]>([]);
+  const DEBUG = true; // TEMPORARY — set to false to disable
 
   const isCargoMode = state.mode === "cargo";
-
-  const visibleRectZones = (() => {
-    const zones: Zone[] = [...NAV_ZONES];
-    if (isCargoMode) {
-      zones.push(
-        ...SEAT_ZONES.filter((z) => z.id !== "seat_6_left" && z.id !== "seat_7_right"),
-        ...RECT_BAGGAGE_ZONES,
-      );
-    } else {
-      zones.push(
-        ...SEAT_ZONES,
-        ...RECT_BAGGAGE_ZONES.filter((z) => z.id !== "bag_rear_f"),
-      );
-    }
-    return zones;
-  })();
-
-  const disabledZoneIds = new Set(
-    isCargoMode ? ["seat_6_left", "seat_7_right"] : ["bag_rear_f"],
-  );
-
-  const handleRectClick = useCallback(
-    (zone: Zone) => {
-      if (disabledZoneIds.has(zone.id)) return;
-      if (zone.type === "navigate" && zone.navTo) {
-        navigate(zone.navTo);
-        return;
-      }
-      setEditingZone(zone);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, isCargoMode],
-  );
-
-  const handleNoseBagClick = useCallback(
-    (zone: NoseBagZone) => setEditingZone(zone),
-    [],
-  );
 
   const handleSave = useCallback(
     (v: number) => {
@@ -134,25 +88,17 @@ export default function CabinSvg() {
     [editingZone, dispatch],
   );
 
-  const zoneValue = (zone: { stateKey?: keyof AircraftState }): number => {
-    if (!zone.stateKey) return 0;
-    return state[zone.stateKey] as number;
-  };
+  const val = (key: keyof AircraftState) => (state[key] as number) || 0;
 
-  const seatColors = (zone: Zone, isHover: boolean) => {
-    if (disabledZoneIds.has(zone.id)) return SEAT.disabled;
-    const val = zoneValue(zone);
-    if (val > 0) return isHover ? SEAT.filledHover : SEAT.filled;
-    return isHover ? SEAT.emptyHover : SEAT.empty;
-  };
+  const visibleSeats = isCargoMode
+    ? SEATS.filter((s) => s.id !== "s6l" && s.id !== "s7r")
+    : SEATS;
 
-  if (svgError) {
-    return (
-      <div className="flex items-center justify-center h-48 rounded-xl border-2 border-dashed border-[var(--panel-border)] text-[var(--text-muted)]">
-        Provide cabin.svg file
-      </div>
-    );
-  }
+  const visibleBags = isCargoMode
+    ? BAGS
+    : BAGS.filter((b) => b.id !== "brf");
+
+  const disabledSeatIds = new Set(isCargoMode ? ["s6l", "s7r"] : []);
 
   return (
     <>
@@ -160,158 +106,198 @@ export default function CabinSvg() {
         <svg
           viewBox={VIEW_BOX}
           preserveAspectRatio="xMidYMid meet"
-          className="block w-full h-auto"
+          style={{ display: "block", width: "100%", height: "auto" }}
         >
-          <defs>
-            <filter id="seat-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
-              <feFlood floodColor="#22c55e" floodOpacity="0.25" result="color" />
-              <feComposite in="color" in2="blur" operator="in" result="glow" />
-              <feMerge>
-                <feMergeNode in="glow" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
+          {/* cabin image */}
+          <image
+            href="/cabin_2.svg"
+            x="0"
+            y="0"
+            width={SVG_W}
+            height={SVG_H}
+          />
 
-          <g transform={TRANSFORM}>
-            <image
-              href="/cabin.svg"
-              x="0"
-              y="0"
-              width={ORIG_W}
-              height={ORIG_H}
-              onError={() => setSvgError(true)}
+          {/* DEBUG: click anywhere to read SVG coordinates */}
+          {DEBUG && (
+            <rect
+              x="0" y="0" width={SVG_W} height={SVG_H}
+              fill="transparent"
+              pointerEvents="all"
+              style={{ cursor: "crosshair" }}
+              onClick={(e) => {
+                const svg = e.currentTarget.ownerSVGElement;
+                if (!svg) return;
+                const pt = svg.createSVGPoint();
+                pt.x = e.clientX;
+                pt.y = e.clientY;
+                const svgPt = pt.matrixTransform(svg.getScreenCTM()!.inverse());
+                const coord = { x: Math.round(svgPt.x), y: Math.round(svgPt.y) };
+                setDebugClicks((prev) => [...prev, coord]);
+                console.log(`CLICK: (${coord.x}, ${coord.y})`);
+              }}
             />
+          )}
 
-            {/* ── Nose baggage: dot indicators ── */}
-            {NOSE_BAG_ZONES.map((nb) => {
-              const isHover = hovered === nb.id;
-              const val = zoneValue(nb);
-              const dotR = 22;
-              const dotColor = val > 0 ? "#22c55e" : "#60a5fa";
+          {/* DEBUG: show clicked points */}
+          {DEBUG && debugClicks.map((c, i) => (
+            <g key={i}>
+              <circle cx={c.x} cy={c.y} r={8} fill="red" />
+              <text x={c.x + 12} y={c.y + 5} fontSize={16} fill="yellow" fontWeight={700}>
+                {i + 1}: ({c.x},{c.y})
+              </text>
+            </g>
+          ))}
 
-              return (
-                <g key={nb.id}>
-                  <path
-                    d={nb.d}
-                    fill="transparent"
-                    stroke="transparent"
-                    strokeWidth={30}
-                    pointerEvents="all"
-                    style={{ cursor: "pointer" }}
-                    onMouseEnter={() => setHovered(nb.id)}
-                    onMouseLeave={() => setHovered(null)}
-                    onClick={() => handleNoseBagClick(nb)}
-                  />
-                  <circle
-                    cx={nb.labelX}
-                    cy={nb.labelY}
-                    r={isHover ? dotR + 4 : dotR}
-                    fill={dotColor}
-                    opacity={isHover ? 0.9 : 0.7}
-                    pointerEvents="all"
-                    style={{ cursor: "pointer", transition: "r 0.15s, opacity 0.15s" }}
-                    onMouseEnter={() => setHovered(nb.id)}
-                    onMouseLeave={() => setHovered(null)}
-                    onClick={() => handleNoseBagClick(nb)}
-                  />
-                  <text
-                    x={nb.labelX}
-                    y={nb.labelY + 1}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="white"
-                    fontSize={18}
-                    fontWeight={700}
-                    pointerEvents="none"
-                  >
-                    {val > 0 ? val : "0"}
-                  </text>
+          {/* DEBUG: show current zone outlines */}
+          {DEBUG && [...SEATS, ...BAGS].map((z) => (
+            <rect
+              key={z.id + "-dbg"}
+              x={z.cx - z.w / 2} y={z.cy - z.h / 2}
+              width={z.w} height={z.h}
+              rx={10} ry={10}
+              fill="none" stroke="red" strokeWidth={3} strokeDasharray="10 5"
+              pointerEvents="none"
+            />
+          ))}
 
-                  {state.debugZones && (
-                    <path
-                      d={nb.d}
-                      fill="none"
-                      stroke="red"
-                      strokeWidth={3}
-                      strokeDasharray="12 6"
-                      pointerEvents="none"
-                    />
-                  )}
-                </g>
-              );
-            })}
+          {/* ── Seat zones ── */}
+          {visibleSeats.map((s) => {
+            const isHover = hovered === s.id;
+            const disabled = disabledSeatIds.has(s.id);
+            const v = val(s.stateKey);
+            const x = s.cx - s.w / 2;
+            const y = s.cy - s.h / 2;
+            const cardX = s.cx - CARD_W / 2;
+            const cardY = s.cy + s.h / 2 - CARD_H - 8;
 
-            {/* ── Rect-based zones (seats, rear bag) ── */}
-            {visibleRectZones.map((zone) => {
-              const isHover = hovered === zone.id;
-              const disabled = disabledZoneIds.has(zone.id);
-              const val = zoneValue(zone);
-              const c = seatColors(zone, isHover);
-              const useGlow = val > 0 && !disabled;
+            return (
+              <g
+                key={s.id}
+                style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+                onMouseEnter={() => setHovered(s.id)}
+                onMouseLeave={() => setHovered(null)}
+                onClick={() => {
+                  if (!disabled) setEditingZone(s);
+                }}
+              >
+                {/* Invisible hit area */}
+                <rect
+                  x={x} y={y} width={s.w} height={s.h}
+                  rx={16} ry={16}
+                  fill="transparent"
+                  stroke={isHover ? "rgba(255,255,255,0.12)" : "transparent"}
+                  strokeWidth={2}
+                  pointerEvents="all"
+                />
 
-              return (
-                <g key={zone.id} filter={useGlow ? "url(#seat-glow)" : undefined}>
+                {/* Dark label card */}
+                <rect
+                  x={cardX} y={cardY}
+                  width={CARD_W} height={CARD_H}
+                  rx={CARD_RX} ry={CARD_RX}
+                  fill="rgba(20,20,25,0.82)"
+                  stroke={v > 0 ? "rgba(56,189,248,0.25)" : "rgba(255,255,255,0.08)"}
+                  strokeWidth={1}
+                />
+
+                {/* Person icon + weight */}
+                <text
+                  x={cardX + 14} y={cardY + 28}
+                  fontSize={20} fill="#888" pointerEvents="none"
+                >
+                  🧑
+                </text>
+                <text
+                  x={cardX + 42} y={cardY + 30}
+                  fontSize={19} fontWeight={600}
+                  fill={v > 0 ? "#38bdf8" : "#888"}
+                  pointerEvents="none"
+                >
+                  {v.toFixed(1)} kg
+                </text>
+
+                {disabled && (
                   <rect
-                    x={zone.x}
-                    y={zone.y}
-                    width={zone.w}
-                    height={zone.h}
-                    rx={14}
-                    ry={14}
-                    fill={c.fill}
-                    stroke={c.stroke}
-                    strokeWidth={isHover ? 2.5 : 1.5}
-                    style={{
-                      cursor: disabled ? "not-allowed" : "pointer",
-                      transition: "fill 0.2s, stroke 0.2s, stroke-width 0.2s",
-                    }}
-                    onMouseEnter={() => setHovered(zone.id)}
-                    onMouseLeave={() => setHovered(null)}
-                    onClick={() => handleRectClick(zone)}
+                    x={x} y={y} width={s.w} height={s.h}
+                    rx={16} ry={16}
+                    fill="rgba(0,0,0,0.50)"
+                    pointerEvents="none"
                   />
+                )}
+              </g>
+            );
+          })}
 
-                  {val > 0 && (
-                    <text
-                      x={zone.x + zone.w / 2}
-                      y={zone.y + zone.h / 2}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="rgba(187,247,208,0.90)"
-                      fontSize={26}
-                      fontWeight={600}
-                      pointerEvents="none"
-                    >
-                      {val}
-                    </text>
-                  )}
+          {/* ── Baggage zones ── */}
+          {visibleBags.map((b) => {
+            const isHover = hovered === b.id;
+            const v = val(b.stateKey);
+            const x = b.cx - b.w / 2;
+            const y = b.cy - b.h / 2;
+            const cardX = b.cx - CARD_W / 2;
+            const cardY = b.cy - CARD_H / 2;
 
-                  {zone.type === "navigate" && (
-                    <text
-                      x={zone.x + zone.w / 2}
-                      y={zone.y + zone.h / 2}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="rgba(147,197,253,0.9)"
-                      fontSize={zone.id === "zone_fuel" ? 18 : 22}
-                      fontWeight={600}
-                      pointerEvents="none"
-                    >
-                      {zone.label} →
-                    </text>
-                  )}
-                </g>
-              );
-            })}
-          </g>
+            return (
+              <g
+                key={b.id}
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHovered(b.id)}
+                onMouseLeave={() => setHovered(null)}
+                onClick={() => setEditingZone(b)}
+              >
+                {/* Invisible hit area */}
+                <rect
+                  x={x} y={y} width={b.w} height={b.h}
+                  rx={14} ry={14}
+                  fill="transparent"
+                  stroke={isHover ? "rgba(255,255,255,0.12)" : "transparent"}
+                  strokeWidth={2}
+                  pointerEvents="all"
+                />
+
+                {/* Dark label card */}
+                <rect
+                  x={cardX} y={cardY}
+                  width={CARD_W} height={CARD_H}
+                  rx={CARD_RX} ry={CARD_RX}
+                  fill="rgba(20,20,25,0.82)"
+                  stroke={v > 0 ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.08)"}
+                  strokeWidth={1}
+                />
+
+                {/* Bag icon + weight */}
+                <text
+                  x={cardX + 14} y={cardY + 28}
+                  fontSize={18} fill="#888" pointerEvents="none"
+                >
+                  🧳
+                </text>
+                <text
+                  x={cardX + 42} y={cardY + 30}
+                  fontSize={19} fontWeight={600}
+                  fill={v > 0 ? "#4ade80" : "#888"}
+                  pointerEvents="none"
+                >
+                  {v.toFixed(1)} kg
+                </text>
+
+                {/* Max info */}
+                <text
+                  x={cardX + 14} y={cardY + 55}
+                  fontSize={13} fill="#555" pointerEvents="none"
+                >
+                  max {b.max} kg
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
       {editingZone && (
         <Modal
           title={editingZone.label}
-          value={zoneValue(editingZone)}
+          value={val(editingZone.stateKey)}
           max={editingZone.max}
           onSave={handleSave}
           onClose={() => setEditingZone(null)}

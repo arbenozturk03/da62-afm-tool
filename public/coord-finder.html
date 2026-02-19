@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Coordinate Finder</title>
+<style>
+  body { margin: 0; background: #111; color: #fff; font-family: monospace; }
+  #info { position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 8px 14px; border-radius: 8px; font-size: 16px; z-index: 10; }
+  #log { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 10; max-height: 90vh; overflow-y: auto; }
+  #container { position: relative; display: inline-block; }
+  img { display: block; width: 400px; }
+  .dot { position: absolute; width: 8px; height: 8px; background: red; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+  .dot-label { position: absolute; color: yellow; font-size: 11px; transform: translate(6px, -12px); pointer-events: none; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="info">Click on the image to get SVG coordinates. viewBox: 0 0 1063 3792</div>
+<div id="log"></div>
+<div id="container">
+  <img id="img" src="/cabin_2.svg" />
+</div>
+<script>
+const SVG_W = 1063, SVG_H = 3792;
+const img = document.getElementById('img');
+const container = document.getElementById('container');
+const log = document.getElementById('log');
+let clicks = [];
+
+container.addEventListener('click', (e) => {
+  const rect = img.getBoundingClientRect();
+  const pxX = e.clientX - rect.left;
+  const pxY = e.clientY - rect.top;
+  const svgX = Math.round((pxX / rect.width) * SVG_W);
+  const svgY = Math.round((pxY / rect.height) * SVG_H);
+  
+  clicks.push({svgX, svgY});
+  
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.left = pxX + 'px';
+  dot.style.top = pxY + 'px';
+  container.appendChild(dot);
+  
+  const label = document.createElement('div');
+  label.className = 'dot-label';
+  label.style.left = pxX + 'px';
+  label.style.top = pxY + 'px';
+  label.textContent = `(${svgX}, ${svgY})`;
+  container.appendChild(label);
+  
+  log.innerHTML = clicks.map((c, i) => `${i+1}: (${c.svgX}, ${c.svgY})`).join('<br>');
+});
+</script>
+</body>
+</html>
