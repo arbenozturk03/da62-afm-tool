@@ -147,13 +147,13 @@ export default function CabinSvg() {
 
   const fillForZone = (zone: Zone, isHover: boolean): string => {
     const disabled = disabledZoneIds.has(zone.id);
-    if (disabled) return "rgba(80,80,80,0.20)";
+    if (disabled) return "rgba(60,60,60,0.35)";
     const val = zoneValue(zone);
     if (zone.type === "navigate")
-      return isHover ? "rgba(59,130,246,0.25)" : "rgba(59,130,246,0.08)";
+      return isHover ? "rgba(59,130,246,0.20)" : "rgba(59,130,246,0.05)";
     if (val > 0)
-      return isHover ? "rgba(34,197,94,0.30)" : "rgba(34,197,94,0.15)";
-    return isHover ? "rgba(120,120,120,0.25)" : "rgba(120,120,120,0.10)";
+      return isHover ? "rgba(34,197,94,0.25)" : "rgba(34,197,94,0.12)";
+    return isHover ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.02)";
   };
 
 
@@ -262,8 +262,8 @@ export default function CabinSvg() {
                     rx={14}
                     ry={14}
                     fill={fillForZone(zone, isHover)}
-                    stroke={isHover ? "rgba(150,150,150,0.5)" : "rgba(150,150,150,0.12)"}
-                    strokeWidth={isHover ? 3 : 1.5}
+                    stroke={isHover ? "rgba(100,100,100,0.4)" : "transparent"}
+                    strokeWidth={isHover ? 2 : 0}
                     style={{
                       cursor: disabled ? "not-allowed" : "pointer",
                       transition: "fill 0.15s, stroke 0.15s",

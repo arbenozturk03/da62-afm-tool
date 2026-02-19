@@ -96,8 +96,7 @@ export default function CgPage() {
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
       {/* Mode switch */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>Cabin mode:</span>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
           {(["passenger", "cargo"] as const).map((m) => (
             <button
@@ -106,8 +105,8 @@ export default function CgPage() {
               style={{
                 background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
                 color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-                padding: "6px 16px",
-                fontSize: 13,
+                padding: "5px 14px",
+                fontSize: 12,
                 fontWeight: 600,
                 border: "none",
                 borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
@@ -115,11 +114,11 @@ export default function CgPage() {
                 cursor: "pointer",
               }}
             >
-              {m === "passenger" ? "Passenger" : "Cargo"}
+              {m === "passenger" ? "🪑 Passenger" : "📦 Cargo"}
             </button>
           ))}
         </div>
-        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
           {state.mode === "passenger" ? "Rear seats installed" : "Rear seats folded → cargo"}
         </span>
       </div>
