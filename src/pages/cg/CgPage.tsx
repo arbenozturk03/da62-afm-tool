@@ -88,7 +88,7 @@ export default function CgPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 items-start">
         {/* Left: Cabin SVG (sticky sidebar on desktop) */}
         <div className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto rounded-xl">
           <CabinSvg />

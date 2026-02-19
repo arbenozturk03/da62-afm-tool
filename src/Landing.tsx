@@ -133,12 +133,8 @@ export default function Landing() {
       result.breakdown.slopeMultiplier !== 1);
 
   return (
-    <div
-      style={{ padding: "16px 12px", maxWidth: 480, margin: "0 auto" }}
-    >
-      <h1 style={{ fontSize: "1.5em", margin: "0 0 12px 0", textAlign: "center" }}>
-        DA-62 Performance Calculator
-      </h1>
+    <div style={{ padding: "16px 12px", maxWidth: 480, margin: "0 auto" }}>
+      <h1 className="perf-title">DA-62 Performance Calculator</h1>
 
       {/* ── Runway & Wind Diagram ────────────────────────────── */}
       {(() => {

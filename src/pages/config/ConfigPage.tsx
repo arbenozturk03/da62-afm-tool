@@ -49,7 +49,7 @@ export default function ConfigPage() {
 
   return (
     <div className="max-w-lg mx-auto px-3 py-6 space-y-4">
-      <h1 className="text-xl font-bold mb-4">Aircraft Configuration</h1>
+      <h1 className="perf-title mb-4">Aircraft Configuration</h1>
 
       {/* Basic aircraft */}
       <div className="rounded-xl p-4 border bg-[var(--panel-bg)] border-[var(--panel-border)]">

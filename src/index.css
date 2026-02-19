@@ -1,130 +1,131 @@
 @import "tailwindcss";
 
-@layer base {
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* App theme tokens (dark default) */
+  --border-color: #444;
+  --text-muted: #999;
+  --text-secondary: #aaa;
+  --panel-bg: #2a2a2a;
+  --panel-border: #444;
+  --diagram-bg: #1e2e1e;
+  --result-bg: #1a2a3a;
+  --result-border: #1976d2;
+  --gravel-color: #bcaaa4;
+  --hw-tw-color: #aaa;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+.perf-title {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 12px 0;
+  color: #003366;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+input,
+select,
+textarea {
+  color: inherit;
+  font-family: inherit;
+}
+
+/* Takeoff / Landing cards: form layout */
+.takeoff-inputs .field {
+  margin-bottom: 8px;
+}
+
+.takeoff-inputs .field-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.takeoff-inputs .field-value {
+  display: block;
+}
+
+.takeoff-inputs .field-value input,
+.takeoff-inputs .field-value select {
+  border: 1px solid var(--panel-border);
+  border-radius: 2px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+
+@media (prefers-color-scheme: light) {
   :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+    color: #213547;
+    background-color: #ffffff;
 
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
-    /* App theme tokens (dark default) */
-    --border-color: #444;
+    --border-color: #ccc;
     --text-muted: #999;
-    --text-secondary: #aaa;
-    --panel-bg: #2a2a2a;
-    --panel-border: #444;
-    --diagram-bg: #1e2e1e;
-    --result-bg: #1a2a3a;
+    --text-secondary: #666;
+    --panel-bg: #f8f9fa;
+    --panel-border: #ccc;
+    --diagram-bg: #eef2ee;
+    --result-bg: #e3f2fd;
     --result-border: #1976d2;
-    --gravel-color: #bcaaa4;
-    --hw-tw-color: #aaa;
-  }
-
-  a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
+    --gravel-color: #795548;
+    --hw-tw-color: #666;
   }
   a:hover {
-    color: #535bf2;
+    color: #747bff;
   }
-
-  body {
-    margin: 0;
-    min-width: 320px;
-  }
-
-  h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
-  }
-
   button {
-    font-family: inherit;
-    cursor: pointer;
-  }
-
-  input, select, textarea {
-    color: inherit;
-    font-family: inherit;
-  }
-
-  /* Takeoff / Landing form layout */
-  .field {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--panel-border);
-    gap: 8px;
-  }
-  .field:last-child {
-    border-bottom: none;
-  }
-  .field-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .field-value {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  .field-value input,
-  .field-value select {
-    background: var(--result-bg);
-    border: 1px solid var(--result-border);
-    border-radius: 6px;
-    padding: 5px 8px;
-    font-size: 13px;
-    font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
-    outline: none;
-    min-width: 0;
-    width: 80px;
-    text-align: right;
-  }
-  .field-value select {
-    width: auto;
-    text-align: left;
-    cursor: pointer;
-    -webkit-appearance: menulist;
-    appearance: menulist;
-  }
-  .field-value input:focus,
-  .field-value select:focus {
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      color: #213547;
-      background-color: #ffffff;
-
-      --border-color: #ccc;
-      --text-muted: #999;
-      --text-secondary: #666;
-      --panel-bg: #f8f9fa;
-      --panel-border: #ccc;
-      --diagram-bg: #eef2ee;
-      --result-bg: #e3f2fd;
-      --result-border: #1976d2;
-      --gravel-color: #795548;
-      --hw-tw-color: #666;
-    }
-    a:hover {
-      color: #747bff;
-    }
+    background-color: #f9f9f9;
   }
 }
