@@ -66,7 +66,7 @@ const BAG_CARD_H = 90;
 /* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 1350 },
+  { id: "cabin", label: "Cabin", targetY: 1200 },
 ] as const;
 
 /* ── Component ── */
@@ -113,7 +113,7 @@ export default function CabinSvg() {
 
     const svgYNorm = (section.targetY - CROP_Y) / CROP_H;
     const contentH = content.scrollHeight;
-    const targetScroll = svgYNorm * contentH - vp.clientHeight / 3;
+    const targetScroll = svgYNorm * contentH - 20;
 
     vp.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
   };
