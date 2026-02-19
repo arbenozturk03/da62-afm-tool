@@ -70,9 +70,9 @@ const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
 
 const SEAT = {
   empty:       { fill: "rgba(0,0,0,0.35)",       stroke: "rgba(255,255,255,0.04)" },
-  emptyHover:  { fill: "rgba(0,0,0,0.22)",       stroke: "rgba(56,189,248,0.20)" },
+  emptyHover:  { fill: "rgba(0,0,0,0.30)",       stroke: "rgba(255,255,255,0.08)" },
   filled:      { fill: "rgba(22,101,52,0.35)",   stroke: "rgba(34,197,94,0.25)" },
-  filledHover: { fill: "rgba(22,101,52,0.50)",   stroke: "rgba(34,197,94,0.45)" },
+  filledHover: { fill: "rgba(22,101,52,0.45)",   stroke: "rgba(34,197,94,0.35)" },
   disabled:    { fill: "rgba(0,0,0,0.45)",        stroke: "rgba(255,255,255,0.02)" },
 };
 
