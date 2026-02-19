@@ -66,7 +66,7 @@ const BAG_CARD_H = 90;
 /* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 950 },
+  { id: "cabin", label: "Cabin", targetY: 1050 },
 ] as const;
 
 /* ── Component ── */
