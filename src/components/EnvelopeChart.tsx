@@ -19,6 +19,8 @@ function scaleY(v: number): number {
 export default function EnvelopeChart() {
   const { result, insideEnvelope, zfInsideEnvelope } = useAircraft();
 
+  const allInside = insideEnvelope && zfInsideEnvelope;
+
   const polyPoints = useMemo(
     () => envelope.polygon.map((p) => `${scaleX(p.x)},${scaleY(p.y)}`).join(" "),
     [],
@@ -48,6 +50,9 @@ export default function EnvelopeChart() {
   const showCg = result.totalMass > 0;
   const showZf = result.zeroFuelMass > 0;
 
+  const envFill = allInside ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)";
+  const envStroke = allInside ? "#22c55e" : "#ef4444";
+
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
       <rect width={W} height={H} rx={8} fill="var(--panel-bg)" />
@@ -73,9 +78,10 @@ export default function EnvelopeChart() {
       {/* Envelope polygon */}
       <polygon
         points={polyPoints}
-        fill="rgba(34,197,94,0.12)"
-        stroke="#22c55e"
+        fill={envFill}
+        stroke={envStroke}
         strokeWidth={2}
+        style={{ transition: "fill 0.3s, stroke 0.3s" }}
       />
 
       {/* Axes */}
@@ -121,7 +127,12 @@ export default function EnvelopeChart() {
       {showZf && (
         <>
           <circle cx={zfX} cy={zfY} r={5} fill={zfInsideEnvelope ? "#3b82f6" : "#ef4444"} stroke="white" strokeWidth={1.5} />
-          <text x={zfX + 10} y={zfY - 8} fontSize={10} fill={zfInsideEnvelope ? "#93c5fd" : "#fca5a5"}>
+          <text
+            x={zfX + 10} y={zfY + 4}
+            fontSize={10} fontWeight={600}
+            fill={zfInsideEnvelope ? "#93c5fd" : "#fca5a5"}
+            dominantBaseline="middle"
+          >
             ZFW
           </text>
         </>
@@ -131,7 +142,12 @@ export default function EnvelopeChart() {
       {showCg && (
         <>
           <circle cx={cgX} cy={cgY} r={6} fill={insideEnvelope ? "#22c55e" : "#ef4444"} stroke="white" strokeWidth={2} />
-          <text x={cgX + 10} y={cgY - 8} fontSize={11} fontWeight={600} fill={insideEnvelope ? "#86efac" : "#fca5a5"}>
+          <text
+            x={cgX + 10} y={cgY + 1}
+            fontSize={11} fontWeight={700}
+            fill={insideEnvelope ? "#86efac" : "#fca5a5"}
+            dominantBaseline="middle"
+          >
             T/O
           </text>
         </>

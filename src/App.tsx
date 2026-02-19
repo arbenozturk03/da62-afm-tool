@@ -37,12 +37,12 @@ class ErrorBoundary extends Component<
   }
 }
 
+// Top navigation order: Config → W&B → Takeoff → Landing
 const NAV_ITEMS = [
+  { to: "/config", label: "Config" },
+  { to: "/cg", label: "W&B" },
   { to: "/takeoff", label: "Takeoff" },
   { to: "/landing", label: "Landing" },
-  { to: "/cg", label: "W&B" },
-  { to: "/fuel", label: "Fuel" },
-  { to: "/config", label: "Config" },
 ] as const;
 
 export default function App() {
@@ -64,12 +64,13 @@ export default function App() {
       </header>
 
       <Routes>
+        <Route path="/config" element={<ConfigPage />} />
+        <Route path="/cg" element={<CgPage />} />
         <Route path="/takeoff" element={<Takeoff />} />
         <Route path="/landing" element={<Landing />} />
-        <Route path="/cg" element={<CgPage />} />
+        {/* Fuel page kept for direct URL access, but removed from top nav */}
         <Route path="/fuel" element={<FuelPage />} />
-        <Route path="/config" element={<ConfigPage />} />
-        <Route path="*" element={<Navigate to="/takeoff" replace />} />
+        <Route path="*" element={<Navigate to="/cg" replace />} />
       </Routes>
     </ErrorBoundary>
   );

@@ -45,8 +45,9 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center
-                       text-[var(--text-muted)] hover:text-white hover:bg-white/10
+                       text-[var(--text-muted)] hover:opacity-80
                        transition-colors text-lg leading-none"
+            style={{ background: "transparent", border: "none", padding: 0 }}
           >
             ×
           </button>
@@ -80,8 +81,19 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
             <button
               key={`m${s}`}
               onClick={() => adjust(-s)}
-              className="rounded-lg py-1.5 text-sm font-medium
-                         bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors"
+              style={{
+                background: "rgba(239,68,68,0.15)",
+                color: "#f87171",
+                padding: "6px 0",
+                fontSize: 14,
+                fontWeight: 600,
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.25)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.15)")}
             >
               − {s}
             </button>
@@ -90,8 +102,19 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
             <button
               key={`p${s}`}
               onClick={() => adjust(s)}
-              className="rounded-lg py-1.5 text-sm font-medium
-                         bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+              style={{
+                background: "rgba(34,197,94,0.15)",
+                color: "#4ade80",
+                padding: "6px 0",
+                fontSize: 14,
+                fontWeight: 600,
+                borderRadius: 8,
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(34,197,94,0.25)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(34,197,94,0.15)")}
             >
               + {s}
             </button>

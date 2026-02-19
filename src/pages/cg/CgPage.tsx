@@ -1,7 +1,12 @@
+import { useState } from "react";
 import CabinSvg from "../../components/CabinSvg";
 import EnvelopeChart from "../../components/EnvelopeChart";
 import { useAircraft } from "../../context/AircraftContext";
 import { aircraftConfig } from "../../data/aircraftConfig";
+
+type FuelUnit = "L" | "kg" | "lbs";
+const FUEL_DENSITY = aircraftConfig.densities.fuel;
+const KG_TO_LBS = 2.20462;
 
 function Card({ title, children, accent }: { title: string; children: React.ReactNode; accent?: boolean }) {
   return (
@@ -32,9 +37,22 @@ function Stat({ label, value, unit, warn }: { label: string; value: string; unit
   );
 }
 
+function litersFromInput(value: number, unit: FuelUnit): number {
+  if (unit === "L") return value;
+  if (unit === "kg") return value / FUEL_DENSITY;
+  return value / KG_TO_LBS / FUEL_DENSITY;
+}
+
+function litersToDisplay(liters: number, unit: FuelUnit): number {
+  if (unit === "L") return liters;
+  if (unit === "kg") return liters * FUEL_DENSITY;
+  return liters * FUEL_DENSITY * KG_TO_LBS;
+}
+
 export default function CgPage() {
   const { state, dispatch, result, insideEnvelope, zfInsideEnvelope } = useAircraft();
   const { limits } = aircraftConfig;
+  const [fuelUnit, setFuelUnit] = useState<FuelUnit>("L");
 
   return (
     <div className="max-w-[1400px] mx-auto px-3 py-4">
@@ -42,26 +60,26 @@ export default function CgPage() {
       <div className="flex items-center gap-3 mb-4">
         <span className="text-sm font-semibold text-[var(--text-muted)]">Cabin mode:</span>
         <div className="flex rounded-lg overflow-hidden border border-[var(--panel-border)]">
-          <button
-            onClick={() => dispatch({ type: "SET_MODE", mode: "passenger" })}
-            className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-              state.mode === "passenger"
-                ? "bg-[var(--result-bg)] text-blue-400 border-r border-[var(--result-border)]"
-                : "bg-[var(--panel-bg)] text-[var(--text-muted)] border-r border-[var(--panel-border)] hover:text-white"
-            }`}
-          >
-            Passenger
-          </button>
-          <button
-            onClick={() => dispatch({ type: "SET_MODE", mode: "cargo" })}
-            className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-              state.mode === "cargo"
-                ? "bg-[var(--result-bg)] text-blue-400"
-                : "bg-[var(--panel-bg)] text-[var(--text-muted)] hover:text-white"
-            }`}
-          >
-            Cargo
-          </button>
+          {(["passenger", "cargo"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => dispatch({ type: "SET_MODE", mode: m })}
+              style={{
+                background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
+                color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
+                padding: "6px 16px",
+                fontSize: 14,
+                fontWeight: 600,
+                border: "none",
+                borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
+                borderRadius: 0,
+                cursor: "pointer",
+                transition: "background 0.15s, color 0.15s",
+              }}
+            >
+              {m === "passenger" ? "Passenger" : "Cargo"}
+            </button>
+          ))}
         </div>
         <span className="text-xs text-[var(--text-muted)] ml-1 hidden sm:inline">
           {state.mode === "passenger"
@@ -94,7 +112,96 @@ export default function CgPage() {
 
         {/* Right: cards */}
         <div className="flex flex-col gap-3">
-          {/* Results */}
+          {/* Fuel (top) */}
+          <Card title="Fuel">
+            <div className="space-y-2">
+              {/* Unit selector */}
+              <div className="flex rounded-lg overflow-hidden border border-[var(--panel-border)] w-fit mb-1">
+                {(["L", "kg", "lbs"] as FuelUnit[]).map((u) => (
+                  <button
+                    key={u}
+                    onClick={() => setFuelUnit(u)}
+                    style={{
+                      background: fuelUnit === u ? "#2563eb" : "var(--panel-bg)",
+                      color: fuelUnit === u ? "#fff" : "var(--text-muted)",
+                      padding: "4px 12px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      border: "none",
+                      borderRadius: 0,
+                      cursor: "pointer",
+                      transition: "background 0.15s, color 0.15s",
+                    }}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-[var(--text-secondary)]">Main fuel</span>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    value={parseFloat(litersToDisplay(state.mainFuelL, fuelUnit).toFixed(1))}
+                    min={0}
+                    step={1}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_FIELD",
+                        field: "mainFuelL",
+                        value: Math.max(0, litersFromInput(parseFloat(e.target.value) || 0, fuelUnit)),
+                      })
+                    }
+                    onFocus={(e) => e.target.select()}
+                    className="w-20 rounded-lg px-2 py-1.5 text-right text-sm font-mono
+                               bg-[var(--result-bg)] border border-[var(--result-border)]
+                               outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-[var(--text-muted)] w-8">{fuelUnit}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-[var(--text-secondary)]">Aux fuel</span>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    value={parseFloat(litersToDisplay(state.auxFuelL, fuelUnit).toFixed(1))}
+                    min={0}
+                    step={1}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_FIELD",
+                        field: "auxFuelL",
+                        value: Math.max(0, litersFromInput(parseFloat(e.target.value) || 0, fuelUnit)),
+                      })
+                    }
+                    onFocus={(e) => e.target.select()}
+                    className="w-20 rounded-lg px-2 py-1.5 text-right text-sm font-mono
+                               bg-[var(--result-bg)] border border-[var(--result-border)]
+                               outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-xs text-[var(--text-muted)] w-8">{fuelUnit}</span>
+                </div>
+              </div>
+
+              <div className="mt-2 pt-2 border-t border-[var(--panel-border)] text-xs text-[var(--text-muted)]">
+                <div className="flex justify-between">
+                  <span>Total</span>
+                  <span className="font-mono">
+                    {litersToDisplay(state.mainFuelL + state.auxFuelL, fuelUnit).toFixed(1)} {fuelUnit}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* CG Envelope (second) */}
+          <Card title="CG Envelope">
+            <EnvelopeChart />
+          </Card>
+
+          {/* Results (third) */}
           <Card title="Results" accent>
             <Stat
               label="Total weight"
@@ -116,7 +223,21 @@ export default function CgPage() {
             </div>
           </Card>
 
-          {/* Zero fuel */}
+          {/* Warnings – keep near Results */}
+          {result.warnings.length > 0 && (
+            <Card title="Warnings">
+              <ul className="space-y-1">
+                {result.warnings.map((w, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-red-400">
+                    <span className="mt-0.5 shrink-0">⚠</span>
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          {/* Zero fuel (fourth) */}
           <Card title="Zero Fuel">
             <Stat
               label="ZFW"
@@ -137,26 +258,7 @@ export default function CgPage() {
             </div>
           </Card>
 
-          {/* Warnings */}
-          {result.warnings.length > 0 && (
-            <Card title="Warnings">
-              <ul className="space-y-1">
-                {result.warnings.map((w, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-red-400">
-                    <span className="mt-0.5 shrink-0">⚠</span>
-                    {w}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-
-          {/* Envelope */}
-          <Card title="CG Envelope">
-            <EnvelopeChart />
-          </Card>
-
-          {/* Baggage info */}
+          {/* Baggage (bottom) */}
           <Card title="Baggage">
             <Stat
               label="LH Nose"
@@ -180,37 +282,6 @@ export default function CgPage() {
             )}
           </Card>
 
-          {/* Station breakdown */}
-          <Card title="Station Breakdown">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-[var(--text-muted)] text-left">
-                    <th className="pb-1 pr-4 font-medium">Station</th>
-                    <th className="pb-1 pr-4 font-medium text-right">Mass (kg)</th>
-                    <th className="pb-1 pr-4 font-medium text-right">Arm (m)</th>
-                    <th className="pb-1 font-medium text-right">Moment (kg·m)</th>
-                  </tr>
-                </thead>
-                <tbody className="font-mono">
-                  {result.stations.map((st, i) => (
-                    <tr key={i} className="border-t border-[var(--panel-border)]">
-                      <td className="py-1 pr-4 font-sans">{st.label}</td>
-                      <td className="py-1 pr-4 text-right">{st.mass.toFixed(1)}</td>
-                      <td className="py-1 pr-4 text-right">{st.arm.toFixed(2)}</td>
-                      <td className="py-1 text-right">{st.moment.toFixed(1)}</td>
-                    </tr>
-                  ))}
-                  <tr className="border-t-2 border-[var(--result-border)] font-bold">
-                    <td className="py-1 pr-4 font-sans">Total</td>
-                    <td className="py-1 pr-4 text-right">{result.totalMass.toFixed(1)}</td>
-                    <td className="py-1 pr-4 text-right">{result.cg.toFixed(3)}</td>
-                    <td className="py-1 text-right">{result.totalMoment.toFixed(1)}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Card>
         </div>
       </div>
     </div>

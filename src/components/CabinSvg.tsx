@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
+import { NOSE_BAG_LH, NOSE_BAG_RH } from "./baggagePaths";
 import Modal from "./Modal";
 
 /* ── Zone definitions ─────────────────────────────────────── */
@@ -21,6 +22,16 @@ interface Zone {
   max?: number;
 }
 
+interface NoseBagZone {
+  id: string;
+  label: string;
+  d: string;
+  labelX: number;
+  labelY: number;
+  stateKey: keyof AircraftState;
+  max: number;
+}
+
 /**
  * Coordinates in the ORIGINAL (pre-rotation) SVG space.
  * viewBox = "0 0 3406.606 581.918"
@@ -29,9 +40,6 @@ interface Zone {
  * LH  → TOP (low y)       RH  → BOTTOM (high y)
  *
  * After -90° CCW rotation the nose points UP.
- *
- * Baggage compartments align with the dashed rectangles
- * drawn in the SVG between x≈2544 and x≈3150.
  */
 
 const SEAT_ZONES: Zone[] = [
@@ -46,30 +54,29 @@ const SEAT_ZONES: Zone[] = [
   { id: "seat_7_right", label: "Seat 7 (R)", x: 1218, y: 296, w: 275, h: 174, type: "seat", stateKey: "seat7" },
 ];
 
-const BAGGAGE_ZONES: Zone[] = [
-  // Burun bagajları: işaretlediğin dashed dikdörtgenlerle tam çakışacak şekilde daralttım
-  { id: "bag_lh_nose", label: "LH Nose", x: 2620, y: 70, w: 460, h: 190, type: "baggage", stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
-  { id: "bag_rh_nose", label: "RH Nose", x: 2620, y: 325, w: 460, h: 190, type: "baggage", stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+// Nose baggage: path-based (not rect) to follow the curved fuselage skin
+const NOSE_BAG_ZONES: NoseBagZone[] = [
+  { id: "bag_lh_nose", label: "LH Nose", d: NOSE_BAG_LH, labelX: 2870, labelY: 170, stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
+  { id: "bag_rh_nose", label: "RH Nose", d: NOSE_BAG_RH, labelX: 2870, labelY: 420, stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+];
 
-  // Arka F: arka koltukların hemen arkasındaki dikdörtgene oturacak şekilde
+// Rear baggage only (nose bags handled separately via paths)
+const RECT_BAGGAGE_ZONES: Zone[] = [
   { id: "bag_rear_f", label: "Rear Cargo F", x: 1218, y: 122, w: 275, h: 348, type: "baggage", stateKey: "rearFKg", max: aircraftConfig.baggageLimits.rearF },
 ];
 
-const NAV_ZONES: Zone[] = [
-  { id: "zone_fuel", label: "Fuel", x: 1380, y: 5, w: 220, h: 40, type: "navigate", navTo: "/fuel" },
-  { id: "zone_deice", label: "De-Ice", x: 3160, y: 220, w: 140, h: 140, type: "navigate", navTo: "/config" },
-];
+// Fuel / De-Ice overlays removed from the cabin view – navigation only via top tabs
+const NAV_ZONES: Zone[] = [];
 
 /* ── Rotation / crop ──────────────────────────────────────── */
 
 const ORIG_W = 3406.606;
 const ORIG_H = 581.918;
 
-// Show from rear seats to nose tip: x ≈ 1050 → 3350
 const CROP_X_MIN = 1050;
 const CROP_X_MAX = 3350;
-const CROP_RANGE = CROP_X_MAX - CROP_X_MIN; // 2300
-const VB_Y_START = ORIG_W - CROP_X_MAX;     // 56.606
+const CROP_RANGE = CROP_X_MAX - CROP_X_MIN;
+const VB_Y_START = ORIG_W - CROP_X_MAX;
 
 const VIEW_BOX = `0 ${VB_Y_START} ${ORIG_H} ${CROP_RANGE}`;
 const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
@@ -80,22 +87,23 @@ export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const navigate = useNavigate();
   const [hovered, setHovered] = useState<string | null>(null);
-  const [editingZone, setEditingZone] = useState<Zone | null>(null);
+  const [editingZone, setEditingZone] = useState<Zone | NoseBagZone | null>(null);
   const [svgError, setSvgError] = useState(false);
 
   const isCargoMode = state.mode === "cargo";
 
-  const visibleZones = (() => {
+  /* ── rect-based zones (seats, rear bag) ── */
+  const visibleRectZones = (() => {
     const zones: Zone[] = [...NAV_ZONES];
     if (isCargoMode) {
       zones.push(
         ...SEAT_ZONES.filter((z) => z.id !== "seat_6_left" && z.id !== "seat_7_right"),
-        ...BAGGAGE_ZONES,
+        ...RECT_BAGGAGE_ZONES,
       );
     } else {
       zones.push(
         ...SEAT_ZONES,
-        ...BAGGAGE_ZONES.filter((z) => z.id !== "bag_rear_f"),
+        ...RECT_BAGGAGE_ZONES.filter((z) => z.id !== "bag_rear_f"),
       );
     }
     return zones;
@@ -105,7 +113,7 @@ export default function CabinSvg() {
     isCargoMode ? ["seat_6_left", "seat_7_right"] : ["bag_rear_f"],
   );
 
-  const handleClick = useCallback(
+  const handleRectClick = useCallback(
     (zone: Zone) => {
       if (disabledZoneIds.has(zone.id)) return;
       if (zone.type === "navigate" && zone.navTo) {
@@ -118,6 +126,11 @@ export default function CabinSvg() {
     [navigate, isCargoMode],
   );
 
+  const handleNoseBagClick = useCallback(
+    (zone: NoseBagZone) => setEditingZone(zone),
+    [],
+  );
+
   const handleSave = useCallback(
     (v: number) => {
       if (editingZone?.stateKey) {
@@ -127,7 +140,7 @@ export default function CabinSvg() {
     [editingZone, dispatch],
   );
 
-  const zoneValue = (zone: Zone): number => {
+  const zoneValue = (zone: { stateKey?: keyof AircraftState }): number => {
     if (!zone.stateKey) return 0;
     return state[zone.stateKey] as number;
   };
@@ -143,6 +156,13 @@ export default function CabinSvg() {
     return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.08)";
   };
 
+  const noseBagFill = (zone: NoseBagZone, isHover: boolean): string => {
+    const val = zoneValue(zone);
+    if (val > 0)
+      return isHover ? "rgba(34,197,94,0.40)" : "rgba(34,197,94,0.20)";
+    return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.08)";
+  };
+
   if (svgError) {
     return (
       <div className="flex items-center justify-center h-48 rounded-xl border-2 border-dashed border-[var(--panel-border)] text-[var(--text-muted)]">
@@ -153,8 +173,7 @@ export default function CabinSvg() {
 
   return (
     <>
-      {/* Scrollable wrapper: scroll on mobile, sticky-scroll on desktop */}
-      <div className="mx-auto lg:mx-0 max-h-[60vh] lg:max-h-none overflow-y-auto overflow-x-hidden rounded-lg w-[200px] lg:w-full">
+      <div className="mx-auto lg:mx-0 max-h-[60vh] lg:max-h-none overflow-y-auto overflow-x-hidden rounded-lg w-full max-w-[300px] lg:max-w-none">
         <svg
           viewBox={VIEW_BOX}
           preserveAspectRatio="xMidYMid meet"
@@ -170,7 +189,89 @@ export default function CabinSvg() {
               onError={() => setSvgError(true)}
             />
 
-            {visibleZones.map((zone) => {
+            {/* ── Nose baggage: path-based ── */}
+            {NOSE_BAG_ZONES.map((nb) => {
+              const isHover = hovered === nb.id;
+              const val = zoneValue(nb);
+
+              return (
+                <g key={nb.id}>
+                  {/* Invisible hit area (generous stroke for easier clicking) */}
+                  <path
+                    d={nb.d}
+                    fill="transparent"
+                    stroke="transparent"
+                    strokeWidth={20}
+                    pointerEvents="stroke"
+                    style={{ cursor: "pointer" }}
+                    onMouseEnter={() => setHovered(nb.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => handleNoseBagClick(nb)}
+                  />
+
+                  {/* Visible highlight */}
+                  <path
+                    d={nb.d}
+                    fill={noseBagFill(nb, isHover)}
+                    stroke={isHover ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)"}
+                    strokeWidth={isHover ? 4 : 2}
+                    pointerEvents="fill"
+                    style={{ cursor: "pointer", transition: "fill 0.15s, stroke 0.15s" }}
+                    onMouseEnter={() => setHovered(nb.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => handleNoseBagClick(nb)}
+                  />
+
+                  {/* Debug: red outline */}
+                  {state.debugZones && (
+                    <path
+                      d={nb.d}
+                      fill="none"
+                      stroke="red"
+                      strokeWidth={3}
+                      strokeDasharray="12 6"
+                      pointerEvents="none"
+                    />
+                  )}
+
+                  {/* Debug label */}
+                  {state.showDebugLabels && (
+                    <text
+                      x={nb.labelX}
+                      y={nb.labelY - 16}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="yellow"
+                      fontSize={24}
+                      fontWeight={700}
+                      pointerEvents="none"
+                    >
+                      {nb.id}
+                    </text>
+                  )}
+
+                  {/* Value label */}
+                  {val > 0 && (
+                    <text
+                      x={nb.labelX}
+                      y={nb.labelY + (state.showDebugLabels ? 16 : 0)}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="white"
+                      fontSize={28}
+                      fontWeight={600}
+                      pointerEvents="none"
+                      style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+                    >
+                      {val} kg
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* ── Rect-based zones (seats, rear bag, nav) ── */}
+            {visibleRectZones.map((zone) => {
               const isHover = hovered === zone.id;
               const disabled = disabledZoneIds.has(zone.id);
 
@@ -192,7 +293,7 @@ export default function CabinSvg() {
                     }}
                     onMouseEnter={() => setHovered(zone.id)}
                     onMouseLeave={() => setHovered(null)}
-                    onClick={() => handleClick(zone)}
+                    onClick={() => handleRectClick(zone)}
                   />
 
                   {state.showDebugLabels && (

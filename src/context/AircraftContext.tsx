@@ -34,6 +34,7 @@ export interface AircraftState {
 
   mode: CabinMode;
   showDebugLabels: boolean;
+  debugZones: boolean;
 }
 
 const initialState: AircraftState = {
@@ -59,6 +60,7 @@ const initialState: AircraftState = {
 
   mode: "passenger",
   showDebugLabels: false,
+  debugZones: false,
 };
 
 /* ── Actions ──────────────────────────────────────────────── */
