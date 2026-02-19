@@ -173,7 +173,7 @@ export default function CabinSvg() {
 
   return (
     <>
-      <div className="mx-auto lg:mx-0 max-h-[50vh] lg:max-h-none overflow-y-auto overflow-x-hidden rounded-lg w-full max-w-[180px] lg:max-w-none">
+      <div className="mx-auto lg:mx-0 rounded-lg w-full max-w-[180px] lg:max-w-none">
         <svg
           viewBox={VIEW_BOX}
           preserveAspectRatio="xMidYMid meet"

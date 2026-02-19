@@ -145,7 +145,7 @@ export default function Takeoff() {
       corrResult.breakdown.slopeMultiplier !== 1);
 
   return (
-    <div style={{ padding: "16px 12px", maxWidth: 480, margin: "0 auto" }}>
+    <div style={{ padding: "16px 12px", maxWidth: 480, margin: "0 auto"}}>
       <h1 className="perf-title">DA-62 Performance Calculator</h1>
 
       {/* ── Runway & Wind Diagram ────────────────────────────── */}

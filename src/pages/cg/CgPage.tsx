@@ -89,8 +89,8 @@ export default function CgPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 items-start">
-        {/* Left: Cabin SVG (sticky sidebar on desktop) */}
-        <div className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto rounded-xl">
+        {/* Left: Cabin SVG (no inner scroll; page scroll only) */}
+        <div className="min-w-0 rounded-xl">
           <CabinSvg />
           <p className="text-xs text-[var(--text-muted)] mt-1 text-center px-2">
             Click a zone to enter weight
