@@ -95,34 +95,6 @@ export default function CgPage() {
 
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
-      {/* Mode switch */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 16 }}>
-        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
-          {(["passenger", "cargo"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => dispatch({ type: "SET_MODE", mode: m })}
-              style={{
-                background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
-                color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "none",
-                borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
-                borderRadius: 0,
-                cursor: "pointer",
-              }}
-            >
-              {m === "passenger" ? "🪑 Passenger" : "📦 Cargo"}
-            </button>
-          ))}
-        </div>
-        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-          {state.mode === "passenger" ? "Rear seats installed" : "Rear seats folded → cargo"}
-        </span>
-      </div>
-
       <div className="cg-layout">
         {/* Cabin SVG */}
         <div style={{ minWidth: 0 }}>

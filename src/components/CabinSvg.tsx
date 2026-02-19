@@ -66,8 +66,7 @@ const BAG_CARD_H = 90;
 /* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 1500 },
-  { id: "rear", label: "Rear", targetY: 2100 },
+  { id: "cabin", label: "Cabin", targetY: 1350 },
 ] as const;
 
 /* ── Component ── */
@@ -135,36 +134,70 @@ export default function CabinSvg() {
 
   return (
     <>
-      {/* Quick-jump segmented control */}
+      {/* Controls row: section jump + mode switch */}
       <div style={{
         display: "flex",
         justifyContent: "center",
-        gap: 0,
-        borderRadius: 8,
-        overflow: "hidden",
-        border: "1px solid var(--panel-border)",
-        width: "fit-content",
-        margin: "0 auto 6px",
+        alignItems: "center",
+        gap: 8,
+        flexWrap: "wrap",
+        marginBottom: 6,
       }}>
-        {SECTIONS.map((s, i) => (
-          <button
-            key={s.id}
-            onClick={() => jumpTo(s.id)}
-            style={{
-              background: activeSection === s.id ? "var(--result-bg)" : "var(--panel-bg)",
-              color: activeSection === s.id ? "#60a5fa" : "var(--text-muted)",
-              padding: "5px 16px",
-              fontSize: 12,
-              fontWeight: 600,
-              border: "none",
-              borderRight: i < SECTIONS.length - 1 ? "1px solid var(--panel-border)" : "none",
-              borderRadius: 0,
-              cursor: "pointer",
-            }}
-          >
-            {s.label}
-          </button>
-        ))}
+        {/* Section jump */}
+        <div style={{
+          display: "flex",
+          borderRadius: 8,
+          overflow: "hidden",
+          border: "1px solid var(--panel-border)",
+        }}>
+          {SECTIONS.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => jumpTo(s.id)}
+              style={{
+                background: activeSection === s.id ? "var(--result-bg)" : "var(--panel-bg)",
+                color: activeSection === s.id ? "#60a5fa" : "var(--text-muted)",
+                padding: "5px 14px",
+                fontSize: 12,
+                fontWeight: 600,
+                border: "none",
+                borderRight: i < SECTIONS.length - 1 ? "1px solid var(--panel-border)" : "none",
+                borderRadius: 0,
+                cursor: "pointer",
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Mode switch */}
+        <div style={{
+          display: "flex",
+          borderRadius: 8,
+          overflow: "hidden",
+          border: "1px solid var(--panel-border)",
+        }}>
+          {(["passenger", "cargo"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => dispatch({ type: "SET_MODE", mode: m })}
+              style={{
+                background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
+                color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
+                padding: "5px 14px",
+                fontSize: 12,
+                fontWeight: 600,
+                border: "none",
+                borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
+                borderRadius: 0,
+                cursor: "pointer",
+              }}
+            >
+              {m === "passenger" ? "🪑 PAX" : "📦 Cargo"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Scrollable viewport */}
@@ -177,7 +210,8 @@ export default function CabinSvg() {
           overflowX: "hidden",
           WebkitOverflowScrolling: "touch",
           touchAction: "pan-y",
-          maxHeight: "calc(100dvh - 160px)",
+          height: 480,
+          maxHeight: 480,
           borderRadius: 10,
           border: "1px solid var(--panel-border)",
           background: "#111",
