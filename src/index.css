@@ -121,7 +121,7 @@ textarea {
 @media (min-width: 900px) {
   .cg-layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 300px 1fr;
     align-items: start;
   }
 }
