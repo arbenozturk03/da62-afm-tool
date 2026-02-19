@@ -73,7 +73,7 @@ function rowPositions(count: number, cy: number): Array<{ cardX: number; cardY: 
 /* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 950 },
+  { id: "cabin", label: "Cabin", targetY: 1100 },
 ] as const;
 
 /* ── Component ── */
