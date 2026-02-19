@@ -46,21 +46,21 @@ interface BagZone {
  */
 
 const SEATS: SeatZone[] = [
-  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 310, cy: 1700, w: 280, h: 250 },
-  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 750, cy: 1700, w: 280, h: 250 },
+  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 400, cy: 1450, w: 240, h: 220 },
+  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 700, cy: 1450, w: 240, h: 220 },
 
-  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 220, cy: 2150, w: 250, h: 250 },
-  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 530, cy: 2150, w: 250, h: 250 },
-  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 840, cy: 2150, w: 250, h: 250 },
+  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 360, cy: 1850, w: 200, h: 220 },
+  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 550, cy: 1850, w: 200, h: 220 },
+  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 750, cy: 1850, w: 200, h: 220 },
 
-  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 340, cy: 2650, w: 280, h: 250 },
-  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 720, cy: 2650, w: 280, h: 250 },
+  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 450, cy: 2280, w: 220, h: 220 },
+  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 650, cy: 2280, w: 220, h: 220 },
 ];
 
 const BAGS: BagZone[] = [
-  { id: "blh", label: "LH Nose", stateKey: "lhNoseKg", cx: 310, cy: 820, w: 250, h: 200, max: aircraftConfig.baggageLimits.lhNose },
-  { id: "brh", label: "RH Nose", stateKey: "rhNoseKg", cx: 750, cy: 820, w: 250, h: 200, max: aircraftConfig.baggageLimits.rhNose },
-  { id: "brf", label: "Rear Cargo", stateKey: "rearFKg", cx: 530, cy: 2650, w: 350, h: 250, max: aircraftConfig.baggageLimits.rearF },
+  { id: "blh", label: "Left Cargo", stateKey: "lhNoseKg", cx: 400, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.lhNose },
+  { id: "brh", label: "Right Cargo", stateKey: "rhNoseKg", cx: 688, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.rhNose },
+  { id: "brf", label: "Rear Baggage", stateKey: "rearFKg", cx: 550, cy: 2280, w: 300, h: 220, max: aircraftConfig.baggageLimits.rearF },
 ];
 
 /* ── Label card dimensions (SVG units) ── */
@@ -168,7 +168,7 @@ export default function CabinSvg() {
             const x = s.cx - s.w / 2;
             const y = s.cy - s.h / 2;
             const cardX = s.cx - CARD_W / 2;
-            const cardY = s.cy + s.h / 2 - CARD_H - 8;
+            const cardY = s.cy - CARD_H / 2;
 
             return (
               <g

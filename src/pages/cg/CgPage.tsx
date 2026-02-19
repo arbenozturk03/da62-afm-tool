@@ -280,7 +280,7 @@ export default function CgPage() {
             <Stat label="LH Nose" value={`${state.lhNoseKg}`} unit={`/ ${aircraftConfig.baggageLimits.lhNose} kg`} warn={state.lhNoseKg > aircraftConfig.baggageLimits.lhNose} />
             <Stat label="RH Nose" value={`${state.rhNoseKg}`} unit={`/ ${aircraftConfig.baggageLimits.rhNose} kg`} warn={state.rhNoseKg > aircraftConfig.baggageLimits.rhNose} />
             {state.mode === "cargo" && (
-              <Stat label="Rear F" value={`${state.rearFKg}`} unit={`/ ${aircraftConfig.baggageLimits.rearF} kg`} warn={state.rearFKg > aircraftConfig.baggageLimits.rearF} />
+              <Stat label="Rear Baggage" value={`${state.rearFKg}`} unit={`/ ${aircraftConfig.baggageLimits.rearF} kg`} warn={state.rearFKg > aircraftConfig.baggageLimits.rearF} />
             )}
           </div>
         </div>
