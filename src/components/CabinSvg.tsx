@@ -27,43 +27,37 @@ interface Zone {
  *
  * Nose is on the RIGHT (high x), tail on the LEFT (low x).
  * Top of SVG = Left side of aircraft, Bottom = Right side.
- *
  * After rotation (-90° CCW), nose points UP.
- *
- * Seat image transforms found in cabin.svg:
- *   Front row (row 1, 2 seats): images at x≈1975
- *   Middle row (row 2, 3 seats): images at x≈1598
- *   Rear row  (row 3, 2 seats): images at x≈1218
- * Nose baggage structures at x≈2550–2900.
  */
 
 const SEAT_ZONES: Zone[] = [
-  // Row 1 – Front (nearest to nose)
+  // Row 1 – Front (nearest to nose), images at x≈1975
   { id: "seat_1_left", label: "Seat 1 (L)", x: 1975, y: 76, w: 275, h: 174, type: "seat", stateKey: "seat1" },
   { id: "seat_2_right", label: "Seat 2 (R)", x: 1975, y: 337, w: 275, h: 174, type: "seat", stateKey: "seat2" },
 
-  // Row 2 – Middle
+  // Row 2 – Middle, images at x≈1598
   { id: "seat_3_left", label: "Seat 3 (L)", x: 1598, y: 35, w: 275, h: 170, type: "seat", stateKey: "seat3" },
   { id: "seat_4_middle", label: "Seat 4 (M)", x: 1598, y: 205, w: 275, h: 170, type: "seat", stateKey: "seat4" },
   { id: "seat_5_right", label: "Seat 5 (R)", x: 1598, y: 375, w: 275, h: 170, type: "seat", stateKey: "seat5" },
 
-  // Row 3 – Rear (farthest from nose)
+  // Row 3 – Rear (farthest from nose), images at x≈1218
   { id: "seat_6_left", label: "Seat 6 (L)", x: 1218, y: 122, w: 275, h: 174, type: "seat", stateKey: "seat6" },
   { id: "seat_7_right", label: "Seat 7 (R)", x: 1218, y: 296, w: 275, h: 174, type: "seat", stateKey: "seat7" },
 ];
 
 const BAGGAGE_ZONES: Zone[] = [
-  // Nose baggage – high x (front/right in original SVG)
-  { id: "bag_lh_nose", label: "LH Nose Bag", x: 2560, y: 100, w: 340, h: 170, type: "baggage", stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
-  { id: "bag_rh_nose", label: "RH Nose Bag", x: 2560, y: 310, w: 340, h: 170, type: "baggage", stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+  // Nose baggage: LH = left side of aircraft = top of original SVG (low y)
+  { id: "bag_lh_nose", label: "LH Nose", x: 2500, y: 20, w: 420, h: 220, type: "baggage", stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
+  // RH = right side of aircraft = bottom of original SVG (high y)
+  { id: "bag_rh_nose", label: "RH Nose", x: 2500, y: 340, w: 420, h: 220, type: "baggage", stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
 
-  // Rear cargo F – same area as rear seats (low x / tail in original)
+  // Rear cargo F – same physical area as rear seats
   { id: "bag_rear_f", label: "Rear Cargo F", x: 1218, y: 122, w: 275, h: 348, type: "baggage", stateKey: "rearFKg", max: aircraftConfig.baggageLimits.rearF },
 ];
 
 const NAV_ZONES: Zone[] = [
-  { id: "zone_fuel", label: "Fuel", x: 700, y: 210, w: 300, h: 160, type: "navigate", navTo: "/fuel" },
-  { id: "zone_deice", label: "De-Ice", x: 2920, y: 200, w: 250, h: 180, type: "navigate", navTo: "/config" },
+  { id: "zone_fuel", label: "Fuel", x: 1380, y: 5, w: 220, h: 40, type: "navigate", navTo: "/fuel" },
+  { id: "zone_deice", label: "De-Ice", x: 2750, y: 225, w: 180, h: 130, type: "navigate", navTo: "/config" },
 ];
 
 /* ── Rotation constants ───────────────────────────────────── */
@@ -71,12 +65,11 @@ const NAV_ZONES: Zone[] = [
 const ORIG_W = 3406.606;
 const ORIG_H = 581.918;
 
-// After -90° CCW rotation: width=ORIG_H, height=ORIG_W
-// Crop to cabin area: x ≈ 1050..3150 in original → y = 256..2356 in rotated space
-const CROP_X_MIN = 1050;
-const CROP_X_MAX = 3150;
-const CROP_RANGE = CROP_X_MAX - CROP_X_MIN; // 2100
-const VB_Y_START = ORIG_W - CROP_X_MAX;     // 256.606
+// Crop to cabin + nose area: x ≈ 1100..2980 in the original
+const CROP_X_MIN = 1100;
+const CROP_X_MAX = 2980;
+const CROP_RANGE = CROP_X_MAX - CROP_X_MIN;
+const VB_Y_START = ORIG_W - CROP_X_MAX;
 
 const VIEW_BOX = `0 ${VB_Y_START} ${ORIG_H} ${CROP_RANGE}`;
 const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
@@ -169,11 +162,11 @@ export default function CabinSvg() {
     <>
       <svg
         viewBox={VIEW_BOX}
-        className="w-full h-auto"
         preserveAspectRatio="xMidYMid meet"
+        className="block mx-auto w-full max-h-[50vh] lg:max-h-none"
+        style={{ maxWidth: 260 }}
       >
         <g transform={TRANSFORM}>
-          {/* Cabin background image */}
           <image
             href="/cabin.svg"
             x="0"
@@ -183,7 +176,6 @@ export default function CabinSvg() {
             onError={() => setSvgError(true)}
           />
 
-          {/* Clickable zones (all coordinates in original pre-rotation space) */}
           {visibleZones.map((zone) => {
             const isHover = hovered === zone.id;
             const disabled = disabledZoneIds.has(zone.id);
@@ -247,7 +239,7 @@ export default function CabinSvg() {
                     textAnchor="middle"
                     dominantBaseline="central"
                     fill="rgba(147,197,253,0.9)"
-                    fontSize={28}
+                    fontSize={zone.id === "zone_fuel" ? 20 : 26}
                     fontWeight={600}
                     pointerEvents="none"
                   >
