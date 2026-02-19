@@ -1,13 +1,10 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
 import Modal from "./Modal";
 
-/* ── cabin_2.svg: viewBox = "0 0 1063 3792", nose-up ── */
-
 const SVG_W = 1063;
 const SVG_H = 3792;
-
 const CROP_Y = 50;
 const CROP_H = 2750;
 const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
@@ -17,11 +14,13 @@ const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 interface SeatZone {
   id: string;
   label: string;
+  shortLabel: string;
   stateKey: keyof AircraftState;
   cx: number;
   cy: number;
   w: number;
   h: number;
+  row: number;
   max?: number;
 }
 
@@ -33,40 +32,48 @@ interface BagZone {
   cy: number;
   w: number;
   h: number;
+  row: number;
   max: number;
 }
 
-/* ── Zone data ── */
+/* ── Zone data (row groups: 0=front, 1=mid, 2=rear, 10=nose-bags, 11=rear-bag) ── */
 
 const SEATS: SeatZone[] = [
-  { id: "s1l", label: "Seat 1 (L)", stateKey: "seat1", cx: 400, cy: 1450, w: 240, h: 220 },
-  { id: "s2r", label: "Seat 2 (R)", stateKey: "seat2", cx: 700, cy: 1450, w: 240, h: 220 },
-  { id: "s3l", label: "Seat 3 (L)", stateKey: "seat3", cx: 360, cy: 1850, w: 200, h: 220 },
-  { id: "s4m", label: "Seat 4 (M)", stateKey: "seat4", cx: 550, cy: 1850, w: 200, h: 220 },
-  { id: "s5r", label: "Seat 5 (R)", stateKey: "seat5", cx: 750, cy: 1850, w: 200, h: 220 },
-  { id: "s6l", label: "Seat 6 (L)", stateKey: "seat6", cx: 450, cy: 2280, w: 220, h: 220 },
-  { id: "s7r", label: "Seat 7 (R)", stateKey: "seat7", cx: 650, cy: 2280, w: 220, h: 220 },
+  { id: "s1l", shortLabel: "1L", label: "Seat 1L", stateKey: "seat1", cx: 400, cy: 1450, w: 260, h: 240, row: 0 },
+  { id: "s2r", shortLabel: "1R", label: "Seat 1R", stateKey: "seat2", cx: 700, cy: 1450, w: 260, h: 240, row: 0 },
+  { id: "s3l", shortLabel: "2L", label: "Seat 2L", stateKey: "seat3", cx: 360, cy: 1850, w: 220, h: 240, row: 1 },
+  { id: "s4m", shortLabel: "2C", label: "Seat 2C", stateKey: "seat4", cx: 550, cy: 1850, w: 220, h: 240, row: 1 },
+  { id: "s5r", shortLabel: "2R", label: "Seat 2R", stateKey: "seat5", cx: 750, cy: 1850, w: 220, h: 240, row: 1 },
+  { id: "s6l", shortLabel: "3L", label: "Seat 3L", stateKey: "seat6", cx: 450, cy: 2280, w: 240, h: 240, row: 2 },
+  { id: "s7r", shortLabel: "3R", label: "Seat 3R", stateKey: "seat7", cx: 650, cy: 2280, w: 240, h: 240, row: 2 },
 ];
 
 const BAGS: BagZone[] = [
-  { id: "blh", label: "Left Cargo", stateKey: "lhNoseKg", cx: 400, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.lhNose },
-  { id: "brh", label: "Right Cargo", stateKey: "rhNoseKg", cx: 688, cy: 435, w: 200, h: 180, max: aircraftConfig.baggageLimits.rhNose },
-  { id: "brf", label: "Rear Baggage", stateKey: "rearFKg", cx: 550, cy: 2280, w: 300, h: 220, max: aircraftConfig.baggageLimits.rearF },
+  { id: "blh", label: "Left Cargo",    stateKey: "lhNoseKg", cx: 400, cy: 435, w: 220, h: 200, row: 10, max: aircraftConfig.baggageLimits.lhNose },
+  { id: "brh", label: "Right Cargo",   stateKey: "rhNoseKg", cx: 688, cy: 435, w: 220, h: 200, row: 10, max: aircraftConfig.baggageLimits.rhNose },
+  { id: "brf", label: "Rear Baggage",  stateKey: "rearFKg",  cx: 550, cy: 2280, w: 320, h: 240, row: 11, max: aircraftConfig.baggageLimits.rearF },
 ];
 
-/* Label card sizes */
-const CARD_W = 200;
-const CARD_H = 70;
-const CARD_RX = 12;
+/* Card dimensions */
+const CW = 320;
+const CH = 140;
+const RX = 18;
+const CARD_GAP = 4;
 
-/* Bigger baggage cards */
-const BAG_CARD_W = 260;
-const BAG_CARD_H = 90;
+function rowPositions(count: number, cy: number): Array<{ cardX: number; cardY: number }> {
+  const totalW = count * CW + (count - 1) * CARD_GAP;
+  const startX = (SVG_W - totalW) / 2;
+  const cardY = cy - CH / 2;
+  return Array.from({ length: count }, (_, i) => ({
+    cardX: startX + i * (CW + CARD_GAP),
+    cardY,
+  }));
+}
 
 /* Section scroll targets */
 const SECTIONS = [
   { id: "nose", label: "Nose", targetY: 200 },
-  { id: "cabin", label: "Cabin", targetY: 1150 },
+  { id: "cabin", label: "Cabin", targetY: 950 },
 ] as const;
 
 /* ── Component ── */
@@ -102,253 +109,181 @@ export default function CabinSvg() {
 
   const disabledSeatIds = new Set(isCargoMode ? ["s6l", "s7r"] : []);
 
+  /* Compute card positions per row — all cards in a row are centered and adjacent */
+  const seatCardMap = useMemo(() => {
+    const map = new Map<string, { cardX: number; cardY: number }>();
+    const byRow = new Map<number, SeatZone[]>();
+    for (const s of visibleSeats) {
+      if (!byRow.has(s.row)) byRow.set(s.row, []);
+      byRow.get(s.row)!.push(s);
+    }
+    for (const [, group] of byRow) {
+      const cy = group[0].cy;
+      const positions = rowPositions(group.length, cy);
+      group.forEach((s, i) => map.set(s.id, positions[i]));
+    }
+    return map;
+  }, [visibleSeats]);
+
+  const bagCardMap = useMemo(() => {
+    const map = new Map<string, { cardX: number; cardY: number }>();
+    const byRow = new Map<number, BagZone[]>();
+    for (const b of visibleBags) {
+      if (!byRow.has(b.row)) byRow.set(b.row, []);
+      byRow.get(b.row)!.push(b);
+    }
+    for (const [, group] of byRow) {
+      const cy = group[0].cy;
+      const positions = rowPositions(group.length, cy);
+      group.forEach((b, i) => map.set(b.id, positions[i]));
+    }
+    return map;
+  }, [visibleBags]);
+
   const jumpTo = (sectionId: string) => {
     const vp = viewportRef.current;
     const content = svgContentRef.current;
     if (!vp || !content) return;
     setActiveSection(sectionId);
-
     const section = SECTIONS.find((s) => s.id === sectionId);
     if (!section) return;
-
     const svgYNorm = (section.targetY - CROP_Y) / CROP_H;
     const contentH = content.scrollHeight;
-    const targetScroll = svgYNorm * contentH - 20;
-
-    vp.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    vp.scrollTo({ top: Math.max(0, svgYNorm * contentH - 20), behavior: "smooth" });
   };
 
   const handleScroll = () => {
     const vp = viewportRef.current;
     const content = svgContentRef.current;
     if (!vp || !content) return;
-
     const scrollCenter = vp.scrollTop + vp.clientHeight / 2;
-    const contentH = content.scrollHeight;
-    const svgY = (scrollCenter / contentH) * CROP_H + CROP_Y;
-
-    if (svgY < 900) setActiveSection("nose");
-    else if (svgY < 2000) setActiveSection("cabin");
-    else setActiveSection("rear");
+    const svgY = (scrollCenter / content.scrollHeight) * CROP_H + CROP_Y;
+    setActiveSection(svgY < 900 ? "nose" : "cabin");
   };
 
   return (
     <>
-      {/* Controls row: section jump + mode switch */}
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 8,
-        flexWrap: "wrap",
-        marginBottom: 6,
-      }}>
-        {/* Section jump */}
-        <div style={{
-          display: "flex",
-          borderRadius: 8,
-          overflow: "hidden",
-          border: "1px solid var(--panel-border)",
-        }}>
+      {/* Controls */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
           {SECTIONS.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => jumpTo(s.id)}
-              style={{
-                background: activeSection === s.id ? "var(--result-bg)" : "var(--panel-bg)",
-                color: activeSection === s.id ? "#60a5fa" : "var(--text-muted)",
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "none",
-                borderRight: i < SECTIONS.length - 1 ? "1px solid var(--panel-border)" : "none",
-                borderRadius: 0,
-                cursor: "pointer",
-              }}
-            >
-              {s.label}
-            </button>
+            <button key={s.id} onClick={() => jumpTo(s.id)} style={{
+              background: activeSection === s.id ? "var(--result-bg)" : "var(--panel-bg)",
+              color: activeSection === s.id ? "#60a5fa" : "var(--text-muted)",
+              padding: "5px 14px", fontSize: 12, fontWeight: 600,
+              border: "none", borderRight: i < SECTIONS.length - 1 ? "1px solid var(--panel-border)" : "none",
+              borderRadius: 0, cursor: "pointer",
+            }}>{s.label}</button>
           ))}
         </div>
-
-        {/* Mode switch */}
-        <div style={{
-          display: "flex",
-          borderRadius: 8,
-          overflow: "hidden",
-          border: "1px solid var(--panel-border)",
-        }}>
+        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
           {(["passenger", "cargo"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => dispatch({ type: "SET_MODE", mode: m })}
-              style={{
-                background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
-                color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "none",
-                borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
-                borderRadius: 0,
-                cursor: "pointer",
-              }}
-            >
-              {m === "passenger" ? "🪑 PAX" : "📦 Cargo"}
-            </button>
+            <button key={m} onClick={() => dispatch({ type: "SET_MODE", mode: m })} style={{
+              background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
+              color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
+              padding: "5px 14px", fontSize: 12, fontWeight: 600,
+              border: "none", borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
+              borderRadius: 0, cursor: "pointer",
+            }}>{m === "passenger" ? "🪑 PAX" : "📦 Cargo"}</button>
           ))}
         </div>
       </div>
 
-      {/* Scrollable viewport */}
-      <div
-        ref={viewportRef}
-        onScroll={handleScroll}
-        style={{
-          position: "relative",
-          overflowY: "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-          touchAction: "pan-y",
-          height: 480,
-          maxHeight: 480,
-          borderRadius: 10,
-          border: "1px solid var(--panel-border)",
-          background: "#111",
-        }}
-      >
-        <div
-          ref={svgContentRef}
-          style={{ width: "100%", margin: "0 auto" }}
-        >
-          <svg
-            viewBox={VIEW_BOX}
-            preserveAspectRatio="xMidYMid meet"
-            style={{ display: "block", width: "100%", height: "auto" }}
-          >
-            <image
-              href="/cabin_2.svg"
-              x="0" y="0"
-              width={SVG_W} height={SVG_H}
-            />
+      {/* Viewport */}
+      <div ref={viewportRef} onScroll={handleScroll} style={{
+        position: "relative", overflowY: "auto", overflowX: "hidden",
+        WebkitOverflowScrolling: "touch", touchAction: "pan-y",
+        height: 480, maxHeight: 480, borderRadius: 10,
+        border: "1px solid var(--panel-border)", background: "#111",
+      }}>
+        <div ref={svgContentRef} style={{ width: "100%" }}>
+          <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", height: "auto" }}>
+            <image href="/cabin_2.svg" x="0" y="0" width={SVG_W} height={SVG_H} />
 
-            {/* ── Seat zones ── */}
+            {/* ── Seats ── */}
             {visibleSeats.map((s) => {
+              const pos = seatCardMap.get(s.id);
+              if (!pos) return null;
+              const { cardX, cardY } = pos;
               const isHover = hovered === s.id;
               const disabled = disabledSeatIds.has(s.id);
               const v = val(s.stateKey);
-              const x = s.cx - s.w / 2;
-              const y = s.cy - s.h / 2;
-              const cardX = s.cx - CARD_W / 2;
-              const cardY = s.cy - CARD_H / 2;
+              const filled = v > 0;
 
               return (
-                <g
-                  key={s.id}
-                  style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+                <g key={s.id} style={{ cursor: disabled ? "not-allowed" : "pointer" }}
                   onMouseEnter={() => setHovered(s.id)}
                   onMouseLeave={() => setHovered(null)}
                   onClick={() => { if (!disabled) setEditingZone(s); }}
                 >
-                  <rect
-                    x={x} y={y} width={s.w} height={s.h}
-                    rx={16} ry={16}
-                    fill="transparent"
-                    stroke={isHover ? "rgba(255,255,255,0.12)" : "transparent"}
-                    strokeWidth={2}
-                    pointerEvents="all"
+                  <rect x={cardX} y={cardY} width={CW} height={CH}
+                    fill="transparent" pointerEvents="all" />
+
+                  <rect x={cardX} y={cardY} width={CW} height={CH} rx={RX} ry={RX}
+                    fill={isHover ? "rgba(30,30,38,0.95)" : "rgba(18,18,24,0.88)"}
+                    stroke={filled ? "rgba(56,189,248,0.35)" : "rgba(255,255,255,0.06)"}
+                    strokeWidth={1.5}
                   />
-                  <rect
-                    x={cardX} y={cardY}
-                    width={CARD_W} height={CARD_H}
-                    rx={CARD_RX} ry={CARD_RX}
-                    fill="rgba(20,20,25,0.82)"
-                    stroke={v > 0 ? "rgba(56,189,248,0.25)" : "rgba(255,255,255,0.08)"}
-                    strokeWidth={1}
-                  />
-                  <text x={cardX + 14} y={cardY + 28} fontSize={20} fill="#888" pointerEvents="none">🧑</text>
-                  <text
-                    x={cardX + 42} y={cardY + 30}
-                    fontSize={19} fontWeight={600}
-                    fill={v > 0 ? "#38bdf8" : "#888"}
-                    pointerEvents="none"
-                  >
-                    {v.toFixed(1)} kg
-                  </text>
+
+                  <text x={cardX + CW / 2} y={cardY + 38} textAnchor="middle"
+                    fontSize={30} fontWeight={800}
+                    fill={filled ? "#e0f2fe" : "#666"} pointerEvents="none"
+                  >{s.label}</text>
+
+                  <text x={cardX + CW / 2} y={cardY + 88} textAnchor="middle"
+                    fontSize={38} fontWeight={800}
+                    fill={filled ? "#38bdf8" : "#444"} pointerEvents="none"
+                  >🧑 {v.toFixed(0)} kg</text>
+
+                  <text x={cardX + CW / 2} y={cardY + 122} textAnchor="middle"
+                    fontSize={20} fill={filled ? "rgba(56,189,248,0.45)" : "rgba(255,255,255,0.15)"} pointerEvents="none"
+                  >{filled ? "occupied" : "tap to set"}</text>
 
                   {disabled && (
-                    <rect
-                      x={x} y={y} width={s.w} height={s.h}
-                      rx={16} ry={16}
-                      fill="rgba(0,0,0,0.50)"
-                      pointerEvents="none"
-                    />
+                    <rect x={cardX} y={cardY} width={CW} height={CH} rx={RX} ry={RX}
+                      fill="rgba(0,0,0,0.6)" pointerEvents="none" />
                   )}
                 </g>
               );
             })}
 
-            {/* ── Baggage zones ── */}
+            {/* ── Baggage ── */}
             {visibleBags.map((b) => {
+              const pos = bagCardMap.get(b.id);
+              if (!pos) return null;
+              const { cardX, cardY } = pos;
               const isHover = hovered === b.id;
               const v = val(b.stateKey);
-              const x = b.cx - b.w / 2;
-              const y = b.cy - b.h / 2;
-              const cardX = b.cx - BAG_CARD_W / 2;
-              const cardY = b.cy - BAG_CARD_H / 2;
+              const filled = v > 0;
 
               return (
-                <g
-                  key={b.id}
-                  style={{ cursor: "pointer" }}
+                <g key={b.id} style={{ cursor: "pointer" }}
                   onMouseEnter={() => setHovered(b.id)}
                   onMouseLeave={() => setHovered(null)}
                   onClick={() => setEditingZone(b)}
                 >
-                  <rect
-                    x={x} y={y} width={b.w} height={b.h}
-                    rx={14} ry={14}
-                    fill="transparent"
-                    stroke={isHover ? "rgba(255,255,255,0.12)" : "transparent"}
-                    strokeWidth={2}
-                    pointerEvents="all"
-                  />
-                  <rect
-                    x={cardX} y={cardY}
-                    width={BAG_CARD_W} height={BAG_CARD_H}
-                    rx={CARD_RX} ry={CARD_RX}
-                    fill="rgba(20,20,25,0.82)"
-                    stroke={v > 0 ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.08)"}
+                  <rect x={cardX} y={cardY} width={CW} height={CH}
+                    fill="transparent" pointerEvents="all" />
+
+                  <rect x={cardX} y={cardY} width={CW} height={CH} rx={RX} ry={RX}
+                    fill={isHover ? "rgba(30,30,38,0.95)" : "rgba(18,18,24,0.88)"}
+                    stroke={filled ? "rgba(34,197,94,0.35)" : "rgba(255,255,255,0.06)"}
                     strokeWidth={1.5}
                   />
-                  {/* Label */}
-                  <text
-                    x={cardX + BAG_CARD_W / 2} y={cardY + 24}
-                    textAnchor="middle"
-                    fontSize={18} fontWeight={700}
-                    fill={v > 0 ? "#4ade80" : "#aaa"}
-                    pointerEvents="none"
-                  >
-                    {b.label}
-                  </text>
-                  {/* Weight */}
-                  <text
-                    x={cardX + BAG_CARD_W / 2} y={cardY + 52}
-                    textAnchor="middle"
-                    fontSize={22} fontWeight={700}
-                    fill={v > 0 ? "#4ade80" : "#666"}
-                    pointerEvents="none"
-                  >
-                    {v.toFixed(1)} kg
-                  </text>
-                  {/* Max */}
-                  <text
-                    x={cardX + BAG_CARD_W / 2} y={cardY + 76}
-                    textAnchor="middle"
-                    fontSize={14} fill="#555" pointerEvents="none"
-                  >
-                    max {b.max} kg
-                  </text>
+
+                  <text x={cardX + CW / 2} y={cardY + 36} textAnchor="middle"
+                    fontSize={28} fontWeight={800}
+                    fill={filled ? "#bbf7d0" : "#888"} pointerEvents="none"
+                  >{b.label}</text>
+
+                  <text x={cardX + CW / 2} y={cardY + 86} textAnchor="middle"
+                    fontSize={38} fontWeight={800}
+                    fill={filled ? "#4ade80" : "#444"} pointerEvents="none"
+                  >🧳 {v.toFixed(0)} kg</text>
+
+                  <text x={cardX + CW / 2} y={cardY + 122} textAnchor="middle"
+                    fontSize={20} fill={v > b.max ? "#f87171" : "#555"} pointerEvents="none"
+                  >max {b.max} kg</text>
                 </g>
               );
             })}
