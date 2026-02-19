@@ -63,20 +63,33 @@ export default function CgPage() {
             Cargo
           </button>
         </div>
-        <span className="text-xs text-[var(--text-muted)] ml-1">
+        <span className="text-xs text-[var(--text-muted)] ml-1 hidden sm:inline">
           {state.mode === "passenger"
             ? "Rear seats installed"
             : "Rear seats folded → cargo"}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
-        {/* Left: Cabin SVG */}
-        <div className="min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
+        {/* Left: Cabin SVG (sticky sidebar on desktop) */}
+        <div className="min-w-0 lg:sticky lg:top-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto rounded-xl">
           <CabinSvg />
-          <p className="text-xs text-[var(--text-muted)] mt-1 text-center">
-            Click a zone to enter weight. Fuel/De-Ice zones navigate to their pages.
+          <p className="text-xs text-[var(--text-muted)] mt-1 text-center px-2">
+            Click a zone to enter weight
           </p>
+
+          {/* Debug toggle */}
+          <label className="flex items-center gap-2 text-xs text-[var(--text-muted)] cursor-pointer select-none mt-2 px-2 pb-2">
+            <input
+              type="checkbox"
+              checked={state.showDebugLabels}
+              onChange={(e) =>
+                dispatch({ type: "SET_FIELD", field: "showDebugLabels", value: e.target.checked })
+              }
+              className="accent-blue-500"
+            />
+            Show zone labels (debug)
+          </label>
         </div>
 
         {/* Right: cards */}
@@ -167,53 +180,38 @@ export default function CgPage() {
             )}
           </Card>
 
-          {/* Debug toggle */}
-          <label className="flex items-center gap-2 text-xs text-[var(--text-muted)] cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={state.showDebugLabels}
-              onChange={(e) =>
-                dispatch({ type: "SET_FIELD", field: "showDebugLabels", value: e.target.checked })
-              }
-              className="accent-blue-500"
-            />
-            Show zone labels (debug)
-          </label>
-        </div>
-      </div>
-
-      {/* Station breakdown */}
-      <div className="mt-4">
-        <Card title="Station Breakdown">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[var(--text-muted)] text-left">
-                  <th className="pb-1 pr-4 font-medium">Station</th>
-                  <th className="pb-1 pr-4 font-medium text-right">Mass (kg)</th>
-                  <th className="pb-1 pr-4 font-medium text-right">Arm (m)</th>
-                  <th className="pb-1 font-medium text-right">Moment (kg·m)</th>
-                </tr>
-              </thead>
-              <tbody className="font-mono">
-                {result.stations.map((st, i) => (
-                  <tr key={i} className="border-t border-[var(--panel-border)]">
-                    <td className="py-1 pr-4 font-sans">{st.label}</td>
-                    <td className="py-1 pr-4 text-right">{st.mass.toFixed(1)}</td>
-                    <td className="py-1 pr-4 text-right">{st.arm.toFixed(2)}</td>
-                    <td className="py-1 text-right">{st.moment.toFixed(1)}</td>
+          {/* Station breakdown */}
+          <Card title="Station Breakdown">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-[var(--text-muted)] text-left">
+                    <th className="pb-1 pr-4 font-medium">Station</th>
+                    <th className="pb-1 pr-4 font-medium text-right">Mass (kg)</th>
+                    <th className="pb-1 pr-4 font-medium text-right">Arm (m)</th>
+                    <th className="pb-1 font-medium text-right">Moment (kg·m)</th>
                   </tr>
-                ))}
-                <tr className="border-t-2 border-[var(--result-border)] font-bold">
-                  <td className="py-1 pr-4 font-sans">Total</td>
-                  <td className="py-1 pr-4 text-right">{result.totalMass.toFixed(1)}</td>
-                  <td className="py-1 pr-4 text-right">{result.cg.toFixed(3)}</td>
-                  <td className="py-1 text-right">{result.totalMoment.toFixed(1)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                </thead>
+                <tbody className="font-mono">
+                  {result.stations.map((st, i) => (
+                    <tr key={i} className="border-t border-[var(--panel-border)]">
+                      <td className="py-1 pr-4 font-sans">{st.label}</td>
+                      <td className="py-1 pr-4 text-right">{st.mass.toFixed(1)}</td>
+                      <td className="py-1 pr-4 text-right">{st.arm.toFixed(2)}</td>
+                      <td className="py-1 text-right">{st.moment.toFixed(1)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-[var(--result-border)] font-bold">
+                    <td className="py-1 pr-4 font-sans">Total</td>
+                    <td className="py-1 pr-4 text-right">{result.totalMass.toFixed(1)}</td>
+                    <td className="py-1 pr-4 text-right">{result.cg.toFixed(3)}</td>
+                    <td className="py-1 text-right">{result.totalMoment.toFixed(1)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
