@@ -147,13 +147,13 @@ export default function CabinSvg() {
 
   const fillForZone = (zone: Zone, isHover: boolean): string => {
     const disabled = disabledZoneIds.has(zone.id);
-    if (disabled) return "rgba(100,100,100,0.25)";
+    if (disabled) return "rgba(80,80,80,0.20)";
     const val = zoneValue(zone);
     if (zone.type === "navigate")
-      return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.10)";
+      return isHover ? "rgba(59,130,246,0.25)" : "rgba(59,130,246,0.08)";
     if (val > 0)
-      return isHover ? "rgba(34,197,94,0.40)" : "rgba(34,197,94,0.20)";
-    return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.08)";
+      return isHover ? "rgba(34,197,94,0.30)" : "rgba(34,197,94,0.15)";
+    return isHover ? "rgba(120,120,120,0.25)" : "rgba(120,120,120,0.10)";
   };
 
 
@@ -168,7 +168,7 @@ export default function CabinSvg() {
 
   return (
     <>
-      <div className="mx-auto rounded-lg w-full max-w-[180px]">
+      <div style={{ width: "100%" }}>
         <svg
           viewBox={VIEW_BOX}
           preserveAspectRatio="xMidYMid meet"
@@ -262,8 +262,8 @@ export default function CabinSvg() {
                     rx={14}
                     ry={14}
                     fill={fillForZone(zone, isHover)}
-                    stroke={isHover ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)"}
-                    strokeWidth={isHover ? 4 : 2}
+                    stroke={isHover ? "rgba(150,150,150,0.5)" : "rgba(150,150,150,0.12)"}
+                    strokeWidth={isHover ? 3 : 1.5}
                     style={{
                       cursor: disabled ? "not-allowed" : "pointer",
                       transition: "fill 0.15s, stroke 0.15s",

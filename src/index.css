@@ -107,18 +107,22 @@ textarea {
   font-size: 13px;
 }
 
-/* CG page layout: stack on mobile, side-by-side on desktop */
+/* CG page layout: single column on mobile, 2-col on desktop */
 .cg-layout {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  align-items: flex-start;
+}
+
+.cg-layout > * {
+  width: 100%;
 }
 
 @media (min-width: 900px) {
   .cg-layout {
     display: grid;
     grid-template-columns: 220px 1fr;
+    align-items: start;
   }
 }
 
