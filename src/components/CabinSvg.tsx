@@ -69,11 +69,11 @@ const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
 /* ── Dark-cockpit seat palette ────────────────────────────── */
 
 const SEAT = {
-  empty:       { fill: "rgba(0,0,0,0.35)",       stroke: "rgba(255,255,255,0.04)" },
-  emptyHover:  { fill: "rgba(0,0,0,0.30)",       stroke: "rgba(255,255,255,0.08)" },
-  filled:      { fill: "rgba(22,101,52,0.35)",   stroke: "rgba(34,197,94,0.25)" },
-  filledHover: { fill: "rgba(22,101,52,0.45)",   stroke: "rgba(34,197,94,0.35)" },
-  disabled:    { fill: "rgba(0,0,0,0.45)",        stroke: "rgba(255,255,255,0.02)" },
+  empty:       { fill: "rgba(15,15,15,0.80)",     stroke: "rgba(255,255,255,0.06)" },
+  emptyHover:  { fill: "rgba(15,15,15,0.70)",     stroke: "rgba(255,255,255,0.10)" },
+  filled:      { fill: "rgba(10,60,30,0.80)",     stroke: "rgba(34,197,94,0.30)" },
+  filledHover: { fill: "rgba(10,60,30,0.70)",     stroke: "rgba(34,197,94,0.40)" },
+  disabled:    { fill: "rgba(10,10,10,0.85)",      stroke: "rgba(255,255,255,0.03)" },
 };
 
 /* ── Component ────────────────────────────────────────────── */
