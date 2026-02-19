@@ -14,6 +14,7 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    inputRef.current?.focus();
     inputRef.current?.select();
   }, []);
 
@@ -34,25 +35,38 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.5)",
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+        padding: 20,
+      }}
       onClick={onClose}
       onKeyDown={handleKey}
     >
       <div
-        className="w-72 rounded-xl p-5 shadow-2xl bg-[var(--panel-bg)] border border-[var(--panel-border)]"
+        style={{
+          width: "100%",
+          maxWidth: 240,
+          borderRadius: 14,
+          padding: 16,
+          background: "var(--panel-bg)",
+          border: "1px solid var(--panel-border)",
+          boxShadow: "0 12px 40px rgba(0,0,0,.4)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold">{title}</h3>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center
-                       text-[var(--text-muted)] hover:opacity-80
-                       transition-colors text-lg leading-none"
-            style={{ background: "transparent", border: "none", padding: 0 }}
-          >
-            ×
-          </button>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10, opacity: 0.7 }}>
+          {title}
+          {max != null && (
+            <span style={{ fontWeight: 400, opacity: 0.7 }}> (max {max})</span>
+          )}
         </div>
 
         <form
@@ -61,28 +75,58 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
             onClose();
           }}
         >
-          <div className="flex items-center gap-2">
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <input
               ref={inputRef}
               type="number"
+              inputMode="decimal"
               min={0}
               max={max}
               step={0.1}
               value={local}
               onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
               onFocus={(e) => e.target.select()}
-              className="flex-1 rounded-lg px-3 py-2 text-center text-lg font-mono
-                         bg-[var(--result-bg)] border border-[var(--result-border)]
-                         outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                height: 42,
+                borderRadius: 8,
+                border: "1px solid var(--result-border)",
+                background: "var(--result-bg)",
+                color: "inherit",
+                fontSize: 18,
+                fontFamily: "inherit",
+                textAlign: "center",
+                outline: "none",
+                padding: "0 8px",
+              }}
             />
-            <span className="text-sm text-[var(--text-muted)] w-8">{unit}</span>
+            <span style={{ fontSize: 12, opacity: 0.5, flexShrink: 0 }}>{unit}</span>
           </div>
 
-          {max != null && (
-            <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
-              Max: {max} {unit}
-            </p>
-          )}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              height: 40,
+              marginTop: 10,
+              borderRadius: 8,
+              border: "none",
+              background: "#22c55e",
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 0,
+              lineHeight: 1,
+            }}
+            aria-label="Confirm"
+          >
+            ✓
+          </button>
         </form>
       </div>
     </div>
