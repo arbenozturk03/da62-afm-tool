@@ -47,10 +47,11 @@ const SEAT_ZONES: Zone[] = [
 ];
 
 const BAGGAGE_ZONES: Zone[] = [
-  // Dashed rectangles in the SVG: left edge x≈2544, right edge x≈3150
-  { id: "bag_lh_nose", label: "LH Nose", x: 2544, y: 50, w: 600, h: 200, type: "baggage", stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
-  { id: "bag_rh_nose", label: "RH Nose", x: 2544, y: 330, w: 600, h: 200, type: "baggage", stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+  // Burun bagajları: işaretlediğin dashed dikdörtgenlerle tam çakışacak şekilde daralttım
+  { id: "bag_lh_nose", label: "LH Nose", x: 2620, y: 70, w: 460, h: 190, type: "baggage", stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
+  { id: "bag_rh_nose", label: "RH Nose", x: 2620, y: 325, w: 460, h: 190, type: "baggage", stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
 
+  // Arka F: arka koltukların hemen arkasındaki dikdörtgene oturacak şekilde
   { id: "bag_rear_f", label: "Rear Cargo F", x: 1218, y: 122, w: 275, h: 348, type: "baggage", stateKey: "rearFKg", max: aircraftConfig.baggageLimits.rearF },
 ];
 
