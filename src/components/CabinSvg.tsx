@@ -8,9 +8,9 @@ import Modal from "./Modal";
 const SVG_W = 1063;
 const SVG_H = 3792;
 
-/* Crop to cabin area only (skip tail & nose cone extremes) */
-const CROP_Y = 400;
-const CROP_H = 2800;
+/* Crop: nose tip to just past rear seats */
+const CROP_Y = 50;
+const CROP_H = 3150;
 const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 
 /* ── Zone definitions ─────────────────────────────────────── */
