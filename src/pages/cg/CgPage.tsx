@@ -124,7 +124,7 @@ export default function CgPage() {
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 16, alignItems: "start" }}>
+      <div className="cg-layout" style={{ gap: 16, alignItems: "flex-start" as const }}>
         {/* Left: Cabin SVG */}
         <div style={{ minWidth: 0 }}>
           <CabinSvg />

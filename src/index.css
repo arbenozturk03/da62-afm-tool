@@ -107,6 +107,21 @@ textarea {
   font-size: 13px;
 }
 
+/* CG page layout: stack on mobile, side-by-side on desktop */
+.cg-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+@media (min-width: 900px) {
+  .cg-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
