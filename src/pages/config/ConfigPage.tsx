@@ -1,6 +1,57 @@
 import { useAircraft } from "../../context/AircraftContext";
 import { aircraftConfig } from "../../data/aircraftConfig";
 
+const cardStyle: React.CSSProperties = {
+  border: "1px solid var(--panel-border)",
+  borderRadius: 8,
+  padding: "8px 14px 16px",
+  backgroundColor: "var(--panel-bg)",
+  marginBottom: 16,
+};
+
+const sectionTitle: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  color: "var(--text-muted)",
+  marginBottom: 8,
+};
+
+const fieldStyle: React.CSSProperties = { marginBottom: 8 };
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: 2,
+  fontSize: 13,
+  fontWeight: 600,
+  color: "var(--text-secondary)",
+};
+
+const inputStyle: React.CSSProperties = {
+  border: "1px solid var(--panel-border)",
+  borderRadius: 2,
+  padding: "2px 4px",
+  fontSize: 13,
+  width: 90,
+  background: "transparent",
+  color: "inherit",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  width: "100%",
+  textAlign: "left",
+};
+
+const outputRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "baseline",
+  padding: "4px 0",
+  fontSize: 13,
+};
+
 function Field({
   label,
   value,
@@ -19,9 +70,9 @@ function Field({
   max?: number;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-1.5">
-      <label className="text-sm text-[var(--text-secondary)] shrink-0">{label}</label>
-      <div className="flex items-center gap-1.5">
+    <div style={fieldStyle}>
+      <span style={labelStyle}>{label}</span>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
         <input
           type="number"
           value={value}
@@ -30,12 +81,10 @@ function Field({
           max={max}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           onFocus={(e) => e.target.select()}
-          className="w-24 rounded-lg px-2 py-1.5 text-right text-sm font-mono
-                     bg-[var(--result-bg)] border border-[var(--result-border)]
-                     outline-none focus:ring-2 focus:ring-blue-500"
+          style={inputStyle}
         />
-        {unit && <span className="text-xs text-[var(--text-muted)] w-8">{unit}</span>}
-      </div>
+        {unit && <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{unit}</span>}
+      </span>
     </div>
   );
 }
@@ -48,14 +97,12 @@ export default function ConfigPage() {
     : "0.00";
 
   return (
-    <div className="max-w-lg mx-auto px-3 py-6 space-y-4">
-      <h1 className="perf-title mb-4">Aircraft Configuration</h1>
+    <div style={{ padding: "16px 12px", maxWidth: 480, margin: "0 auto" }}>
+      <h1 className="perf-title" style={{ marginBottom: 16 }}>Aircraft Configuration</h1>
 
       {/* Basic aircraft */}
-      <div className="rounded-xl p-4 border bg-[var(--panel-bg)] border-[var(--panel-border)]">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--text-muted)] mb-2">
-          Basic Aircraft
-        </h2>
+      <div style={cardStyle}>
+        <div style={sectionTitle}>Basic Aircraft</div>
         <Field
           label="Empty Mass"
           value={state.emptyMass}
@@ -75,24 +122,19 @@ export default function ConfigPage() {
       </div>
 
       {/* Deicing */}
-      <div
-        id="deicing"
-        className="rounded-xl p-4 border bg-[var(--panel-bg)] border-[var(--panel-border)]"
-      >
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--text-muted)] mb-2">
-          De-Icing System
-        </h2>
+      <div id="deicing" style={cardStyle}>
+        <div style={sectionTitle}>De-Icing System</div>
 
-        <label className="flex items-center gap-2 mb-3 cursor-pointer select-none">
+        <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, cursor: "pointer" }}>
           <input
             type="checkbox"
             checked={state.deiceEnabled}
             onChange={(e) =>
               dispatch({ type: "SET_FIELD", field: "deiceEnabled", value: e.target.checked })
             }
-            className="accent-blue-500 w-4 h-4"
+            style={{ accentColor: "#3b82f6", width: 16, height: 16 }}
           />
-          <span className="text-sm">TKS De-Ice enabled</span>
+          <span style={{ fontSize: 13 }}>TKS De-Ice enabled</span>
         </label>
 
         {state.deiceEnabled && (
@@ -105,14 +147,14 @@ export default function ConfigPage() {
               step={0.1}
               min={0}
             />
-            <div className="flex justify-between items-baseline pt-2 border-t border-[var(--panel-border)] mt-2">
-              <span className="text-sm text-[var(--text-secondary)]">Fluid mass</span>
-              <span className="font-mono text-sm font-semibold">
+            <div style={{ ...outputRow, borderTop: "1px solid var(--panel-border)", marginTop: 8, paddingTop: 6 }}>
+              <span style={{ color: "var(--text-secondary)" }}>Fluid mass</span>
+              <span style={{ fontWeight: 600 }}>
                 {deiceMass}
-                <span className="text-xs text-[var(--text-muted)] ml-1">kg</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 4 }}>kg</span>
               </span>
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
               Density: {aircraftConfig.densities.deice} kg/L &nbsp;|&nbsp; Arm: {aircraftConfig.arms.deice} m
             </p>
           </>
@@ -120,32 +162,23 @@ export default function ConfigPage() {
       </div>
 
       {/* Aircraft presets */}
-      <div className="rounded-xl p-4 border bg-[var(--panel-bg)] border-[var(--panel-border)]">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--text-muted)] mb-2">
-          Aircraft Presets
-        </h2>
-        <select
-          className="w-full rounded-lg px-3 py-2 text-sm
-                     bg-[var(--result-bg)] border border-[var(--result-border)]
-                     outline-none focus:ring-2 focus:ring-blue-500"
-          defaultValue="default"
-        >
+      <div style={cardStyle}>
+        <div style={sectionTitle}>Aircraft Presets</div>
+        <select style={selectStyle} defaultValue="default">
           <option value="default">DA-62 (Default)</option>
         </select>
-        <p className="text-xs text-[var(--text-muted)] mt-2">
+        <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
           More presets coming soon. Configure manually above.
         </p>
       </div>
 
       {/* Reference */}
-      <div className="rounded-xl p-4 border bg-[var(--panel-bg)] border-[var(--panel-border)]">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-[var(--text-muted)] mb-2">
-          Reference Values
-        </h2>
-        <div className="text-xs text-[var(--text-secondary)] space-y-0.5 font-mono">
-          <p>MTOW = {aircraftConfig.limits.MTOW} kg</p>
-          <p>MZFW = {aircraftConfig.limits.MZFW} kg</p>
-          <p>Fuel density = {aircraftConfig.densities.fuel} kg/L</p>
+      <div style={cardStyle}>
+        <div style={sectionTitle}>Reference Values</div>
+        <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.8 }}>
+          <div>MTOW = {aircraftConfig.limits.MTOW} kg</div>
+          <div>MZFW = {aircraftConfig.limits.MZFW} kg</div>
+          <div>Fuel density = {aircraftConfig.densities.fuel} kg/L</div>
         </div>
       </div>
     </div>

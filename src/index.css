@@ -47,12 +47,13 @@ h1 {
 }
 
 .perf-title {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   line-height: 1.2;
   font-weight: 700;
   text-align: center;
   margin: 0 0 12px 0;
-  color: #003366;
+  color: #e0e0e0;
+  white-space: nowrap;
 }
 
 button {
@@ -127,5 +128,8 @@ textarea {
   }
   button {
     background-color: #f9f9f9;
+  }
+  .perf-title {
+    color: #003366;
   }
 }

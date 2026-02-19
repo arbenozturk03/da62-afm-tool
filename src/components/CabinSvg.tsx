@@ -56,8 +56,8 @@ const SEAT_ZONES: Zone[] = [
 
 // Nose baggage: path-based (not rect) to follow the curved fuselage skin
 const NOSE_BAG_ZONES: NoseBagZone[] = [
-  { id: "bag_lh_nose", label: "LH Nose", d: NOSE_BAG_LH, labelX: 2870, labelY: 170, stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
-  { id: "bag_rh_nose", label: "RH Nose", d: NOSE_BAG_RH, labelX: 2870, labelY: 420, stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
+  { id: "bag_lh_nose", label: "LH Nose", d: NOSE_BAG_LH, labelX: 3030, labelY: 160, stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
+  { id: "bag_rh_nose", label: "RH Nose", d: NOSE_BAG_RH, labelX: 3030, labelY: 415, stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
 ];
 
 // Rear baggage only (nose bags handled separately via paths)
@@ -156,12 +156,7 @@ export default function CabinSvg() {
     return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.08)";
   };
 
-  const noseBagFill = (zone: NoseBagZone, isHover: boolean): string => {
-    const val = zoneValue(zone);
-    if (val > 0)
-      return isHover ? "rgba(34,197,94,0.40)" : "rgba(34,197,94,0.20)";
-    return isHover ? "rgba(59,130,246,0.30)" : "rgba(59,130,246,0.08)";
-  };
+
 
   if (svgError) {
     return (
@@ -189,38 +184,53 @@ export default function CabinSvg() {
               onError={() => setSvgError(true)}
             />
 
-            {/* ── Nose baggage: path-based ── */}
+            {/* ── Nose baggage: dot indicators ── */}
             {NOSE_BAG_ZONES.map((nb) => {
               const isHover = hovered === nb.id;
               const val = zoneValue(nb);
+              const dotR = 22;
+              const dotColor = val > 0 ? "#22c55e" : "#60a5fa";
 
               return (
                 <g key={nb.id}>
-                  {/* Invisible hit area (generous stroke for easier clicking) */}
+                  {/* Invisible hit area */}
                   <path
                     d={nb.d}
                     fill="transparent"
                     stroke="transparent"
-                    strokeWidth={20}
-                    pointerEvents="stroke"
+                    strokeWidth={30}
+                    pointerEvents="all"
                     style={{ cursor: "pointer" }}
                     onMouseEnter={() => setHovered(nb.id)}
                     onMouseLeave={() => setHovered(null)}
                     onClick={() => handleNoseBagClick(nb)}
                   />
 
-                  {/* Visible highlight */}
-                  <path
-                    d={nb.d}
-                    fill={noseBagFill(nb, isHover)}
-                    stroke={isHover ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)"}
-                    strokeWidth={isHover ? 4 : 2}
-                    pointerEvents="fill"
-                    style={{ cursor: "pointer", transition: "fill 0.15s, stroke 0.15s" }}
+                  {/* Dot indicator */}
+                  <circle
+                    cx={nb.labelX}
+                    cy={nb.labelY}
+                    r={isHover ? dotR + 4 : dotR}
+                    fill={dotColor}
+                    opacity={isHover ? 0.9 : 0.7}
+                    pointerEvents="all"
+                    style={{ cursor: "pointer", transition: "r 0.15s, opacity 0.15s" }}
                     onMouseEnter={() => setHovered(nb.id)}
                     onMouseLeave={() => setHovered(null)}
                     onClick={() => handleNoseBagClick(nb)}
                   />
+                  <text
+                    x={nb.labelX}
+                    y={nb.labelY + 1}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontSize={18}
+                    fontWeight={700}
+                    pointerEvents="none"
+                  >
+                    {val > 0 ? val : "0"}
+                  </text>
 
                   {/* Debug: red outline */}
                   {state.debugZones && (
@@ -232,39 +242,6 @@ export default function CabinSvg() {
                       strokeDasharray="12 6"
                       pointerEvents="none"
                     />
-                  )}
-
-                  {/* Debug label */}
-                  {state.showDebugLabels && (
-                    <text
-                      x={nb.labelX}
-                      y={nb.labelY - 16}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="yellow"
-                      fontSize={24}
-                      fontWeight={700}
-                      pointerEvents="none"
-                    >
-                      {nb.id}
-                    </text>
-                  )}
-
-                  {/* Value label */}
-                  {val > 0 && (
-                    <text
-                      x={nb.labelX}
-                      y={nb.labelY + (state.showDebugLabels ? 16 : 0)}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="white"
-                      fontSize={28}
-                      fontWeight={600}
-                      pointerEvents="none"
-                      style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
-                    >
-                      {val} kg
-                    </text>
                   )}
                 </g>
               );
