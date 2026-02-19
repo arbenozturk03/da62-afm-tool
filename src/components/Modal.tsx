@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type KeyboardEvent } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent, type FormEvent } from "react";
 
 interface ModalProps {
   title: string;
@@ -55,29 +55,35 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            ref={inputRef}
-            type="number"
-            min={0}
-            max={max}
-            step={0.1}
-            value={local}
-            onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
-            onFocus={(e) => e.target.select()}
-            onKeyDown={(e) => { if (e.key === "Enter") onClose(); }}
-            className="flex-1 rounded-lg px-3 py-2 text-center text-lg font-mono
-                       bg-[var(--result-bg)] border border-[var(--result-border)]
-                       outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <span className="text-sm text-[var(--text-muted)] w-8">{unit}</span>
-        </div>
+        <form
+          onSubmit={(e: FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            onClose();
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <input
+              ref={inputRef}
+              type="number"
+              min={0}
+              max={max}
+              step={0.1}
+              value={local}
+              onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
+              className="flex-1 rounded-lg px-3 py-2 text-center text-lg font-mono
+                         bg-[var(--result-bg)] border border-[var(--result-border)]
+                         outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-[var(--text-muted)] w-8">{unit}</span>
+          </div>
 
-        {max != null && (
-          <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
-            Max: {max} {unit}
-          </p>
-        )}
+          {max != null && (
+            <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
+              Max: {max} {unit}
+            </p>
+          )}
+        </form>
       </div>
     </div>
   );
