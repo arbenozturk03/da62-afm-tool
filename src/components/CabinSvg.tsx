@@ -69,11 +69,11 @@ const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
 /* ── Dark-cockpit seat palette ────────────────────────────── */
 
 const SEAT = {
-  empty:       { fill: "rgba(15,15,15,0.80)",     stroke: "rgba(255,255,255,0.06)" },
-  emptyHover:  { fill: "rgba(15,15,15,0.70)",     stroke: "rgba(255,255,255,0.10)" },
-  filled:      { fill: "rgba(10,60,30,0.80)",     stroke: "rgba(34,197,94,0.30)" },
-  filledHover: { fill: "rgba(10,60,30,0.70)",     stroke: "rgba(34,197,94,0.40)" },
-  disabled:    { fill: "rgba(10,10,10,0.85)",      stroke: "rgba(255,255,255,0.03)" },
+  empty:       { fill: "transparent",              stroke: "rgba(255,255,255,0.06)" },
+  emptyHover:  { fill: "rgba(100,160,255,0.08)",  stroke: "rgba(100,160,255,0.18)" },
+  filled:      { fill: "rgba(34,197,94,0.15)",    stroke: "rgba(34,197,94,0.30)" },
+  filledHover: { fill: "rgba(34,197,94,0.22)",    stroke: "rgba(34,197,94,0.40)" },
+  disabled:    { fill: "rgba(0,0,0,0.30)",         stroke: "rgba(255,255,255,0.03)" },
 };
 
 /* ── Component ────────────────────────────────────────────── */
@@ -163,14 +163,13 @@ export default function CabinSvg() {
           className="block w-full h-auto"
         >
           <defs>
-            <filter id="seat-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
-              <feFlood floodColor="#22c55e" floodOpacity="0.25" result="color" />
-              <feComposite in="color" in2="blur" operator="in" result="glow" />
-              <feMerge>
-                <feMergeNode in="glow" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
+            <filter id="darken-cabin" colorInterpolationFilters="sRGB">
+              <feColorMatrix type="saturate" values="0.15" />
+              <feComponentTransfer>
+                <feFuncR type="linear" slope="0.25" />
+                <feFuncG type="linear" slope="0.25" />
+                <feFuncB type="linear" slope="0.30" />
+              </feComponentTransfer>
             </filter>
           </defs>
 
@@ -181,6 +180,7 @@ export default function CabinSvg() {
               y="0"
               width={ORIG_W}
               height={ORIG_H}
+              filter="url(#darken-cabin)"
               onError={() => setSvgError(true)}
             />
 
@@ -249,10 +249,9 @@ export default function CabinSvg() {
               const disabled = disabledZoneIds.has(zone.id);
               const val = zoneValue(zone);
               const c = seatColors(zone, isHover);
-              const useGlow = val > 0 && !disabled;
 
               return (
-                <g key={zone.id} filter={useGlow ? "url(#seat-glow)" : undefined}>
+                <g key={zone.id}>
                   <rect
                     x={zone.x}
                     y={zone.y}
