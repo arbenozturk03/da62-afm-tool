@@ -165,7 +165,7 @@ export default function ConfigPage() {
       <div style={cardStyle}>
         <div style={sectionTitle}>Aircraft Presets</div>
         <select style={selectStyle} defaultValue="default">
-          <option value="default">DA-62 (Default)</option>
+          <option value="default">DA-62 (TC-YTT)</option>
         </select>
         <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
           More presets coming soon. Configure manually above.

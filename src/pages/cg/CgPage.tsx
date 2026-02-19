@@ -225,7 +225,7 @@ export default function CgPage() {
           {/* Results */}
           <div style={resultCardStyle}>
             <div style={sectionTitle}>Results</div>
-            <Stat label="Total weight" value={result.totalMass.toFixed(1)} unit="kg" warn={result.totalMass > limits.MTOW} />
+            <Stat label="Takeoff weight" value={result.totalMass.toFixed(1)} unit="kg" warn={result.totalMass > limits.MTOW} />
             <Stat label="CG" value={result.cg.toFixed(3)} unit="m" />
             <Stat label="Total moment" value={result.totalMoment.toFixed(1)} unit="kg·m" />
             <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>

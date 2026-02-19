@@ -2,6 +2,7 @@ import { useState, useEffect, type FocusEvent } from "react";
 import { computeLanding } from "./core/landing";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
+import { useAircraft } from "./context/AircraftContext";
 import MetarCard from "./MetarCard";
 import AirportSearch from "./AirportSearch";
 
@@ -10,6 +11,10 @@ const selectOnFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
 
 export default function Landing() {
+  // ── W&B takeoff weight ────────────────────────────────────────
+  const { result: cgResult } = useAircraft();
+  const W = Math.round(cgResult.totalMass);
+
   // ── Airport DB ────────────────────────────────────────────────
   const { db, loading: dbLoading, error: dbError } = useAirportDb();
 
@@ -25,7 +30,6 @@ export default function Landing() {
 
   // ── Inputs ──────────────────────────────────────────────────
   const [flaps, setFlaps] = useState<"LDG" | "TO" | "UP">("LDG");
-  const [W, setW] = useState(2300);
   const [PA, setPA] = useState(0);
   const [OAT, setOAT] = useState(15);
   const [windSpeed, setWindSpeed] = useState(0);
@@ -583,15 +587,15 @@ export default function Landing() {
           </div>
         )}
 
-        {/* Weight */}
+        {/* Weight — from W&B page (read-only) */}
         <div className="field">
-          <span className="field-label">Weight (kg)</span>
+          <span className="field-label">Weight (kg) — from W&B</span>
           <div className="field-value">
             <input
               type="number"
               value={W}
-              onChange={(e) => setW(Number(e.target.value))}
-              onFocus={selectOnFocus}
+              disabled
+              style={{ opacity: 0.6 }}
             />
           </div>
         </div>

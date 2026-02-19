@@ -115,6 +115,14 @@ export function computeTakeoff(input: {
 
   // 🔥 SPEED INTERPOLATION (Weight based)
   if (grid.speeds) {
+    const wAxis = grid.speeds.axisW;
+    if (input.W < wAxis[0] || input.W > wAxis[wAxis.length - 1]) {
+      return {
+        ok: false,
+        error: `Weight ${input.W} kg is outside the speed table range (${wAxis[0]}–${wAxis[wAxis.length - 1]} kg).`,
+      };
+    }
+
     const vr = interp1D(
       grid.speeds.axisW,
       grid.speeds.VR_kias,

@@ -54,18 +54,15 @@ const SEAT_ZONES: Zone[] = [
   { id: "seat_7_right", label: "Seat 7 (R)", x: 1218, y: 296, w: 275, h: 174, type: "seat", stateKey: "seat7" },
 ];
 
-// Nose baggage: path-based (not rect) to follow the curved fuselage skin
 const NOSE_BAG_ZONES: NoseBagZone[] = [
   { id: "bag_lh_nose", label: "LH Nose", d: NOSE_BAG_LH, labelX: 3030, labelY: 160, stateKey: "lhNoseKg", max: aircraftConfig.baggageLimits.lhNose },
   { id: "bag_rh_nose", label: "RH Nose", d: NOSE_BAG_RH, labelX: 3030, labelY: 415, stateKey: "rhNoseKg", max: aircraftConfig.baggageLimits.rhNose },
 ];
 
-// Rear baggage only (nose bags handled separately via paths)
 const RECT_BAGGAGE_ZONES: Zone[] = [
   { id: "bag_rear_f", label: "Rear Cargo F", x: 1218, y: 122, w: 275, h: 348, type: "baggage", stateKey: "rearFKg", max: aircraftConfig.baggageLimits.rearF },
 ];
 
-// Fuel / De-Ice overlays removed from the cabin view – navigation only via top tabs
 const NAV_ZONES: Zone[] = [];
 
 /* ── Rotation / crop ──────────────────────────────────────── */
@@ -81,6 +78,16 @@ const VB_Y_START = ORIG_W - CROP_X_MAX;
 const VIEW_BOX = `0 ${VB_Y_START} ${ORIG_H} ${CROP_RANGE}`;
 const TRANSFORM = `translate(0, ${ORIG_W}) rotate(-90)`;
 
+/* ── Seat style helpers ───────────────────────────────────── */
+
+const SEAT_COLORS = {
+  empty:        { fill: "rgba(255,255,255,0.03)", stroke: "rgba(255,255,255,0.08)" },
+  emptyHover:   { fill: "rgba(56,189,248,0.10)",  stroke: "rgba(56,189,248,0.35)" },
+  filled:       { fill: "rgba(34,211,238,0.12)",   stroke: "rgba(34,211,238,0.30)" },
+  filledHover:  { fill: "rgba(34,211,238,0.20)",   stroke: "rgba(34,211,238,0.50)" },
+  disabled:     { fill: "rgba(50,50,50,0.30)",      stroke: "rgba(255,255,255,0.05)" },
+};
+
 /* ── Component ────────────────────────────────────────────── */
 
 export default function CabinSvg() {
@@ -92,7 +99,6 @@ export default function CabinSvg() {
 
   const isCargoMode = state.mode === "cargo";
 
-  /* ── rect-based zones (seats, rear bag) ── */
   const visibleRectZones = (() => {
     const zones: Zone[] = [...NAV_ZONES];
     if (isCargoMode) {
@@ -145,18 +151,13 @@ export default function CabinSvg() {
     return state[zone.stateKey] as number;
   };
 
-  const fillForZone = (zone: Zone, isHover: boolean): string => {
+  const seatStyle = (zone: Zone, isHover: boolean) => {
     const disabled = disabledZoneIds.has(zone.id);
-    if (disabled) return "rgba(60,60,60,0.35)";
+    if (disabled) return SEAT_COLORS.disabled;
     const val = zoneValue(zone);
-    if (zone.type === "navigate")
-      return isHover ? "rgba(59,130,246,0.20)" : "rgba(59,130,246,0.05)";
-    if (val > 0)
-      return isHover ? "rgba(34,197,94,0.25)" : "rgba(34,197,94,0.12)";
-    return isHover ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.02)";
+    if (val > 0) return isHover ? SEAT_COLORS.filledHover : SEAT_COLORS.filled;
+    return isHover ? SEAT_COLORS.emptyHover : SEAT_COLORS.empty;
   };
-
-
 
   if (svgError) {
     return (
@@ -174,6 +175,18 @@ export default function CabinSvg() {
           preserveAspectRatio="xMidYMid meet"
           className="block w-full h-auto"
         >
+          <defs>
+            <filter id="seat-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur" />
+              <feFlood floodColor="#38bdf8" floodOpacity="0.35" result="color" />
+              <feComposite in="color" in2="blur" operator="in" result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
           <g transform={TRANSFORM}>
             <image
               href="/cabin.svg"
@@ -193,7 +206,6 @@ export default function CabinSvg() {
 
               return (
                 <g key={nb.id}>
-                  {/* Invisible hit area */}
                   <path
                     d={nb.d}
                     fill="transparent"
@@ -206,7 +218,6 @@ export default function CabinSvg() {
                     onClick={() => handleNoseBagClick(nb)}
                   />
 
-                  {/* Dot indicator */}
                   <circle
                     cx={nb.labelX}
                     cy={nb.labelY}
@@ -232,7 +243,6 @@ export default function CabinSvg() {
                     {val > 0 ? val : "0"}
                   </text>
 
-                  {/* Debug: red outline */}
                   {state.debugZones && (
                     <path
                       d={nb.d}
@@ -251,9 +261,13 @@ export default function CabinSvg() {
             {visibleRectZones.map((zone) => {
               const isHover = hovered === zone.id;
               const disabled = disabledZoneIds.has(zone.id);
+              const val = zoneValue(zone);
+              const colors = seatStyle(zone, isHover);
+              const hasFill = val > 0;
+              const useGlow = hasFill && !disabled;
 
               return (
-                <g key={zone.id}>
+                <g key={zone.id} filter={useGlow ? "url(#seat-glow)" : undefined}>
                   <rect
                     x={zone.x}
                     y={zone.y}
@@ -261,46 +275,30 @@ export default function CabinSvg() {
                     height={zone.h}
                     rx={14}
                     ry={14}
-                    fill={fillForZone(zone, isHover)}
-                    stroke={isHover ? "rgba(100,100,100,0.4)" : "transparent"}
-                    strokeWidth={isHover ? 2 : 0}
+                    fill={colors.fill}
+                    stroke={colors.stroke}
+                    strokeWidth={isHover ? 2.5 : 1.5}
                     style={{
                       cursor: disabled ? "not-allowed" : "pointer",
-                      transition: "fill 0.15s, stroke 0.15s",
+                      transition: "fill 0.2s, stroke 0.2s, stroke-width 0.2s",
                     }}
                     onMouseEnter={() => setHovered(zone.id)}
                     onMouseLeave={() => setHovered(null)}
                     onClick={() => handleRectClick(zone)}
                   />
 
-                  {state.showDebugLabels && (
+                  {val > 0 && (
                     <text
                       x={zone.x + zone.w / 2}
-                      y={zone.y + zone.h / 2 - 10}
+                      y={zone.y + zone.h / 2}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      fill="yellow"
-                      fontSize={24}
-                      fontWeight={700}
-                      pointerEvents="none"
-                    >
-                      {zone.id}
-                    </text>
-                  )}
-
-                  {zoneValue(zone) > 0 && (
-                    <text
-                      x={zone.x + zone.w / 2}
-                      y={zone.y + zone.h / 2 + (state.showDebugLabels ? 16 : 0)}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="white"
-                      fontSize={28}
+                      fill="rgba(224,242,254,0.95)"
+                      fontSize={26}
                       fontWeight={600}
                       pointerEvents="none"
-                      style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
                     >
-                      {zoneValue(zone)} kg
+                      {val}
                     </text>
                   )}
 

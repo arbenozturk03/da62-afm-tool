@@ -3,6 +3,7 @@ import { computeTakeoff, type RunwayCondition, type RunwaySurface } from "./core
 import { applyTakeoffCorrections, type CorrectionInputs } from "./core/corrections";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
+import { useAircraft } from "./context/AircraftContext";
 import MetarCard from "./MetarCard";
 import AirportSearch from "./AirportSearch";
 
@@ -11,6 +12,10 @@ const selectOnFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
 
 export default function Takeoff() {
+  // ── W&B takeoff weight ────────────────────────────────────────
+  const { result: cgResult } = useAircraft();
+  const W = Math.round(cgResult.totalMass);
+
   // ── Airport DB ────────────────────────────────────────────────
   const { db, loading: dbLoading, error: dbError } = useAirportDb();
 
@@ -28,7 +33,6 @@ export default function Takeoff() {
   const [flaps, setFlaps] = useState<"TO" | "UP">("TO");
   const [condition, setCondition] = useState<"DRY" | "WET">("DRY");
   const [runwaySurface, setRunwaySurface] = useState<"PAVED" | "GRASS" | "GRASS_SOFT">("PAVED");
-  const [W, setW] = useState(2300);
   const [PA, setPA] = useState(0);
   const [OAT, setOAT] = useState(15);
   const [windSpeed, setWindSpeed] = useState(0);
@@ -599,15 +603,15 @@ export default function Takeoff() {
           </div>
         )}
 
-        {/* Weight */}
+        {/* Weight — from W&B page (read-only) */}
         <div className="field">
-          <span className="field-label">Weight (kg)</span>
+          <span className="field-label">Weight (kg) — from W&B</span>
           <div className="field-value">
             <input
               type="number"
               value={W}
-              onChange={(e) => setW(Number(e.target.value))}
-              onFocus={selectOnFocus}
+              disabled
+              style={{ opacity: 0.6 }}
             />
           </div>
         </div>
