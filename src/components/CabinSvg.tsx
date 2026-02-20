@@ -193,8 +193,8 @@ export default function CabinSvg() {
   }, [viewScrollTop]);
 
   const showModeToggle = activeSection === "cabin";
-  const duration = isMobile ? 0.32 : 0.5;
-  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const duration = isMobile ? 0.2 : 0.28;
+  const ease = "cubic-bezier(0.25, 0.1, 0.25, 1)";
 
   return (
     <>
@@ -233,7 +233,7 @@ export default function CabinSvg() {
           overflow: "hidden",
           border: showModeToggle ? "1px solid var(--panel-border)" : "1px solid transparent",
           opacity: showModeToggle ? 1 : 0,
-          transform: showModeToggle ? "translateX(0) scale(1)" : "translateX(-10px) scale(0.96)",
+          transform: showModeToggle ? "translateX(0)" : "translateX(-6px)",
           width: showModeToggle ? "auto" : 0,
           maxWidth: showModeToggle ? 140 : 0,
           minWidth: 0,
