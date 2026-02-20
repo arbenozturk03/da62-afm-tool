@@ -76,12 +76,25 @@ const SECTIONS = [
   { id: "cabin", label: "Cabin", targetY: 1150 },
 ] as const;
 
-/* ── Component ── */
+/* ── Mobile: shorter duration for smoother animation (less jank) ── */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
+  );
+  useEffect(() => {
+    const m = window.matchMedia("(max-width: 768px)");
+    const fn = () => setIsMobile(m.matches);
+    m.addEventListener("change", fn);
+    return () => m.removeEventListener("change", fn);
+  }, []);
+  return isMobile;
+}
 
 const VIEWPORT_H = 480;
 
 export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
+  const isMobile = useIsMobile();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
   const activeSection = state.cabinSection;
@@ -180,17 +193,19 @@ export default function CabinSvg() {
   }, [viewScrollTop]);
 
   const showModeToggle = activeSection === "cabin";
+  const duration = isMobile ? 0.32 : 0.5;
+  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   return (
     <>
-      {/* Controls — single row; PAX/Cargo smoothly appears beside Nose/Cabin */}
+      {/* Controls — GPU-only animation (opacity + transform) for smooth mobile */}
       <div style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        gap: showModeToggle ? 8 : 0,
+        gap: 8,
         marginBottom: 6,
-        transition: "gap 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        contain: "layout",
       }}>
         {/* Nose / Cabin */}
         <div style={{
@@ -211,15 +226,18 @@ export default function CabinSvg() {
           ))}
         </div>
 
-        {/* PAX / Cargo — clip-based reveal when Cabin is active */}
+        {/* PAX / Cargo — width fits content so no empty gap on the right */}
         <div style={{
           display: "flex",
           borderRadius: 8,
           overflow: "hidden",
           border: showModeToggle ? "1px solid var(--panel-border)" : "1px solid transparent",
           opacity: showModeToggle ? 1 : 0,
-          transform: showModeToggle ? "translateX(0)" : "translateX(-8px)",
-          transition: "opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease, padding 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+          transform: showModeToggle ? "translateX(0) scale(1)" : "translateX(-10px) scale(0.96)",
+          width: showModeToggle ? "auto" : 0,
+          maxWidth: showModeToggle ? 140 : 0,
+          minWidth: 0,
+          transition: `opacity ${duration}s ${ease}, transform ${duration}s ${ease}, max-width ${duration}s ${ease}, border-color ${duration}s ease`,
           pointerEvents: showModeToggle ? "auto" : "none",
           flexShrink: 0,
         }}>
@@ -227,14 +245,11 @@ export default function CabinSvg() {
             <button key={m} onClick={() => dispatch({ type: "SET_MODE", mode: m })} style={{
               background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
               color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-              padding: showModeToggle ? "5px 14px" : "5px 0",
-              width: showModeToggle ? undefined : 0,
+              padding: "5px 14px",
               fontSize: 12, fontWeight: 600,
               border: "none", borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
               borderRadius: 0, cursor: "pointer",
               whiteSpace: "nowrap",
-              overflow: "hidden",
-              transition: "padding 0.5s cubic-bezier(0.22, 1, 0.36, 1), width 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
             }}>{m === "passenger" ? "PAX" : "Cargo"}</button>
           ))}
         </div>
