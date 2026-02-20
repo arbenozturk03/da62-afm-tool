@@ -175,11 +175,27 @@ export default function CabinSvg() {
     return () => ro.disconnect();
   }, []);
 
+  const showModeToggle = activeSection === "cabin";
+
   return (
     <>
-      {/* Controls */}
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
-        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
+      {/* Controls — single row; Nose/Cabin slides left when PAX/Cargo appears */}
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 6,
+      }}>
+        {/* Nose / Cabin */}
+        <div style={{
+          display: "flex",
+          borderRadius: 8,
+          overflow: "hidden",
+          border: "1px solid var(--panel-border)",
+          transition: "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+          transform: showModeToggle ? "translateX(0)" : "translateX(0)",
+        }}>
           {SECTIONS.map((s, i) => (
             <button key={s.id} onClick={() => jumpTo(s.id)} style={{
               background: activeSection === s.id ? "var(--result-bg)" : "var(--panel-bg)",
@@ -190,7 +206,21 @@ export default function CabinSvg() {
             }}>{s.label}</button>
           ))}
         </div>
-        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--panel-border)" }}>
+
+        {/* PAX / Cargo — slides in from right when Cabin is active */}
+        <div style={{
+          display: "flex",
+          borderRadius: 8,
+          overflow: "hidden",
+          border: "1px solid var(--panel-border)",
+          opacity: showModeToggle ? 1 : 0,
+          width: showModeToggle ? "auto" : 0,
+          maxWidth: showModeToggle ? 200 : 0,
+          transform: showModeToggle ? "translateX(0) scale(1)" : "translateX(-12px) scale(0.95)",
+          transition: "opacity 0.35s ease, max-width 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+          pointerEvents: showModeToggle ? "auto" : "none",
+          flexShrink: 0,
+        }}>
           {(["passenger", "cargo"] as const).map((m) => (
             <button key={m} onClick={() => dispatch({ type: "SET_MODE", mode: m })} style={{
               background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
@@ -198,7 +228,8 @@ export default function CabinSvg() {
               padding: "5px 14px", fontSize: 12, fontWeight: 600,
               border: "none", borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
               borderRadius: 0, cursor: "pointer",
-            }}>{m === "passenger" ? "🪑 PAX" : "📦 Cargo"}</button>
+              whiteSpace: "nowrap",
+            }}>{m === "passenger" ? "PAX" : "Cargo"}</button>
           ))}
         </div>
       </div>
@@ -219,7 +250,7 @@ export default function CabinSvg() {
           style={{
             width: "100%",
             transform: `translateY(-${viewScrollTop}px)`,
-            transition: "transform 0.25s ease-out",
+            transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
           <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", height: "auto" }}>
