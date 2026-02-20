@@ -1,12 +1,11 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, NavLink, Navigate } from "react-router-dom";
 import Takeoff from "./Takeoff";
 import Landing from "./Landing";
 import CgPage from "./pages/cg/CgPage";
 import ConfigPage from "./pages/config/ConfigPage";
 import FuelPage from "./pages/fuel/FuelPage";
 import Logo from "./Logo";
-import AppLayout from "./layout/AppLayout";
 import "./App.css";
 
 class ErrorBoundary extends Component<
@@ -38,24 +37,40 @@ class ErrorBoundary extends Component<
   }
 }
 
+// Top navigation order: Config → W&B → Takeoff → Landing
+const NAV_ITEMS = [
+  { to: "/config", label: "Config" },
+  { to: "/cg", label: "W&B" },
+  { to: "/takeoff", label: "Takeoff" },
+  { to: "/landing", label: "Landing" },
+] as const;
+
 export default function App() {
   return (
     <ErrorBoundary>
       <header className="app-header">
         <Logo className="tai-logo" />
+        <nav className="page-nav">
+          {NAV_ITEMS.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
 
       <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/config" element={<ConfigPage />} />
-          <Route path="/wb" element={<CgPage />} />
-          <Route path="/takeoff" element={<Takeoff />} />
-          <Route path="/landing" element={<Landing />} />
-          <Route path="/fuel" element={<FuelPage />} />
-          <Route path="*" element={<Navigate to="/config" replace />} />
-        </Route>
-        {/* Backward compat: /cg -> /wb */}
-        <Route path="/cg" element={<Navigate to="/wb" replace />} />
+        <Route path="/config" element={<ConfigPage />} />
+        <Route path="/cg" element={<CgPage />} />
+        <Route path="/takeoff" element={<Takeoff />} />
+        <Route path="/landing" element={<Landing />} />
+        {/* Fuel page kept for direct URL access, but removed from top nav */}
+        <Route path="/fuel" element={<FuelPage />} />
+        <Route path="*" element={<Navigate to="/config" replace />} />
       </Routes>
     </ErrorBoundary>
   );

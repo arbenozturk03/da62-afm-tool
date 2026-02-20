@@ -96,7 +96,7 @@ export default function CgPage() {
   const [fuelMode, setFuelMode] = useState<FuelMode>("metric");
 
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
+    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px 48px 12px" }}>
       <div className="cg-layout">
         {/* Cabin SVG */}
         <div style={{ minWidth: 0 }}>
