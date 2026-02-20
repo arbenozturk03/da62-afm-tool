@@ -96,7 +96,7 @@ export default function CgPage() {
   const [fuelMode, setFuelMode] = useState<FuelMode>("metric");
 
   return (
-    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px 48px 12px" }}>
+    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
       <div className="cg-layout">
         {/* Cabin SVG */}
         <div style={{ minWidth: 0 }}>
@@ -342,6 +342,17 @@ export default function CgPage() {
           </div>
         </div>
       </div>
+
+      <p
+        style={{
+          marginTop: 20,
+          fontSize: 11,
+          color: "var(--text-muted)",
+          fontStyle: "italic",
+        }}
+      >
+        All data are based on the DA-62 AFM (Aircraft Flight Manual).
+      </p>
     </div>
   );
 }
