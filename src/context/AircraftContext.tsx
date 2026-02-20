@@ -35,6 +35,9 @@ export interface AircraftState {
   mode: CabinMode;
   showDebugLabels: boolean;
   debugZones: boolean;
+
+  cabinSection: string;
+  cabinScrollTop: number;
 }
 
 const initialState: AircraftState = {
@@ -61,12 +64,15 @@ const initialState: AircraftState = {
   mode: "passenger",
   showDebugLabels: false,
   debugZones: false,
+
+  cabinSection: "nose",
+  cabinScrollTop: -1,
 };
 
 /* ── Actions ──────────────────────────────────────────────── */
 
 type Action =
-  | { type: "SET_FIELD"; field: keyof AircraftState; value: number | boolean | CabinMode }
+  | { type: "SET_FIELD"; field: keyof AircraftState; value: number | boolean | string | CabinMode }
   | { type: "SET_MODE"; mode: CabinMode }
   | { type: "RESET" };
 

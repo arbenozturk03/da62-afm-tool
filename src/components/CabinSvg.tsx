@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import { useCallback, useRef, useMemo, useEffect, useState } from "react";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
 import Modal from "./Modal";
@@ -84,8 +84,10 @@ export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
-  const [activeSection, setActiveSection] = useState("nose");
-  const [viewScrollTop, setViewScrollTop] = useState(0);
+  const activeSection = state.cabinSection;
+  const viewScrollTop = state.cabinScrollTop;
+  const setActiveSection = (s: string) => dispatch({ type: "SET_FIELD", field: "cabinSection", value: s as unknown as number });
+  const setViewScrollTop = (v: number) => dispatch({ type: "SET_FIELD", field: "cabinScrollTop", value: v });
   const svgContentRef = useRef<HTMLDivElement>(null);
 
   const isCargoMode = state.mode === "cargo";
@@ -155,8 +157,9 @@ export default function CabinSvg() {
     setViewScrollTop(Math.min(target, maxScroll));
   };
 
-  /* Initial view: show Nose as soon as content has height */
+  /* Initial view: show Nose if cabinScrollTop hasn't been set yet (-1) */
   useEffect(() => {
+    if (viewScrollTop >= 0) return;
     const content = svgContentRef.current;
     if (!content) return;
     const applyNose = () => {
@@ -173,19 +176,21 @@ export default function CabinSvg() {
     const ro = new ResizeObserver(applyNose);
     ro.observe(content);
     return () => ro.disconnect();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewScrollTop]);
 
   const showModeToggle = activeSection === "cabin";
 
   return (
     <>
-      {/* Controls — single row; Nose/Cabin slides left when PAX/Cargo appears */}
+      {/* Controls — single row; PAX/Cargo smoothly appears beside Nose/Cabin */}
       <div style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        gap: 8,
+        gap: showModeToggle ? 8 : 0,
         marginBottom: 6,
+        transition: "gap 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
       }}>
         {/* Nose / Cabin */}
         <div style={{
@@ -193,8 +198,7 @@ export default function CabinSvg() {
           borderRadius: 8,
           overflow: "hidden",
           border: "1px solid var(--panel-border)",
-          transition: "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-          transform: showModeToggle ? "translateX(0)" : "translateX(0)",
+          flexShrink: 0,
         }}>
           {SECTIONS.map((s, i) => (
             <button key={s.id} onClick={() => jumpTo(s.id)} style={{
@@ -207,17 +211,15 @@ export default function CabinSvg() {
           ))}
         </div>
 
-        {/* PAX / Cargo — slides in from right when Cabin is active */}
+        {/* PAX / Cargo — clip-based reveal when Cabin is active */}
         <div style={{
           display: "flex",
           borderRadius: 8,
           overflow: "hidden",
-          border: "1px solid var(--panel-border)",
+          border: showModeToggle ? "1px solid var(--panel-border)" : "1px solid transparent",
           opacity: showModeToggle ? 1 : 0,
-          width: showModeToggle ? "auto" : 0,
-          maxWidth: showModeToggle ? 200 : 0,
-          transform: showModeToggle ? "translateX(0) scale(1)" : "translateX(-12px) scale(0.95)",
-          transition: "opacity 0.35s ease, max-width 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+          transform: showModeToggle ? "translateX(0)" : "translateX(-8px)",
+          transition: "opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease, padding 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
           pointerEvents: showModeToggle ? "auto" : "none",
           flexShrink: 0,
         }}>
@@ -225,10 +227,14 @@ export default function CabinSvg() {
             <button key={m} onClick={() => dispatch({ type: "SET_MODE", mode: m })} style={{
               background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
               color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-              padding: "5px 14px", fontSize: 12, fontWeight: 600,
+              padding: showModeToggle ? "5px 14px" : "5px 0",
+              width: showModeToggle ? undefined : 0,
+              fontSize: 12, fontWeight: 600,
               border: "none", borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
               borderRadius: 0, cursor: "pointer",
               whiteSpace: "nowrap",
+              overflow: "hidden",
+              transition: "padding 0.5s cubic-bezier(0.22, 1, 0.36, 1), width 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
             }}>{m === "passenger" ? "PAX" : "Cargo"}</button>
           ))}
         </div>
