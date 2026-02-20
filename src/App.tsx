@@ -70,7 +70,7 @@ export default function App() {
         <Route path="/landing" element={<Landing />} />
         {/* Fuel page kept for direct URL access, but removed from top nav */}
         <Route path="/fuel" element={<FuelPage />} />
-        <Route path="*" element={<Navigate to="/cg" replace />} />
+        <Route path="*" element={<Navigate to="/config" replace />} />
       </Routes>
     </ErrorBoundary>
   );

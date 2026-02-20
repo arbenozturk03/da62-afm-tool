@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
 import Modal from "./Modal";
@@ -154,6 +154,26 @@ export default function CabinSvg() {
     const maxScroll = Math.max(0, contentH - VIEWPORT_H);
     setViewScrollTop(Math.min(target, maxScroll));
   };
+
+  /* Initial view: show Nose as soon as content has height */
+  useEffect(() => {
+    const content = svgContentRef.current;
+    if (!content) return;
+    const applyNose = () => {
+      const contentH = content.offsetHeight;
+      if (contentH <= 0) return;
+      const noseSection = SECTIONS.find((s) => s.id === "nose");
+      if (!noseSection) return;
+      const svgYNorm = (noseSection.targetY - CROP_Y) / CROP_H;
+      const target = Math.max(0, svgYNorm * contentH - 20);
+      const maxScroll = Math.max(0, contentH - VIEWPORT_H);
+      setViewScrollTop(Math.min(target, maxScroll));
+    };
+    applyNose();
+    const ro = new ResizeObserver(applyNose);
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <>
