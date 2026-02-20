@@ -1,44 +1,34 @@
-import { useState, useEffect, type FocusEvent } from "react";
+import { useEffect, type FocusEvent } from "react";
 import { computeLanding } from "./core/landing";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
-import { useAircraft } from "./context/AircraftContext";
+import { usePerformance } from "./context/PerformanceContext";
 import MetarCard from "./MetarCard";
 import AirportSearch from "./AirportSearch";
+
+const metersToFeet = (meters: number) => Math.round(meters * 3.28084);
 
 /** Select all text on focus so leading zeros / old values are replaced on typing */
 const selectOnFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
 
 export default function Landing() {
-  // ── W&B takeoff weight ────────────────────────────────────────
-  const { result: cgResult } = useAircraft();
-  const W = Math.round(cgResult.totalMass);
+  // ── Weight: manual entry only (no auto-fill from W&B) ─────────────
+  const { state: perfState, setLanding } = usePerformance();
 
   // ── Airport DB ────────────────────────────────────────────────
   const { db, loading: dbLoading, error: dbError } = useAirportDb();
 
-  // ── Airport & runway selection ──────────────────────────────
-  const [selectedAirport, setSelectedAirport] = useState<string>("CUSTOM");
-  const [selectedRunway, setSelectedRunway] = useState<string>("");
-
+  // ── Persisted form state (survives tab switch) ─────────────────
+  const L = perfState.landing;
+  const W = L.weightKg;
+  const selectedAirport = L.selectedAirport;
+  const selectedRunway = L.selectedRunway;
   const airport = db?.get(selectedAirport) ?? null;
   const runway =
     airport?.runways.find((r) => r.id === selectedRunway) ??
     airport?.runways[0] ??
     null;
-
-  // ── Inputs ──────────────────────────────────────────────────
-  const [flaps, setFlaps] = useState<"LDG" | "TO" | "UP">("LDG");
-  const [PA, setPA] = useState(0);
-  const [OAT, setOAT] = useState(15);
-  const [windSpeed, setWindSpeed] = useState(0);
-  const [windDir, setWindDir] = useState(0);
-  const [rwyHeading, setRwyHeading] = useState(0);
-  const [condition, setCondition] = useState<"DRY" | "WET">("DRY");
-  const [runwaySurface, setRunwaySurface] = useState<"PAVED" | "GRASS" | "GRASS_SOFT">("PAVED");
-  const [grassLengthCm, setGrassLengthCm] = useState(5);
-  const [downhillSlope, setDownhillSlope] = useState(0);
 
   // ── METAR ──────────────────────────────────────────────────
   const metarIcao = selectedAirport !== "CUSTOM" ? selectedAirport : null;
@@ -49,68 +39,64 @@ export default function Landing() {
     refresh: refreshMetar,
   } = useMetar(metarIcao);
 
-  const [tempDirty, setTempDirty] = useState(false);
-  const [windSpeedDirty, setWindSpeedDirty] = useState(false);
-  const [windDirDirty, setWindDirDirty] = useState(false);
-
   // Reset dirty flags when airport changes
   useEffect(() => {
-    setTempDirty(false);
-    setWindSpeedDirty(false);
-    setWindDirDirty(false);
-  }, [selectedAirport]);
+    setLanding("tempDirty", false);
+    setLanding("windSpeedDirty", false);
+    setLanding("windDirDirty", false);
+  }, [selectedAirport, setLanding]);
 
   // Auto-fill inputs from METAR (only non-dirty fields)
   useEffect(() => {
     if (!metar) return;
-    if (metar.tempC != null && !tempDirty) setOAT(metar.tempC);
-    if (metar.windSpeedKt != null && !windSpeedDirty)
-      setWindSpeed(metar.windSpeedKt);
-    if (metar.windDirDeg != null && !windDirDirty)
-      setWindDir(metar.windDirDeg);
+    if (metar.tempC != null && !L.tempDirty) setLanding("OAT", metar.tempC);
+    if (metar.windSpeedKt != null && !L.windSpeedDirty)
+      setLanding("windSpeed", metar.windSpeedKt);
+    if (metar.windDirDeg != null && !L.windDirDirty)
+      setLanding("windDir", metar.windDirDeg);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metar]);
 
   const applyMetarValues = () => {
     if (!metar) return;
-    if (metar.tempC != null) setOAT(metar.tempC);
-    if (metar.windSpeedKt != null) setWindSpeed(metar.windSpeedKt);
-    if (metar.windDirDeg != null) setWindDir(metar.windDirDeg);
-    setTempDirty(false);
-    setWindSpeedDirty(false);
-    setWindDirDirty(false);
+    if (metar.tempC != null) setLanding("OAT", metar.tempC);
+    if (metar.windSpeedKt != null) setLanding("windSpeed", metar.windSpeedKt);
+    if (metar.windDirDeg != null) setLanding("windDir", metar.windDirDeg);
+    setLanding("tempDirty", false);
+    setLanding("windSpeedDirty", false);
+    setLanding("windDirDirty", false);
   };
 
-  const hasDirtyFields = tempDirty || windSpeedDirty || windDirDirty;
+  const hasDirtyFields = L.tempDirty || L.windSpeedDirty || L.windDirDirty;
 
   // ── Effective values (airport overrides when selected) ──────
-  const effPA = runway?.pressureAltitude ?? airport?.pressureAltitude ?? PA;
-  const effHeading = runway ? runway.heading : rwyHeading;
+  const effPA = runway?.pressureAltitude ?? airport?.pressureAltitude ?? L.PA;
+  const effHeading = runway ? runway.heading : L.rwyHeading;
 
   // Slope: raw value (positive = uphill, negative = downhill)
   // For landing correction: only negative (downhill) slopes cause penalty.
-  const effSlope = runway ? runway.slopePercent : downhillSlope;
+  const effSlope = runway ? runway.slopePercent : L.downhillSlope;
   const effDownhillSlope = Math.max(0, -effSlope);
 
   // ── Derived correction values from surface selection ────────
-  const effSurface = airport ? airport.surface : runwaySurface;
+  const effSurface = airport ? airport.surface : L.runwaySurface;
   const isGrassLike = effSurface !== "PAVED";
   const corrSurface = isGrassLike ? "GRASS" : "PAVED";
   const corrSoftGround = effSurface === "GRASS_SOFT";
 
   // ── Wind component (positive = headwind, negative = tailwind) ─
   const windComponentKt =
-    windSpeed === 0
+    L.windSpeed === 0
       ? 0
       : Math.round(
-          windSpeed *
-            Math.cos(((windDir - effHeading) * Math.PI) / 180) *
+          L.windSpeed *
+            Math.cos(((L.windDir - effHeading) * Math.PI) / 180) *
             10
         ) / 10;
 
   // ── Derive config from flaps ────────────────────────────────
-  const configKey = flaps === "LDG" ? "normal_flaps_ldg" : "abnormal_flaps_to_up";
-  const abnormalMode = flaps === "LDG" ? undefined : flaps;
+  const configKey = L.flaps === "LDG" ? "normal_flaps_ldg" : "abnormal_flaps_to_up";
+  const abnormalMode = L.flaps === "LDG" ? undefined : L.flaps;
 
   // ── Compute ─────────────────────────────────────────────────
   const result = computeLanding({
@@ -118,13 +104,13 @@ export default function Landing() {
     abnormalMode,
     W,
     PA: effPA,
-    OAT,
+    OAT: L.OAT,
     windComponentKt,
     runwaySurface: corrSurface,
-    grassCondition: isGrassLike ? condition : undefined,
-    grassLengthCm: isGrassLike ? grassLengthCm : undefined,
+    grassCondition: isGrassLike ? L.condition : undefined,
+    grassLengthCm: isGrassLike ? L.grassLengthCm : undefined,
     softGround: corrSoftGround,
-    wetPaved: !isGrassLike && condition === "WET",
+    wetPaved: !isGrassLike && L.condition === "WET",
     downhillSlopePercent: effDownhillSlope,
   });
 
@@ -187,7 +173,7 @@ export default function Landing() {
           topLabel = String(topNum).padStart(2, "0");
         }
 
-        const wRad = (windDir * Math.PI) / 180;
+        const wRad = (L.windDir * Math.PI) / 180;
         const wOutR = 100,
           wInR = 60;
         const wX1 = CX + wOutR * Math.sin(wRad);
@@ -427,7 +413,7 @@ export default function Landing() {
               </>
             )}
 
-            {windSpeed > 0 && (
+            {L.windSpeed > 0 && (
               <>
                 <line
                   x1={wX1}
@@ -449,7 +435,7 @@ export default function Landing() {
                   fill="#ef5350"
                   fontWeight="bold"
                 >
-                  {windSpeed}kt
+                  {L.windSpeed}kt
                 </text>
               </>
             )}
@@ -486,12 +472,12 @@ export default function Landing() {
           dbError={dbError}
           selectedIcao={selectedAirport}
           onSelect={(icao) => {
-            setSelectedAirport(icao);
+            setLanding("selectedAirport", icao);
             const ap = db?.get(icao);
             if (ap && ap.runways.length > 0) {
-              setSelectedRunway(ap.runways[0].id);
+              setLanding("selectedRunway", ap.runways[0].id);
             } else {
-              setSelectedRunway("");
+              setLanding("selectedRunway", "");
             }
           }}
         />
@@ -503,7 +489,7 @@ export default function Landing() {
             <div className="field-value">
               <select
                 value={selectedRunway}
-                onChange={(e) => setSelectedRunway(e.target.value)}
+                onChange={(e) => setLanding("selectedRunway", e.target.value)}
               >
                 {airport.runways.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -520,8 +506,8 @@ export default function Landing() {
           <span className="field-label">Flaps</span>
           <div className="field-value">
             <select
-              value={flaps}
-              onChange={(e) => setFlaps(e.target.value as "LDG" | "TO" | "UP")}
+              value={L.flaps}
+              onChange={(e) => setLanding("flaps", e.target.value as "LDG" | "TO" | "UP")}
             >
               <option value="LDG">LDG</option>
               <option value="TO">T/O</option>
@@ -535,8 +521,8 @@ export default function Landing() {
           <span className="field-label">Condition</span>
           <div className="field-value">
             <select
-              value={condition}
-              onChange={(e) => setCondition(e.target.value as "DRY" | "WET")}
+              value={L.condition}
+              onChange={(e) => setLanding("condition", e.target.value as "DRY" | "WET")}
             >
               <option value="DRY">Dry</option>
               <option value="WET">Wet</option>
@@ -552,7 +538,8 @@ export default function Landing() {
               value={effSurface}
               disabled={!!airport}
               onChange={(e) =>
-                setRunwaySurface(
+                setLanding(
+                  "runwaySurface",
                   e.target.value as "PAVED" | "GRASS" | "GRASS_SOFT"
                 )
               }
@@ -574,11 +561,11 @@ export default function Landing() {
                 type="number"
                 min={0}
                 max={30}
-                value={grassLengthCm}
-                onChange={(e) => setGrassLengthCm(Number(e.target.value))}
+                value={L.grassLengthCm}
+                onChange={(e) => setLanding("grassLengthCm", Number(e.target.value))}
                 onFocus={selectOnFocus}
               />
-              {grassLengthCm === 0 && (
+              {L.grassLengthCm === 0 && (
                 <span style={{ fontSize: 12, color: "var(--gravel-color)", fontWeight: "bold" }}>
                   Gravel
                 </span>
@@ -587,15 +574,17 @@ export default function Landing() {
           </div>
         )}
 
-        {/* Weight — from W&B page (read-only) */}
+        {/* Weight — manual entry */}
         <div className="field">
-          <span className="field-label">Weight (kg) — from W&B</span>
+          <span className="field-label">Weight (kg)</span>
           <div className="field-value">
             <input
               type="number"
-              value={W}
-              disabled
-              style={{ opacity: 0.6 }}
+              min={0}
+              value={L.weightKg}
+              onChange={(e) => setLanding("weightKg", Number(e.target.value) || 0)}
+              onFocus={selectOnFocus}
+              style={{ width: 70 }}
             />
           </div>
         </div>
@@ -608,7 +597,7 @@ export default function Landing() {
               type="number"
               value={effPA}
               disabled={!!airport}
-              onChange={(e) => setPA(Number(e.target.value))}
+              onChange={(e) => setLanding("PA", Number(e.target.value))}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -621,8 +610,8 @@ export default function Landing() {
           <div className="field-value">
             <input
               type="number"
-              value={OAT}
-              onChange={(e) => { setOAT(Number(e.target.value)); setTempDirty(true); }}
+              value={L.OAT}
+              onChange={(e) => { setLanding("OAT", Number(e.target.value)); setLanding("tempDirty", true); }}
               onFocus={selectOnFocus}
             />
           </div>
@@ -635,8 +624,8 @@ export default function Landing() {
             <input
               type="number"
               min={0}
-              value={windSpeed}
-              onChange={(e) => { setWindSpeed(Number(e.target.value)); setWindSpeedDirty(true); }}
+              value={L.windSpeed}
+              onChange={(e) => { setLanding("windSpeed", Number(e.target.value)); setLanding("windSpeedDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
@@ -645,8 +634,8 @@ export default function Landing() {
               type="number"
               min={0}
               max={360}
-              value={windDir}
-              onChange={(e) => { setWindDir(Number(e.target.value)); setWindDirDirty(true); }}
+              value={L.windDir}
+              onChange={(e) => { setLanding("windDir", Number(e.target.value)); setLanding("windDirDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
@@ -655,7 +644,7 @@ export default function Landing() {
         </div>
 
         {/* Wind component display */}
-        {windSpeed > 0 && (
+        {L.windSpeed > 0 && (
           <div
             className="field"
             style={{
@@ -680,8 +669,8 @@ export default function Landing() {
                 type="number"
                 min={0}
                 max={360}
-                value={rwyHeading}
-                onChange={(e) => setRwyHeading(Number(e.target.value))}
+                value={L.rwyHeading}
+                onChange={(e) => setLanding("rwyHeading", Number(e.target.value))}
                 onFocus={selectOnFocus}
               />
             </div>
@@ -697,7 +686,7 @@ export default function Landing() {
               step={0.5}
               value={effSlope}
               disabled={!!airport}
-              onChange={(e) => setDownhillSlope(Number(e.target.value))}
+              onChange={(e) => setLanding("downhillSlope", Number(e.target.value))}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -749,10 +738,10 @@ export default function Landing() {
           {effSurface === "PAVED"
             ? "Paved"
             : effSurface === "GRASS_SOFT"
-              ? `Grass (Soft) ${grassLengthCm} cm`
-              : `Grass ${grassLengthCm} cm`}
+              ? `Grass (Soft) ${L.grassLengthCm} cm`
+              : `Grass ${L.grassLengthCm} cm`}
           {", "}
-          {condition === "WET" ? "Wet" : "Dry"}
+          {L.condition === "WET" ? "Wet" : "Dry"}
         </div>
         <div>
           <strong>VREF:</strong>{" "}
@@ -777,18 +766,30 @@ export default function Landing() {
             Results
           </strong>
 
-          <p style={{ margin: "6px 0" }}>
-            Ground Roll:{" "}
-            <strong>
-              {hasCorrections ? result.correctedGR_m : result.baseGR_m} m
-            </strong>
-          </p>
-          <p style={{ margin: "6px 0" }}>
-            Landing Distance 15 m:{" "}
-            <strong>
-              {hasCorrections ? result.correctedLD15_m : result.baseLD15_m} m
-            </strong>
-          </p>
+          {(() => {
+            const groundRollM = hasCorrections ? result.correctedGR_m : result.baseGR_m;
+            const groundRollFt = metersToFeet(groundRollM);
+
+            const landing50M = hasCorrections ? result.correctedLD15_m : result.baseLD15_m;
+            const landing50Ft = metersToFeet(landing50M);
+
+            return (
+              <>
+                <p style={{ margin: "6px 0" }}>
+                  Ground Roll:{" "}
+                  <strong>
+                    {groundRollFt}ft / {groundRollM.toFixed(0)}m
+                  </strong>
+                </p>
+                <p style={{ margin: "6px 0" }}>
+                  Landing Distance 50 ft:{" "}
+                  <strong>
+                    {landing50Ft}ft / {landing50M.toFixed(0)}m
+                  </strong>
+                </p>
+              </>
+            );
+          })()}
 
           {hasCorrections && (
             <details

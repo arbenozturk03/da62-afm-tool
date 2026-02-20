@@ -1,45 +1,37 @@
-import { useState, useEffect, type FocusEvent } from "react";
+import { useEffect, type FocusEvent } from "react";
 import { computeTakeoff, type RunwayCondition, type RunwaySurface } from "./core/takeoff";
 import { applyTakeoffCorrections, type CorrectionInputs } from "./core/corrections";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
 import { useAircraft } from "./context/AircraftContext";
+import { usePerformance } from "./context/PerformanceContext";
 import MetarCard from "./MetarCard";
 import AirportSearch from "./AirportSearch";
+
+const metersToFeet = (meters: number) => Math.round(meters * 3.28084);
 
 /** Select all text on focus so leading zeros / old values are replaced on typing */
 const selectOnFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
 
 export default function Takeoff() {
-  // ── W&B takeoff weight ────────────────────────────────────────
+  // ── Weight: editable; "From W&B" fills from W&B ─────────────────
   const { result: cgResult } = useAircraft();
-  const W = Math.round(cgResult.totalMass);
+  const { state: perfState, setTakeoff } = usePerformance();
+  const t = perfState.takeoff;
+  const W = t.weightKg;
 
   // ── Airport DB ────────────────────────────────────────────────
   const { db, loading: dbLoading, error: dbError } = useAirportDb();
 
-  // ── Airport & runway selection ──────────────────────────────
-  const [selectedAirport, setSelectedAirport] = useState<string>("CUSTOM");
-  const [selectedRunway, setSelectedRunway] = useState<string>("");
-
+  // ── Persisted form state (survives tab switch) ─────────────────
+  const selectedAirport = t.selectedAirport;
+  const selectedRunway = t.selectedRunway;
   const airport = db?.get(selectedAirport) ?? null;
   const runway =
     airport?.runways.find((r) => r.id === selectedRunway) ??
     airport?.runways[0] ??
     null;
-
-  // ── Inputs ──────────────────────────────────────────────────
-  const [flaps, setFlaps] = useState<"TO" | "UP">("TO");
-  const [condition, setCondition] = useState<"DRY" | "WET">("DRY");
-  const [runwaySurface, setRunwaySurface] = useState<"PAVED" | "GRASS" | "GRASS_SOFT">("PAVED");
-  const [PA, setPA] = useState(0);
-  const [OAT, setOAT] = useState(15);
-  const [windSpeed, setWindSpeed] = useState(0);
-  const [windDir, setWindDir] = useState(0);
-  const [rwyHeading, setRwyHeading] = useState(0);
-  const [grassLengthCm, setGrassLengthCm] = useState(5);
-  const [uphillSlope, setUphillSlope] = useState(0);
 
   // ── METAR ──────────────────────────────────────────────────
   const metarIcao = selectedAirport !== "CUSTOM" ? selectedAirport : null;
@@ -50,83 +42,79 @@ export default function Takeoff() {
     refresh: refreshMetar,
   } = useMetar(metarIcao);
 
-  const [tempDirty, setTempDirty] = useState(false);
-  const [windSpeedDirty, setWindSpeedDirty] = useState(false);
-  const [windDirDirty, setWindDirDirty] = useState(false);
-
   // Reset dirty flags when airport changes
   useEffect(() => {
-    setTempDirty(false);
-    setWindSpeedDirty(false);
-    setWindDirDirty(false);
-  }, [selectedAirport]);
+    setTakeoff("tempDirty", false);
+    setTakeoff("windSpeedDirty", false);
+    setTakeoff("windDirDirty", false);
+  }, [selectedAirport, setTakeoff]);
 
   // Auto-fill inputs from METAR (only non-dirty fields)
   useEffect(() => {
     if (!metar) return;
-    if (metar.tempC != null && !tempDirty) setOAT(metar.tempC);
-    if (metar.windSpeedKt != null && !windSpeedDirty)
-      setWindSpeed(metar.windSpeedKt);
-    if (metar.windDirDeg != null && !windDirDirty)
-      setWindDir(metar.windDirDeg);
+    if (metar.tempC != null && !t.tempDirty) setTakeoff("OAT", metar.tempC);
+    if (metar.windSpeedKt != null && !t.windSpeedDirty)
+      setTakeoff("windSpeed", metar.windSpeedKt);
+    if (metar.windDirDeg != null && !t.windDirDirty)
+      setTakeoff("windDir", metar.windDirDeg);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metar]);
 
   const applyMetarValues = () => {
     if (!metar) return;
-    if (metar.tempC != null) setOAT(metar.tempC);
-    if (metar.windSpeedKt != null) setWindSpeed(metar.windSpeedKt);
-    if (metar.windDirDeg != null) setWindDir(metar.windDirDeg);
-    setTempDirty(false);
-    setWindSpeedDirty(false);
-    setWindDirDirty(false);
+    if (metar.tempC != null) setTakeoff("OAT", metar.tempC);
+    if (metar.windSpeedKt != null) setTakeoff("windSpeed", metar.windSpeedKt);
+    if (metar.windDirDeg != null) setTakeoff("windDir", metar.windDirDeg);
+    setTakeoff("tempDirty", false);
+    setTakeoff("windSpeedDirty", false);
+    setTakeoff("windDirDirty", false);
   };
 
-  const hasDirtyFields = tempDirty || windSpeedDirty || windDirDirty;
+  const hasDirtyFields = t.tempDirty || t.windSpeedDirty || t.windDirDirty;
 
   // ── Effective values (airport overrides when selected) ──────
-  const effPA = runway?.pressureAltitude ?? airport?.pressureAltitude ?? PA;
-  const effHeading = runway ? runway.heading : rwyHeading;
+  const effPA = runway?.pressureAltitude ?? airport?.pressureAltitude ?? t.PA;
+  const effHeading = runway ? runway.heading : t.rwyHeading;
 
   // Slope: raw value (positive = uphill, negative = downhill)
   // For takeoff correction: only positive (uphill) slopes cause penalty.
-  const effSlope = runway ? runway.slopePercent : uphillSlope;
+  const effSlope = runway ? runway.slopePercent : t.uphillSlope;
   const effUphillSlope = Math.max(0, effSlope);
 
   // ── Derived correction values from surface selection ────────
-  const effSurface = airport ? airport.surface : runwaySurface;
+  const effSurface = airport ? airport.surface : t.runwaySurface;
   const isGrassLike = effSurface !== "PAVED";
   const corrSurface = isGrassLike ? "GRASS" : "PAVED";
   const corrSoftGround = effSurface === "GRASS_SOFT";
 
   // ── Wind component (positive = headwind, negative = tailwind) ─
   const windComponentKt =
-    windSpeed === 0
+    t.windSpeed === 0
       ? 0
       : Math.round(
-          windSpeed *
-            Math.cos(((windDir - effHeading) * Math.PI) / 180) *
+          t.windSpeed *
+            Math.cos(((t.windDir - effHeading) * Math.PI) / 180) *
             10
         ) / 10;
 
   // ── Compute base results ───────────────────────────────────
   const result = computeTakeoff({
-    flaps,
+    flaps: t.flaps,
     condition: "DRY" as RunwayCondition,
     surface: "ASPHALT" as RunwaySurface,
     W,
     PA: effPA,
-    OAT,
+    OAT: t.OAT,
   });
 
   // ── Apply corrections (only if base succeeded) ─────────────
   const corrInputs: CorrectionInputs = {
     windComponentKt,
     runwaySurface: corrSurface,
-    grassCondition: isGrassLike ? condition : undefined,
-    grassLengthCm: isGrassLike ? grassLengthCm : undefined,
+    grassCondition: isGrassLike ? t.condition : undefined,
+    grassLengthCm: isGrassLike ? t.grassLengthCm : undefined,
     softGround: corrSoftGround,
-    wetPaved: !isGrassLike && condition === "WET",
+    wetPaved: !isGrassLike && t.condition === "WET",
     slopePercent: effUphillSlope,
   };
 
@@ -199,7 +187,7 @@ export default function Takeoff() {
           topLabel = String(topNum).padStart(2, "0");
         }
 
-        const wRad = (windDir * Math.PI) / 180;
+        const wRad = (t.windDir * Math.PI) / 180;
         const wOutR = 100,
           wInR = 60;
         const wX1 = CX + wOutR * Math.sin(wRad);
@@ -439,7 +427,7 @@ export default function Takeoff() {
               </>
             )}
 
-            {windSpeed > 0 && (
+            {t.windSpeed > 0 && (
               <>
                 <line
                   x1={wX1}
@@ -461,7 +449,7 @@ export default function Takeoff() {
                   fill="#ef5350"
                   fontWeight="bold"
                 >
-                  {windSpeed}kt
+                  {t.windSpeed}kt
                 </text>
               </>
             )}
@@ -498,12 +486,12 @@ export default function Takeoff() {
           dbError={dbError}
           selectedIcao={selectedAirport}
           onSelect={(icao) => {
-            setSelectedAirport(icao);
+            setTakeoff("selectedAirport", icao);
             const ap = db?.get(icao);
             if (ap && ap.runways.length > 0) {
-              setSelectedRunway(ap.runways[0].id);
+              setTakeoff("selectedRunway", ap.runways[0].id);
             } else {
-              setSelectedRunway("");
+              setTakeoff("selectedRunway", "");
             }
           }}
         />
@@ -515,7 +503,7 @@ export default function Takeoff() {
             <div className="field-value">
               <select
                 value={selectedRunway}
-                onChange={(e) => setSelectedRunway(e.target.value)}
+                onChange={(e) => setTakeoff("selectedRunway", e.target.value)}
               >
                 {airport.runways.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -532,8 +520,8 @@ export default function Takeoff() {
           <span className="field-label">Flaps</span>
           <div className="field-value">
             <select
-              value={flaps}
-              onChange={(e) => setFlaps(e.target.value as "TO" | "UP")}
+              value={t.flaps}
+              onChange={(e) => setTakeoff("flaps", e.target.value as "TO" | "UP")}
             >
               <option value="TO">T/O</option>
               <option value="UP">UP</option>
@@ -546,8 +534,8 @@ export default function Takeoff() {
           <span className="field-label">Condition</span>
           <div className="field-value">
             <select
-              value={condition}
-              onChange={(e) => setCondition(e.target.value as "DRY" | "WET")}
+              value={t.condition}
+              onChange={(e) => setTakeoff("condition", e.target.value as "DRY" | "WET")}
             >
               <option value="DRY">Dry</option>
               <option value="WET">Wet</option>
@@ -563,7 +551,8 @@ export default function Takeoff() {
               value={effSurface}
               disabled={!!airport}
               onChange={(e) =>
-                setRunwaySurface(
+                setTakeoff(
+                  "runwaySurface",
                   e.target.value as "PAVED" | "GRASS" | "GRASS_SOFT"
                 )
               }
@@ -585,16 +574,16 @@ export default function Takeoff() {
                 type="number"
                 min={0}
                 max={25}
-                value={grassLengthCm}
-                onChange={(e) => setGrassLengthCm(Number(e.target.value))}
+                value={t.grassLengthCm}
+                onChange={(e) => setTakeoff("grassLengthCm", Number(e.target.value))}
                 onFocus={selectOnFocus}
               />
-              {grassLengthCm === 0 && (
+              {t.grassLengthCm === 0 && (
                 <span style={{ fontSize: 12, color: "var(--gravel-color)", fontWeight: "bold" }}>
                   Gravel
                 </span>
               )}
-              {grassLengthCm > 25 && (
+              {t.grassLengthCm > 25 && (
                 <span style={{ fontSize: 12, color: "#ef5350", fontWeight: "bold" }}>
                   Not permitted (&gt;25 cm)
                 </span>
@@ -603,16 +592,36 @@ export default function Takeoff() {
           </div>
         )}
 
-        {/* Weight — from W&B page (read-only) */}
+        {/* Weight — editable; button fills from W&B */}
         <div className="field">
-          <span className="field-label">Weight (kg) — from W&B</span>
-          <div className="field-value">
+          <span className="field-label">Weight (kg)</span>
+          <div className="field-value" style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <input
               type="number"
-              value={W}
-              disabled
-              style={{ opacity: 0.6 }}
+              min={0}
+              value={t.weightKg}
+              onChange={(e) => setTakeoff("weightKg", Number(e.target.value) || 0)}
+              onFocus={selectOnFocus}
+              style={{ width: 70 }}
             />
+            <button
+              type="button"
+              onClick={() => setTakeoff("weightKg", Math.round(cgResult.totalMass))}
+              style={{
+                padding: "6px 10px",
+                fontSize: 12,
+                fontWeight: 600,
+                border: "1px solid var(--panel-border)",
+                borderRadius: 6,
+                background: "var(--panel-bg)",
+                color: "var(--text-primary)",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+              title="Use current W&B takeoff weight"
+            >
+              From W&B
+            </button>
           </div>
         </div>
 
@@ -624,7 +633,7 @@ export default function Takeoff() {
               type="number"
               value={effPA}
               disabled={!!airport}
-              onChange={(e) => setPA(Number(e.target.value))}
+              onChange={(e) => setTakeoff("PA", Number(e.target.value))}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -637,8 +646,8 @@ export default function Takeoff() {
           <div className="field-value">
             <input
               type="number"
-              value={OAT}
-              onChange={(e) => { setOAT(Number(e.target.value)); setTempDirty(true); }}
+              value={t.OAT}
+              onChange={(e) => { setTakeoff("OAT", Number(e.target.value)); setTakeoff("tempDirty", true); }}
               onFocus={selectOnFocus}
             />
           </div>
@@ -651,8 +660,8 @@ export default function Takeoff() {
             <input
               type="number"
               min={0}
-              value={windSpeed}
-              onChange={(e) => { setWindSpeed(Number(e.target.value)); setWindSpeedDirty(true); }}
+              value={t.windSpeed}
+              onChange={(e) => { setTakeoff("windSpeed", Number(e.target.value)); setTakeoff("windSpeedDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
@@ -661,8 +670,8 @@ export default function Takeoff() {
               type="number"
               min={0}
               max={360}
-              value={windDir}
-              onChange={(e) => { setWindDir(Number(e.target.value)); setWindDirDirty(true); }}
+              value={t.windDir}
+              onChange={(e) => { setTakeoff("windDir", Number(e.target.value)); setTakeoff("windDirDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
@@ -671,7 +680,7 @@ export default function Takeoff() {
         </div>
 
         {/* Wind component display */}
-        {windSpeed > 0 && (
+        {t.windSpeed > 0 && (
           <div
             className="field"
             style={{
@@ -696,8 +705,8 @@ export default function Takeoff() {
                 type="number"
                 min={0}
                 max={360}
-                value={rwyHeading}
-                onChange={(e) => setRwyHeading(Number(e.target.value))}
+                value={t.rwyHeading}
+                onChange={(e) => setTakeoff("rwyHeading", Number(e.target.value))}
                 onFocus={selectOnFocus}
               />
             </div>
@@ -713,7 +722,7 @@ export default function Takeoff() {
               step={0.5}
               value={effSlope}
               disabled={!!airport}
-              onChange={(e) => setUphillSlope(Number(e.target.value))}
+              onChange={(e) => setTakeoff("uphillSlope", Number(e.target.value))}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -765,10 +774,10 @@ export default function Takeoff() {
           {effSurface === "PAVED"
             ? "Paved"
             : effSurface === "GRASS_SOFT"
-              ? `Grass (Soft) ${grassLengthCm} cm`
-              : `Grass ${grassLengthCm} cm`}
+              ? `Grass (Soft) ${t.grassLengthCm} cm`
+              : `Grass ${t.grassLengthCm} cm`}
           {", "}
-          {condition === "WET" ? "Wet" : "Dry"}
+          {t.condition === "WET" ? "Wet" : "Dry"}
         </div>
         <div style={{ marginBottom: 4 }}>
           <strong>VR:</strong>{" "}
@@ -797,24 +806,36 @@ export default function Takeoff() {
             Results
           </strong>
 
-          <p style={{ margin: "6px 0" }}>
-            Ground Roll:{" "}
-            <strong>
-              {corrResult?.ok && hasCorrections
+          {(() => {
+            const groundRollM =
+              corrResult?.ok && hasCorrections
                 ? corrResult.correctedGroundRoll
-                : result.GR}{" "}
-              m
-            </strong>
-          </p>
-          <p style={{ margin: "6px 0" }}>
-            Takeoff Distance 15 m:{" "}
-            <strong>
-              {corrResult?.ok && hasCorrections
+                : result.GR;
+            const groundRollFt = metersToFeet(groundRollM);
+
+            const takeoff50M =
+              corrResult?.ok && hasCorrections
                 ? corrResult.correctedTakeoff15m
-                : result.TOD_15m}{" "}
-              m
-            </strong>
-          </p>
+                : result.TOD_15m;
+            const takeoff50Ft = metersToFeet(takeoff50M);
+
+            return (
+              <>
+                <p style={{ margin: "6px 0" }}>
+                  Ground Roll:{" "}
+                  <strong>
+                    {groundRollFt}ft / {groundRollM.toFixed(0)}m
+                  </strong>
+                </p>
+                <p style={{ margin: "6px 0" }}>
+                  Takeoff Distance 50 ft:{" "}
+                  <strong>
+                    {takeoff50Ft}ft / {takeoff50M.toFixed(0)}m
+                  </strong>
+                </p>
+              </>
+            );
+          })()}
 
           {corrResult?.ok && hasCorrections && (
             <details

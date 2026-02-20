@@ -4,9 +4,10 @@ import EnvelopeChart from "../../components/EnvelopeChart";
 import { useAircraft } from "../../context/AircraftContext";
 import { aircraftConfig } from "../../data/aircraftConfig";
 
-type FuelUnit = "L" | "kg" | "lbs";
+type FuelMode = "metric" | "imperial";
 const FUEL_DENSITY = aircraftConfig.densities.fuel;
 const KG_TO_LBS = 2.20462;
+const L_PER_US_GAL = 3.785411784;
 
 /* ── shared inline styles (matching Takeoff/Landing) ── */
 
@@ -60,17 +61,18 @@ const inputStyle: React.CSSProperties = {
   color: "inherit",
 };
 
-/* ── helpers ── */
+/* ── fuel conversion helpers ── */
 
-function litersFromInput(value: number, unit: FuelUnit): number {
-  if (unit === "L") return value;
-  if (unit === "kg") return value / FUEL_DENSITY;
-  return value / KG_TO_LBS / FUEL_DENSITY;
+function litersToGal(liters: number): number {
+  return liters / L_PER_US_GAL;
 }
-
-function litersToDisplay(liters: number, unit: FuelUnit): number {
-  if (unit === "L") return liters;
-  if (unit === "kg") return liters * FUEL_DENSITY;
+function galToLiters(gal: number): number {
+  return gal * L_PER_US_GAL;
+}
+function litersToKg(liters: number): number {
+  return liters * FUEL_DENSITY;
+}
+function litersToLbs(liters: number): number {
   return liters * FUEL_DENSITY * KG_TO_LBS;
 }
 
@@ -91,7 +93,7 @@ function Stat({ label, value, unit, warn }: { label: string; value: string; unit
 export default function CgPage() {
   const { state, dispatch, result, insideEnvelope, zfInsideEnvelope } = useAircraft();
   const { limits } = aircraftConfig;
-  const [fuelUnit, setFuelUnit] = useState<FuelUnit>("L");
+  const [fuelMode, setFuelMode] = useState<FuelMode>("metric");
 
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
@@ -107,80 +109,168 @@ export default function CgPage() {
           <div style={cardStyle}>
             <div style={sectionTitle}>Fuel</div>
 
-            {/* Unit selector */}
-            <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: "1px solid var(--panel-border)", width: "fit-content", marginBottom: 8 }}>
-              {(["L", "kg", "lbs"] as FuelUnit[]).map((u) => (
+            {/* Metric / Imperial toggle */}
+            <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: "1px solid var(--panel-border)", width: "fit-content", marginBottom: 10 }}>
+              {(["metric", "imperial"] as FuelMode[]).map((mode) => (
                 <button
-                  key={u}
-                  onClick={() => setFuelUnit(u)}
+                  key={mode}
+                  onClick={() => setFuelMode(mode)}
                   style={{
-                    background: fuelUnit === u ? "#2563eb" : "var(--panel-bg)",
-                    color: fuelUnit === u ? "#fff" : "var(--text-muted)",
-                    padding: "3px 10px",
+                    background: fuelMode === mode ? "#2563eb" : "var(--panel-bg)",
+                    color: fuelMode === mode ? "#fff" : "var(--text-muted)",
+                    padding: "4px 14px",
                     fontSize: 12,
                     fontWeight: 600,
                     border: "none",
-                    borderRadius: 0,
                     cursor: "pointer",
                   }}
                 >
-                  {u}
+                  {mode === "metric" ? "L / kg" : "gal / lbs"}
                 </button>
               ))}
             </div>
 
-            <div style={{ marginBottom: 6 }}>
-              <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Main fuel</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                <input
-                  type="number"
-                  value={parseFloat(litersToDisplay(state.mainFuelL, fuelUnit).toFixed(1))}
-                  min={0}
-                  step={1}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "SET_FIELD",
-                      field: "mainFuelL",
-                      value: Math.max(0, litersFromInput(parseFloat(e.target.value) || 0, fuelUnit)),
-                    })
-                  }
-                  onFocus={(e) => e.target.select()}
-                  style={inputStyle}
-                />
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{fuelUnit}</span>
-              </span>
-            </div>
-
-            <div style={{ marginBottom: 6 }}>
-              <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Aux fuel</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                <input
-                  type="number"
-                  value={parseFloat(litersToDisplay(state.auxFuelL, fuelUnit).toFixed(1))}
-                  min={0}
-                  step={1}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "SET_FIELD",
-                      field: "auxFuelL",
-                      value: Math.max(0, litersFromInput(parseFloat(e.target.value) || 0, fuelUnit)),
-                    })
-                  }
-                  onFocus={(e) => e.target.select()}
-                  style={inputStyle}
-                />
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{fuelUnit}</span>
-              </span>
-            </div>
-
-            <div style={{ borderTop: "1px solid var(--panel-border)", marginTop: 6, paddingTop: 6 }}>
-              <div style={rowStyle}>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>Total</span>
-                <span style={{ ...monoVal, fontSize: 12 }}>
-                  {litersToDisplay(state.mainFuelL + state.auxFuelL, fuelUnit).toFixed(1)} {fuelUnit}
-                </span>
-              </div>
-            </div>
+            {fuelMode === "metric" ? (
+              <>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Main fuel</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <input
+                      type="number"
+                      value={state.mainFuelL === 0 ? "" : parseFloat(state.mainFuelL.toFixed(1))}
+                      min={0}
+                      step={1}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_FIELD",
+                          field: "mainFuelL",
+                          value: Math.max(0, parseFloat(e.target.value) || 0),
+                        })
+                      }
+                      onFocus={(e) => e.target.select()}
+                      style={inputStyle}
+                      placeholder="0"
+                    />
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>L</span>
+                    {state.mainFuelL > 0 && (
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        / {litersToKg(state.mainFuelL).toFixed(1)} kg
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Aux fuel</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <input
+                      type="number"
+                      value={state.auxFuelL === 0 ? "" : parseFloat(state.auxFuelL.toFixed(1))}
+                      min={0}
+                      step={1}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_FIELD",
+                          field: "auxFuelL",
+                          value: Math.max(0, parseFloat(e.target.value) || 0),
+                        })
+                      }
+                      onFocus={(e) => e.target.select()}
+                      style={inputStyle}
+                      placeholder="0"
+                    />
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>L</span>
+                    {state.auxFuelL > 0 && (
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        / {litersToKg(state.auxFuelL).toFixed(1)} kg
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div style={{ borderTop: "1px solid var(--panel-border)", marginTop: 6, paddingTop: 6 }}>
+                  <div style={rowStyle}>
+                    <span style={{ color: "var(--text-muted)", fontSize: 12 }}>Total</span>
+                    <span style={{ ...monoVal, fontSize: 12 }}>
+                      {(state.mainFuelL + state.auxFuelL).toFixed(1)} L
+                      {(state.mainFuelL + state.auxFuelL) > 0 && (
+                        <span style={{ ...unitSpan, marginLeft: 6 }}>
+                          / {litersToKg(state.mainFuelL + state.auxFuelL).toFixed(1)} kg
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Main fuel</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <input
+                      type="number"
+                      value={state.mainFuelL === 0 ? "" : parseFloat(litersToGal(state.mainFuelL).toFixed(1))}
+                      min={0}
+                      step={0.1}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_FIELD",
+                          field: "mainFuelL",
+                          value: Math.max(0, galToLiters(parseFloat(e.target.value) || 0)),
+                        })
+                      }
+                      onFocus={(e) => e.target.select()}
+                      style={inputStyle}
+                      placeholder="0"
+                    />
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>gal</span>
+                    {state.mainFuelL > 0 && (
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        / {litersToLbs(state.mainFuelL).toFixed(1)} lbs
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Aux fuel</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <input
+                      type="number"
+                      value={state.auxFuelL === 0 ? "" : parseFloat(litersToGal(state.auxFuelL).toFixed(1))}
+                      min={0}
+                      step={0.1}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_FIELD",
+                          field: "auxFuelL",
+                          value: Math.max(0, galToLiters(parseFloat(e.target.value) || 0)),
+                        })
+                      }
+                      onFocus={(e) => e.target.select()}
+                      style={inputStyle}
+                      placeholder="0"
+                    />
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>gal</span>
+                    {state.auxFuelL > 0 && (
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        / {litersToLbs(state.auxFuelL).toFixed(1)} lbs
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div style={{ borderTop: "1px solid var(--panel-border)", marginTop: 6, paddingTop: 6 }}>
+                  <div style={rowStyle}>
+                    <span style={{ color: "var(--text-muted)", fontSize: 12 }}>Total</span>
+                    <span style={{ ...monoVal, fontSize: 12 }}>
+                      {litersToGal(state.mainFuelL + state.auxFuelL).toFixed(1)} gal
+                      {(state.mainFuelL + state.auxFuelL) > 0 && (
+                        <span style={{ ...unitSpan, marginLeft: 6 }}>
+                          / {litersToLbs(state.mainFuelL + state.auxFuelL).toFixed(1)} lbs
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* CG Envelope */}
