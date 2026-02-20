@@ -78,12 +78,14 @@ const SECTIONS = [
 
 /* ── Component ── */
 
+const VIEWPORT_H = 480;
+
 export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
   const [activeSection, setActiveSection] = useState("nose");
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewScrollTop, setViewScrollTop] = useState(0);
   const svgContentRef = useRef<HTMLDivElement>(null);
 
   const isCargoMode = state.mode === "cargo";
@@ -141,24 +143,16 @@ export default function CabinSvg() {
   }, [visibleBags]);
 
   const jumpTo = (sectionId: string) => {
-    const vp = viewportRef.current;
     const content = svgContentRef.current;
-    if (!vp || !content) return;
+    if (!content) return;
     setActiveSection(sectionId);
     const section = SECTIONS.find((s) => s.id === sectionId);
     if (!section) return;
     const svgYNorm = (section.targetY - CROP_Y) / CROP_H;
-    const contentH = content.scrollHeight;
-    vp.scrollTo({ top: Math.max(0, svgYNorm * contentH - 20), behavior: "smooth" });
-  };
-
-  const handleScroll = () => {
-    const vp = viewportRef.current;
-    const content = svgContentRef.current;
-    if (!vp || !content) return;
-    const scrollCenter = vp.scrollTop + vp.clientHeight / 2;
-    const svgY = (scrollCenter / content.scrollHeight) * CROP_H + CROP_Y;
-    setActiveSection(svgY < 900 ? "nose" : "cabin");
+    const contentH = content.offsetHeight;
+    const target = Math.max(0, svgYNorm * contentH - 20);
+    const maxScroll = Math.max(0, contentH - VIEWPORT_H);
+    setViewScrollTop(Math.min(target, maxScroll));
   };
 
   return (
@@ -189,14 +183,25 @@ export default function CabinSvg() {
         </div>
       </div>
 
-      {/* Viewport */}
-      <div ref={viewportRef} onScroll={handleScroll} style={{
-        position: "relative", overflowY: "auto", overflowX: "hidden",
-        WebkitOverflowScrolling: "touch", touchAction: "pan-y",
-        height: 480, maxHeight: 480, borderRadius: 10,
-        border: "1px solid var(--panel-border)", background: "#111",
-      }}>
-        <div ref={svgContentRef} style={{ width: "100%" }}>
+      {/* Viewport — no scroll; only Nose/Cabin buttons move the view via transform */}
+      <div
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          height: VIEWPORT_H,
+          borderRadius: 10,
+          border: "1px solid var(--panel-border)",
+          background: "#111",
+        }}
+      >
+        <div
+          ref={svgContentRef}
+          style={{
+            width: "100%",
+            transform: `translateY(-${viewScrollTop}px)`,
+            transition: "transform 0.25s ease-out",
+          }}
+        >
           <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", height: "auto" }}>
             <image href="/cabin_2.svg" x="0" y="0" width={SVG_W} height={SVG_H} />
 
