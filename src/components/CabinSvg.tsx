@@ -4,13 +4,12 @@ import { aircraftConfig } from "../data/aircraftConfig";
 import Modal from "./Modal";
 
 const SVG_W = 1063;
-const SVG_H = 3792;
 const CROP_Y = 50;
 const CROP_H = 2750;
 const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 
-/** Horizontal offset for cabin background (if aircraft drawing is off-center in the source). Negative = move aircraft right. */
-const CABIN_IMAGE_OFFSET_X = -18;
+/** Aspect ratio of the cropped cabin view (width / height) for overlay alignment */
+const CABIN_ASPECT = SVG_W / CROP_H;
 
 /* ── Zone types ── */
 
@@ -88,6 +87,7 @@ export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number; maxWarning?: string } | null>(null);
+  const [cabinImageLoaded, setCabinImageLoaded] = useState(false);
   const activeSection = state.cabinSection;
   const viewScrollTop = state.cabinScrollTop;
   const setActiveSection = (s: string) => dispatch({ type: "SET_FIELD", field: "cabinSection", value: s as unknown as number });
@@ -243,9 +243,37 @@ export default function CabinSvg() {
             transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", height: "auto" }}>
-            <image href="/cabin_2.svg" x={CABIN_IMAGE_OFFSET_X} y={0} width={SVG_W} height={SVG_H} />
-
+          <div style={{ position: "relative", width: "100%", aspectRatio: CABIN_ASPECT }}>
+            <img
+              src="/cabin-desktop.webp"
+              srcSet="/cabin-mobile.webp 900w, /cabin-desktop.webp 1400w"
+              sizes="(max-width: 768px) 900px, 1400px"
+              alt=""
+              decoding="async"
+              fetchPriority="high"
+              onLoad={() => setCabinImageLoaded(true)}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "auto",
+                verticalAlign: "middle",
+                opacity: cabinImageLoaded ? 1 : 0,
+                transition: "opacity 0.4s ease-out",
+              }}
+            />
+            <svg
+              viewBox={VIEW_BOX}
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                display: "block",
+                pointerEvents: "none",
+              }}
+            >
+              <g style={{ pointerEvents: "auto" }}>
             {/* ── Seats ── */}
             {visibleSeats.map((s) => {
               const pos = seatCardMap.get(s.id);
@@ -393,7 +421,9 @@ export default function CabinSvg() {
                 </g>
               );
             })()}
-          </svg>
+              </g>
+            </svg>
+          </div>
         </div>
       </div>
 
