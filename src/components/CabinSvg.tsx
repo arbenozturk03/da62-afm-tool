@@ -12,7 +12,7 @@ const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 const CABIN_ASPECT = SVG_W / CROP_H;
 
 /** Horizontal offset for cabin background (if aircraft drawing is off-center). Negative = move aircraft right. */
-const CABIN_IMAGE_OFFSET_X = -5.3;
+const CABIN_IMAGE_OFFSET_X = -6;
 
 /* ── Zone types ── */
 
