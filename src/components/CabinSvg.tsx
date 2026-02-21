@@ -340,53 +340,50 @@ export default function CabinSvg() {
               );
             })}
 
-            {/* ── PAX / Cargo segmented toggle ── */}
+            {/* ── Rear seats: Installed / Folded toggle ── */}
             {(() => {
-              const toggleW = 300;
-              const toggleH = 60;
-              const toggleX = (SVG_W - toggleW) / 2;
-              const toggleY = 2120;
-              const halfW = toggleW / 2;
+              const tw = 340;
+              const th = 60;
+              const tx = (SVG_W - tw) / 2;
+              const ty = 2120;
+              const halfW = tw / 2;
               const r = 14;
               return (
                 <g>
-                  {/* PAX button */}
+                  <text x={SVG_W / 2} y={ty - 12} textAnchor="middle"
+                    fontSize={30} fontWeight={800} fill="#888" pointerEvents="none"
+                  >Rear seats</text>
                   <g style={{ cursor: "pointer" }}
                     onClick={() => dispatch({ type: "SET_MODE", mode: "passenger" })}
                   >
-                    <rect x={toggleX} y={toggleY} width={halfW} height={toggleH}
-                      rx={r} ry={r}
-                      fill={!isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
-                      stroke={!isCargoMode ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.08)"}
-                      strokeWidth={1.5}
+                    <rect x={tx} y={ty} width={halfW} height={th} rx={r} ry={r}
+                      fill={!isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
+                      stroke={!isCargoMode ? "rgba(96,165,250,0.6)" : "rgba(255,255,255,0.1)"}
+                      strokeWidth={2}
                     />
-                    {/* Square off right corners of PAX half */}
-                    <rect x={toggleX + halfW - r} y={toggleY} width={r} height={toggleH}
-                      fill={!isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                    <rect x={tx + halfW - r} y={ty} width={r} height={th}
+                      fill={!isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                     />
-                    <text x={toggleX + halfW / 2} y={toggleY + toggleH / 2 + 10}
-                      textAnchor="middle" fontSize={28} fontWeight={700}
+                    <text x={tx + halfW / 2} y={ty + th / 2 + 10} textAnchor="middle"
+                      fontSize={26} fontWeight={800}
                       fill={!isCargoMode ? "#60a5fa" : "#666"} pointerEvents="none"
-                    >PAX</text>
+                    >Installed</text>
                   </g>
-                  {/* Cargo button */}
                   <g style={{ cursor: "pointer" }}
                     onClick={() => dispatch({ type: "SET_MODE", mode: "cargo" })}
                   >
-                    <rect x={toggleX + halfW} y={toggleY} width={halfW} height={toggleH}
-                      rx={r} ry={r}
-                      fill={isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
-                      stroke={isCargoMode ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.08)"}
-                      strokeWidth={1.5}
+                    <rect x={tx + halfW} y={ty} width={halfW} height={th} rx={r} ry={r}
+                      fill={isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
+                      stroke={isCargoMode ? "rgba(251,191,36,0.6)" : "rgba(255,255,255,0.1)"}
+                      strokeWidth={2}
                     />
-                    {/* Square off left corners of Cargo half */}
-                    <rect x={toggleX + halfW} y={toggleY} width={r} height={toggleH}
-                      fill={isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                    <rect x={tx + halfW} y={ty} width={r} height={th}
+                      fill={isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                     />
-                    <text x={toggleX + halfW + halfW / 2} y={toggleY + toggleH / 2 + 10}
-                      textAnchor="middle" fontSize={28} fontWeight={700}
-                      fill={isCargoMode ? "#60a5fa" : "#666"} pointerEvents="none"
-                    >Cargo</text>
+                    <text x={tx + halfW + halfW / 2} y={ty + th / 2 + 12} textAnchor="middle"
+                      fontSize={30} fontWeight={800}
+                      fill={isCargoMode ? "#fbbf24" : "#666"} pointerEvents="none"
+                    >Folded</text>
                   </g>
                 </g>
               );
