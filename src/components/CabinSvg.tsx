@@ -11,6 +11,9 @@ const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 /** Aspect ratio of the cropped cabin view (width / height) for overlay alignment */
 const CABIN_ASPECT = SVG_W / CROP_H;
 
+/** Horizontal offset for cabin background (if aircraft drawing is off-center). Negative = move aircraft right. */
+const CABIN_IMAGE_OFFSET_X = -5.3;
+
 /* ── Zone types ── */
 
 interface SeatZone {
@@ -257,6 +260,8 @@ export default function CabinSvg() {
                 width: "100%",
                 height: "auto",
                 verticalAlign: "middle",
+                objectFit: "cover",
+                objectPosition: `${CABIN_IMAGE_OFFSET_X}px 0`,
                 opacity: cabinImageLoaded ? 1 : 0,
                 transition: "opacity 0.4s ease-out",
               }}
