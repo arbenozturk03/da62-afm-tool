@@ -6,6 +6,12 @@ import { PerformanceProvider } from "./context/PerformanceContext";
 import "./index.css";
 import App from "./App.tsx";
 
+// Warm-up: preload cabin image so it’s cached before user opens W&B
+if (typeof window !== "undefined") {
+  const cabinImg = new Image();
+  cabinImg.src = "/cabin-desktop.webp";
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>

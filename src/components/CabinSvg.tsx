@@ -246,14 +246,25 @@ export default function CabinSvg() {
             transition: "transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
-          <div style={{ position: "relative", width: "100%", aspectRatio: CABIN_ASPECT }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: CABIN_ASPECT, overflow: "hidden" }}>
+            {/* Placeholder: subtle dark gradient to avoid black flash (no layout shift) */}
+            <div
+              aria-hidden
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(180deg, #1c1c1e 0%, #121214 50%, #0c0c0e 100%)",
+              }}
+            />
             <img
               src="/cabin-desktop.webp"
               alt=""
+              loading="eager"
               decoding="async"
               fetchPriority="high"
               onLoad={() => setCabinImageLoaded(true)}
               style={{
+                position: "relative",
                 display: "block",
                 width: "100%",
                 height: "auto",
@@ -261,7 +272,7 @@ export default function CabinSvg() {
                 objectFit: "cover",
                 objectPosition: `${CABIN_IMAGE_OFFSET_X}px 0`,
                 opacity: cabinImageLoaded ? 1 : 0,
-                transition: "opacity 0.4s ease-out",
+                transition: "opacity 0.25s ease-out",
               }}
             />
             <svg
