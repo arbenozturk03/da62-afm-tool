@@ -9,6 +9,9 @@ const CROP_Y = 50;
 const CROP_H = 2750;
 const VIEW_BOX = `0 ${CROP_Y} ${SVG_W} ${CROP_H}`;
 
+/** Horizontal offset for cabin background (if aircraft drawing is off-center in the source). Negative = move aircraft right. */
+const CABIN_IMAGE_OFFSET_X = -18;
+
 /* ── Zone types ── */
 
 interface SeatZone {
@@ -241,7 +244,7 @@ export default function CabinSvg() {
           }}
         >
           <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" style={{ display: "block", width: "100%", height: "auto" }}>
-            <image href="/cabin_2.svg" x="0" y="0" width={SVG_W} height={SVG_H} />
+            <image href="/cabin_2.svg" x={CABIN_IMAGE_OFFSET_X} y={0} width={SVG_W} height={SVG_H} />
 
             {/* ── Seats ── */}
             {visibleSeats.map((s) => {
@@ -340,47 +343,49 @@ export default function CabinSvg() {
               );
             })}
 
-            {/* ── Rear seats: Installed / Folded toggle ── */}
+            {/* ── Rear seats: Installed / Folded toggle (centered on SVG) ── */}
             {(() => {
+              const centerX = SVG_W / 2;
               const tw = 340;
               const th = 60;
-              const tx = (SVG_W - tw) / 2;
-              const ty = 2120;
               const halfW = tw / 2;
+              const ty = 2120;
               const r = 14;
+              const leftX = centerX - halfW;
+              const rightX = centerX;
               return (
                 <g>
-                  <text x={SVG_W / 2} y={ty - 12} textAnchor="middle"
+                  <text x={centerX} y={ty - 12} textAnchor="middle"
                     fontSize={30} fontWeight={800} fill="#888" pointerEvents="none"
                   >Rear seats</text>
                   <g style={{ cursor: "pointer" }}
                     onClick={() => dispatch({ type: "SET_MODE", mode: "passenger" })}
                   >
-                    <rect x={tx} y={ty} width={halfW} height={th} rx={r} ry={r}
+                    <rect x={leftX} y={ty} width={halfW} height={th} rx={r} ry={r}
                       fill={!isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                       stroke={!isCargoMode ? "rgba(96,165,250,0.6)" : "rgba(255,255,255,0.1)"}
                       strokeWidth={2}
                     />
-                    <rect x={tx + halfW - r} y={ty} width={r} height={th}
+                    <rect x={rightX - r} y={ty} width={r} height={th}
                       fill={!isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                     />
-                    <text x={tx + halfW / 2} y={ty + th / 2 + 10} textAnchor="middle"
-                      fontSize={26} fontWeight={800}
+                    <text x={centerX - halfW / 2} y={ty + th / 2 + 10} textAnchor="middle"
+                      fontSize={30} fontWeight={800}
                       fill={!isCargoMode ? "#60a5fa" : "#666"} pointerEvents="none"
                     >Installed</text>
                   </g>
                   <g style={{ cursor: "pointer" }}
                     onClick={() => dispatch({ type: "SET_MODE", mode: "cargo" })}
                   >
-                    <rect x={tx + halfW} y={ty} width={halfW} height={th} rx={r} ry={r}
+                    <rect x={rightX} y={ty} width={halfW} height={th} rx={r} ry={r}
                       fill={isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                       stroke={isCargoMode ? "rgba(251,191,36,0.6)" : "rgba(255,255,255,0.1)"}
                       strokeWidth={2}
                     />
-                    <rect x={tx + halfW} y={ty} width={r} height={th}
+                    <rect x={rightX} y={ty} width={r} height={th}
                       fill={isCargoMode ? "#1a2a3a" : "rgba(30,30,38,0.92)"}
                     />
-                    <text x={tx + halfW + halfW / 2} y={ty + th / 2 + 12} textAnchor="middle"
+                    <text x={centerX + halfW / 2} y={ty + th / 2 + 12} textAnchor="middle"
                       fontSize={30} fontWeight={800}
                       fill={isCargoMode ? "#fbbf24" : "#666"} pointerEvents="none"
                     >Folded</text>
