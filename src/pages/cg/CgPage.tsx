@@ -8,6 +8,10 @@ type FuelMode = "metric" | "imperial";
 const FUEL_DENSITY = aircraftConfig.densities.fuel;
 const KG_TO_LBS = 2.20462;
 const L_PER_US_GAL = 3.785411784;
+const MAIN_FUEL_MAX_L = 189;
+const AUX_FUEL_MAX_L = 138;
+const MAIN_FUEL_MAX_GAL = 50;
+const AUX_FUEL_MAX_GAL = 36.4;
 
 /* ── shared inline styles (matching Takeoff/Landing) ── */
 
@@ -76,6 +80,16 @@ function litersToLbs(liters: number): number {
   return liters * FUEL_DENSITY * KG_TO_LBS;
 }
 
+function clampFuelLiters(value: number, maxLiters: number): number {
+  return Math.min(Math.max(0, value), maxLiters);
+}
+
+function displayMainFuelGal(liters: number): number {
+  // Keep 189 L internal cap, but show 50.0 gal at cap as requested.
+  if (liters >= MAIN_FUEL_MAX_L) return MAIN_FUEL_MAX_GAL;
+  return parseFloat(litersToGal(liters).toFixed(1));
+}
+
 /* ── components ── */
 
 function Stat({ label, value, unit, warn }: { label: string; value: string; unit?: string; warn?: boolean }) {
@@ -94,6 +108,8 @@ export default function CgPage() {
   const { state, dispatch, result, insideEnvelope, zfInsideEnvelope } = useAircraft();
   const { limits } = aircraftConfig;
   const [fuelMode, setFuelMode] = useState<FuelMode>("metric");
+  const mainFuelMaxLabel = fuelMode === "metric" ? "(max 189 L)" : "(max 50 gal)";
+  const auxFuelMaxLabel = fuelMode === "metric" ? "(max 138 L)" : "(max 36.4 gal)";
 
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: "16px 12px" }}>
@@ -133,18 +149,22 @@ export default function CgPage() {
             {fuelMode === "metric" ? (
               <>
                 <div style={{ marginBottom: 8 }}>
-                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Main fuel</span>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>
+                    Main fuel{" "}
+                    <span style={{ fontWeight: 500, fontSize: 12, color: "var(--text-muted)" }}>{mainFuelMaxLabel}</span>
+                  </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
                       type="number"
                       value={state.mainFuelL === 0 ? "" : parseFloat(state.mainFuelL.toFixed(1))}
                       min={0}
+                      max={MAIN_FUEL_MAX_L}
                       step={1}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "mainFuelL",
-                          value: Math.max(0, parseFloat(e.target.value) || 0),
+                          value: clampFuelLiters(parseFloat(e.target.value) || 0, MAIN_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -160,18 +180,22 @@ export default function CgPage() {
                   </span>
                 </div>
                 <div style={{ marginBottom: 8 }}>
-                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Aux fuel</span>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>
+                    Aux fuel{" "}
+                    <span style={{ fontWeight: 500, fontSize: 12, color: "var(--text-muted)" }}>{auxFuelMaxLabel}</span>
+                  </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
                       type="number"
                       value={state.auxFuelL === 0 ? "" : parseFloat(state.auxFuelL.toFixed(1))}
                       min={0}
+                      max={AUX_FUEL_MAX_L}
                       step={1}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "auxFuelL",
-                          value: Math.max(0, parseFloat(e.target.value) || 0),
+                          value: clampFuelLiters(parseFloat(e.target.value) || 0, AUX_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -203,18 +227,22 @@ export default function CgPage() {
             ) : (
               <>
                 <div style={{ marginBottom: 8 }}>
-                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Main fuel</span>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>
+                    Main fuel{" "}
+                    <span style={{ fontWeight: 500, fontSize: 12, color: "var(--text-muted)" }}>{mainFuelMaxLabel}</span>
+                  </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
                       type="number"
-                      value={state.mainFuelL === 0 ? "" : parseFloat(litersToGal(state.mainFuelL).toFixed(1))}
+                      value={state.mainFuelL === 0 ? "" : displayMainFuelGal(state.mainFuelL)}
                       min={0}
+                      max={MAIN_FUEL_MAX_GAL}
                       step={0.1}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "mainFuelL",
-                          value: Math.max(0, galToLiters(parseFloat(e.target.value) || 0)),
+                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseFloat(e.target.value) || 0), MAIN_FUEL_MAX_GAL)), MAIN_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -230,18 +258,22 @@ export default function CgPage() {
                   </span>
                 </div>
                 <div style={{ marginBottom: 8 }}>
-                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>Aux fuel</span>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 2 }}>
+                    Aux fuel{" "}
+                    <span style={{ fontWeight: 500, fontSize: 12, color: "var(--text-muted)" }}>{auxFuelMaxLabel}</span>
+                  </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
                       type="number"
                       value={state.auxFuelL === 0 ? "" : parseFloat(litersToGal(state.auxFuelL).toFixed(1))}
                       min={0}
+                      max={AUX_FUEL_MAX_GAL}
                       step={0.1}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "auxFuelL",
-                          value: Math.max(0, galToLiters(parseFloat(e.target.value) || 0)),
+                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseFloat(e.target.value) || 0), AUX_FUEL_MAX_GAL)), AUX_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}

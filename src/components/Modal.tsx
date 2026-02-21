@@ -5,12 +5,14 @@ interface ModalProps {
   value: number;
   unit?: string;
   max?: number;
+  maxWarning?: string;
   onSave: (v: number) => void;
   onClose: () => void;
 }
 
-export default function Modal({ title, value, unit = "kg", max, onSave, onClose }: ModalProps) {
+export default function Modal({ title, value, unit = "kg", max, maxWarning, onSave, onClose }: ModalProps) {
   const [local, setLocal] = useState(value);
+  const [hitLimit, setHitLimit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,7 +31,14 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
 
   const handleChange = (v: number) => {
     let val = Math.max(0, v);
-    if (max != null) val = Math.min(val, max);
+    if (max != null) {
+      if (val > max) {
+        setHitLimit(true);
+        val = max;
+      } else {
+        setHitLimit(false);
+      }
+    }
     setLocal(val);
   };
 
@@ -64,10 +73,15 @@ export default function Modal({ title, value, unit = "kg", max, onSave, onClose 
       >
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10, opacity: 0.7 }}>
           {title}
-          {max != null && (
+          {max != null && !maxWarning && (
             <span style={{ fontWeight: 400, opacity: 0.7 }}> (max {max})</span>
           )}
         </div>
+        {maxWarning && hitLimit && (
+          <div style={{ fontSize: 12, color: "#f87171", fontWeight: 600, marginBottom: 8 }}>
+            {maxWarning}
+          </div>
+        )}
 
         <form
           onSubmit={(e: FormEvent<HTMLFormElement>) => {

@@ -36,6 +36,9 @@ interface BagZone {
   max: number;
 }
 
+/* ── Row weight limits (AFM) ── */
+const ROW_LIMITS: Record<number, number> = { 0: 240, 1: 240, 2: 190 };
+
 /* ── Zone data (row groups: 0=front, 1=mid, 2=rear, 10=nose-bags, 11=rear-bag) ── */
 
 const SEATS: SeatZone[] = [
@@ -94,9 +97,8 @@ const VIEWPORT_H = 480;
 
 export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
-  const isMobile = useIsMobile();
   const [hovered, setHovered] = useState<string | null>(null);
-  const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number } | null>(null);
+  const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number; maxWarning?: string } | null>(null);
   const activeSection = state.cabinSection;
   const viewScrollTop = state.cabinScrollTop;
   const setActiveSection = (s: string) => dispatch({ type: "SET_FIELD", field: "cabinSection", value: s as unknown as number });
@@ -115,6 +117,17 @@ export default function CabinSvg() {
   );
 
   const val = (key: keyof AircraftState) => (state[key] as number) || 0;
+
+  const seatMaxForZone = (seat: SeatZone): number => {
+    const rowLimit = ROW_LIMITS[seat.row];
+    if (rowLimit == null) return Infinity;
+    const othersInRow = SEATS.filter((s) => s.row === seat.row && s.id !== seat.id);
+    const othersWeight = othersInRow.reduce((sum, s) => sum + val(s.stateKey), 0);
+    return Math.max(0, rowLimit - othersWeight);
+  };
+
+  const rowTotal = (row: number): number =>
+    SEATS.filter((s) => s.row === row).reduce((sum, s) => sum + val(s.stateKey), 0);
 
   const visibleSeats = isCargoMode
     ? SEATS.filter((s) => s.id !== "s6l" && s.id !== "s7r")
@@ -192,9 +205,6 @@ export default function CabinSvg() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewScrollTop]);
 
-  const showModeToggle = activeSection === "cabin";
-  const duration = isMobile ? 0.2 : 0.28;
-  const ease = "cubic-bezier(0.25, 0.1, 0.25, 1)";
 
   return (
     <>
@@ -226,33 +236,6 @@ export default function CabinSvg() {
           ))}
         </div>
 
-        {/* PAX / Cargo — width fits content so no empty gap on the right */}
-        <div style={{
-          display: "flex",
-          borderRadius: 8,
-          overflow: "hidden",
-          border: showModeToggle ? "1px solid var(--panel-border)" : "1px solid transparent",
-          opacity: showModeToggle ? 1 : 0,
-          transform: showModeToggle ? "translateX(0)" : "translateX(-6px)",
-          width: showModeToggle ? "auto" : 0,
-          maxWidth: showModeToggle ? 140 : 0,
-          minWidth: 0,
-          transition: `opacity ${duration}s ${ease}, transform ${duration}s ${ease}, max-width ${duration}s ${ease}, border-color ${duration}s ease`,
-          pointerEvents: showModeToggle ? "auto" : "none",
-          flexShrink: 0,
-        }}>
-          {(["passenger", "cargo"] as const).map((m) => (
-            <button key={m} onClick={() => dispatch({ type: "SET_MODE", mode: m })} style={{
-              background: state.mode === m ? "var(--result-bg)" : "var(--panel-bg)",
-              color: state.mode === m ? "#60a5fa" : "var(--text-muted)",
-              padding: "5px 14px",
-              fontSize: 12, fontWeight: 600,
-              border: "none", borderRight: m === "passenger" ? "1px solid var(--panel-border)" : "none",
-              borderRadius: 0, cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}>{m === "passenger" ? "PAX" : "Cargo"}</button>
-          ))}
-        </div>
       </div>
 
       {/* Viewport — no scroll; only Nose/Cabin buttons move the view via transform */}
@@ -291,7 +274,16 @@ export default function CabinSvg() {
                 <g key={s.id} style={{ cursor: disabled ? "not-allowed" : "pointer" }}
                   onMouseEnter={() => setHovered(s.id)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => { if (!disabled) setEditingZone(s); }}
+                  onClick={() => {
+                    if (!disabled) {
+                      const rowLimit = ROW_LIMITS[s.row];
+                      setEditingZone({
+                        ...s,
+                        max: seatMaxForZone(s),
+                        maxWarning: rowLimit != null ? `Max ${rowLimit} kg for this row` : undefined,
+                      });
+                    }
+                  }}
                 >
                   <rect x={cardX} y={cardY} width={CW} height={CH}
                     fill="transparent" pointerEvents="all" />
@@ -364,6 +356,58 @@ export default function CabinSvg() {
                 </g>
               );
             })}
+
+            {/* ── PAX / Cargo segmented toggle ── */}
+            {(() => {
+              const toggleW = 300;
+              const toggleH = 60;
+              const toggleX = (SVG_W - toggleW) / 2;
+              const toggleY = 2120;
+              const halfW = toggleW / 2;
+              const r = 14;
+              return (
+                <g>
+                  {/* PAX button */}
+                  <g style={{ cursor: "pointer" }}
+                    onClick={() => dispatch({ type: "SET_MODE", mode: "passenger" })}
+                  >
+                    <rect x={toggleX} y={toggleY} width={halfW} height={toggleH}
+                      rx={r} ry={r}
+                      fill={!isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                      stroke={!isCargoMode ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.08)"}
+                      strokeWidth={1.5}
+                    />
+                    {/* Square off right corners of PAX half */}
+                    <rect x={toggleX + halfW - r} y={toggleY} width={r} height={toggleH}
+                      fill={!isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                    />
+                    <text x={toggleX + halfW / 2} y={toggleY + toggleH / 2 + 10}
+                      textAnchor="middle" fontSize={28} fontWeight={700}
+                      fill={!isCargoMode ? "#60a5fa" : "#666"} pointerEvents="none"
+                    >PAX</text>
+                  </g>
+                  {/* Cargo button */}
+                  <g style={{ cursor: "pointer" }}
+                    onClick={() => dispatch({ type: "SET_MODE", mode: "cargo" })}
+                  >
+                    <rect x={toggleX + halfW} y={toggleY} width={halfW} height={toggleH}
+                      rx={r} ry={r}
+                      fill={isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                      stroke={isCargoMode ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.08)"}
+                      strokeWidth={1.5}
+                    />
+                    {/* Square off left corners of Cargo half */}
+                    <rect x={toggleX + halfW} y={toggleY} width={r} height={toggleH}
+                      fill={isCargoMode ? "var(--result-bg, #1a2a3a)" : "rgba(18,18,24,0.88)"}
+                    />
+                    <text x={toggleX + halfW + halfW / 2} y={toggleY + toggleH / 2 + 10}
+                      textAnchor="middle" fontSize={28} fontWeight={700}
+                      fill={isCargoMode ? "#60a5fa" : "#666"} pointerEvents="none"
+                    >Cargo</text>
+                  </g>
+                </g>
+              );
+            })()}
           </svg>
         </div>
       </div>
@@ -373,6 +417,7 @@ export default function CabinSvg() {
           title={editingZone.label}
           value={val(editingZone.stateKey)}
           max={editingZone.max}
+          maxWarning={editingZone.maxWarning}
           onSave={handleSave}
           onClose={() => setEditingZone(null)}
         />
