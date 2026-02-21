@@ -52,6 +52,12 @@ const outputRow: React.CSSProperties = {
   fontSize: 13,
 };
 
+/** Normalize decimal separator to period so iOS/locale shows "2.43" not "2,43" */
+function parseDecimal(s: string): number {
+  const normalized = s.trim().replace(",", ".");
+  return parseFloat(normalized) || 0;
+}
+
 function Field({
   label,
   value,
@@ -60,6 +66,7 @@ function Field({
   step = 1,
   min,
   max,
+  decimalPlaces,
 }: {
   label: string;
   value: number;
@@ -68,18 +75,26 @@ function Field({
   step?: number;
   min?: number;
   max?: number;
+  /** If set, use text input with fixed decimals so iOS shows "2.43" not "2,43" */
+  decimalPlaces?: number;
 }) {
+  const isDecimal = decimalPlaces != null;
+  const displayValue = isDecimal ? value.toFixed(decimalPlaces) : String(value);
+
   return (
     <div style={fieldStyle}>
       <span style={labelStyle}>{label}</span>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
         <input
-          type="number"
-          value={value}
+          type={isDecimal ? "text" : "number"}
+          inputMode={isDecimal ? "decimal" : "numeric"}
+          value={displayValue}
           step={step}
           min={min}
           max={max}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          onChange={(e) =>
+            onChange(isDecimal ? parseDecimal(e.target.value) : parseFloat(e.target.value) || 0)
+          }
           onFocus={(e) => e.target.select()}
           style={inputStyle}
         />
@@ -118,6 +133,7 @@ export default function ConfigPage() {
           unit="m"
           step={0.01}
           min={0}
+          decimalPlaces={2}
         />
       </div>
 

@@ -249,8 +249,6 @@ export default function CabinSvg() {
           <div style={{ position: "relative", width: "100%", aspectRatio: CABIN_ASPECT }}>
             <img
               src="/cabin-desktop.webp"
-              srcSet="/cabin-mobile.webp 900w, /cabin-desktop.webp 1400w"
-              sizes="(max-width: 768px) 900px, 1400px"
               alt=""
               decoding="async"
               fetchPriority="high"
