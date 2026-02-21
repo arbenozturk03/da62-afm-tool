@@ -79,20 +79,6 @@ const SECTIONS = [
   { id: "cabin", label: "Cabin", targetY: 1150 },
 ] as const;
 
-/* ── Mobile: shorter duration for smoother animation (less jank) ── */
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
-  );
-  useEffect(() => {
-    const m = window.matchMedia("(max-width: 768px)");
-    const fn = () => setIsMobile(m.matches);
-    m.addEventListener("change", fn);
-    return () => m.removeEventListener("change", fn);
-  }, []);
-  return isMobile;
-}
-
 const VIEWPORT_H = 480;
 
 export default function CabinSvg() {
@@ -102,7 +88,7 @@ export default function CabinSvg() {
   const activeSection = state.cabinSection;
   const viewScrollTop = state.cabinScrollTop;
   const setActiveSection = (s: string) => dispatch({ type: "SET_FIELD", field: "cabinSection", value: s as unknown as number });
-  const setViewScrollTop = (v: number) => dispatch({ type: "SET_FIELD", field: "cabinScrollTop", value: v });
+  const setViewScrollTop = useCallback((v: number) => dispatch({ type: "SET_FIELD", field: "cabinScrollTop", value: v }), [dispatch]);
   const svgContentRef = useRef<HTMLDivElement>(null);
 
   const isCargoMode = state.mode === "cargo";
@@ -125,9 +111,6 @@ export default function CabinSvg() {
     const othersWeight = othersInRow.reduce((sum, s) => sum + val(s.stateKey), 0);
     return Math.max(0, rowLimit - othersWeight);
   };
-
-  const rowTotal = (row: number): number =>
-    SEATS.filter((s) => s.row === row).reduce((sum, s) => sum + val(s.stateKey), 0);
 
   const visibleSeats = isCargoMode
     ? SEATS.filter((s) => s.id !== "s6l" && s.id !== "s7r")
