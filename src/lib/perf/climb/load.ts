@@ -12,9 +12,8 @@ import type {
 type RocOrFuelRow = RocGridRow | FuelTableRow;
 
 function normalizePressAlt<T extends RocOrFuelRow>(row: T): T {
-  const alt = (row as RocOrFuelRow & { press_alt_ft: number | "SL" }).press_alt_ft === "SL"
-    ? 0
-    : (row as RocOrFuelRow & { press_alt_ft: number }).press_alt_ft;
+  const rawAlt = (row as RocOrFuelRow & { press_alt_ft: number | "SL" }).press_alt_ft;
+  const alt = typeof rawAlt === "string" ? 0 : rawAlt;
   return {
     ...row,
     press_alt_ft: alt,

@@ -13,6 +13,7 @@ import { computeClimbProfile } from "../lib/perf/climb/compute";
 import type { ClimbFlaps, ClimbProfileMode, ClimbSegment } from "../lib/perf/climb/types";
 import { useAircraft } from "../context/AircraftContext";
 import { usePerformance } from "../context/PerformanceContext";
+import { useAirportDb } from "../hooks/useAirportDb";
 
 type UIMode = "auto" | "manual";
 
@@ -21,7 +22,7 @@ const DEFAULT_TRANSITION_DELTA_FT = 3000;
 const DEFAULTS = {
   uiMode: "auto" as UIMode,
   manualSubMode: "manual_initial" as "manual_initial" | "manual_enroute",
-  flaps: "T/O" as ClimbFlaps,
+  flaps: "UP" as ClimbFlaps,
   weightKg: 1900,
   fieldPAft: 2000,
   fieldOATc: 11,
@@ -54,7 +55,7 @@ function buildChartData(segments: ClimbSegment[]): ChartPoint[] {
   }));
 }
 
-function RocTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ payload: ChartPoint }>; label?: string }) {
+function RocTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartPoint }> }) {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
@@ -105,8 +106,16 @@ function GradientTooltip({ active, payload }: { active?: boolean; payload?: Arra
 export default function ClimbCalculator() {
   const { result: cgResult } = useAircraft();
   const { state: perfState } = usePerformance();
-  const takeoffPA = perfState.takeoff.PA;
-  const takeoffOAT = perfState.takeoff.OAT;
+  const takeoffState = perfState.takeoff;
+  const takeoffPA = takeoffState.PA;
+  const takeoffOAT = takeoffState.OAT;
+
+  const { db: airportDb } = useAirportDb();
+  const selectedIcao = takeoffState.selectedAirport;
+  const climbAirport = selectedIcao !== "CUSTOM" ? airportDb?.get(selectedIcao) ?? null : null;
+  const airportLabel = selectedIcao !== "CUSTOM"
+    ? (climbAirport?.name ?? selectedIcao)
+    : null;
 
   const [uiMode, setUiMode] = useState<UIMode>(DEFAULTS.uiMode);
   const [manualSubMode, setManualSubMode] = useState<"manual_initial" | "manual_enroute">(DEFAULTS.manualSubMode);
@@ -204,37 +213,19 @@ export default function ClimbCalculator() {
 
         <div className="field">
           <span className="field-label">Field PA (ft)</span>
-          <div className="field-value" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="field-value">
             <input
               type="number"
               value={fieldPAft}
               onChange={(e) => setFieldPAft(Number(e.target.value) || 0)}
               onFocus={selectOnFocus}
-              style={{ width: 80 }}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setFieldPAft(takeoffPA);
-                setFieldOATc(takeoffOAT);
-                setTransitionManuallySet(false);
-              }}
-              style={{
-                padding: "6px 10px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "1px solid var(--panel-border)",
-                borderRadius: 6,
-                background: "var(--panel-bg)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-              title="Use Field PA & OAT from Takeoff page"
-            >
-              From T/O (PA+OAT)
-            </button>
           </div>
+          {airportLabel && (
+            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+              From Takeoff: {airportLabel}
+            </span>
+          )}
         </div>
 
         <div className="field">
@@ -247,6 +238,11 @@ export default function ClimbCalculator() {
               onFocus={selectOnFocus}
             />
           </div>
+          {airportLabel && (
+            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+              From Takeoff: {airportLabel}
+            </span>
+          )}
         </div>
 
         <div className="field">
@@ -258,8 +254,8 @@ export default function ClimbCalculator() {
               disabled={effectiveMode === "manual_enroute"}
               style={effectiveMode === "manual_enroute" ? { opacity: 0.7 } : undefined}
             >
-              <option value="T/O">T/O</option>
               <option value="UP">UP</option>
+              <option value="T/O">T/O</option>
             </select>
             {effectiveMode === "manual_enroute" && (
               <span style={{ fontSize: 11, marginLeft: 6, color: "var(--text-muted)" }}>En-route: UP only</span>
