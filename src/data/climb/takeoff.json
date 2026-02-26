@@ -1,0 +1,224 @@
+{
+    "document_section": {
+      "section_number": "5.3.7",
+      "title": "CLIMB PERFORMANCE - TAKE-OFF CLIMB"
+    },
+    "tables": [
+      {
+        "flaps": "T/O",
+        "v_y_kias": 86,
+        "weight": {"kg": 2300, "lb": 5071},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [990, 980, 980, 970, 960, 950, 910, 810, 965]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [970, 960, 950, 940, 930, 930, 860, 760, 943]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [940, 940, 930, 920, 910, 880, 800, 710, 919]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [920, 910, 900, 890, 880, 830, 740, null, 895]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [890, 880, 870, 860, 840, 760, 660, null, 870]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [860, 850, 830, 820, 770, 670, null, null, 839]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [820, 810, 790, 760, 660, 560, null, null, 806]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [750, 730, 690, 630, 510, 400, null, null, 733]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [650, 630, 590, 490, 390, null, null, null, 642]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [540, 510, 470, 370, 270, null, null, null, 540]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [440, 410, 350, 240, null, null, null, null, 447]}
+        ]
+      },
+      {
+        "flaps": "T/O",
+        "v_y_kias": 86,
+        "weight": {"kg": 2200, "lb": 4850},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1060, 1050, 1050, 1040, 1030, 1030, 980, 870, 1037]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1040, 1030, 1020, 1020, 1010, 1000, 920, 820, 1015]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1010, 1010, 1000, 990, 980, 950, 870, 770, 990]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [990, 980, 970, 960, 950, 900, 810, null, 966]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [960, 950, 940, 930, 910, 830, 730, null, 941]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [930, 920, 900, 890, 830, 730, null, null, 910]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [890, 880, 860, 820, 730, 620, null, null, 876]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [820, 790, 760, 690, 570, 450, null, null, 801]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [720, 690, 650, 550, 440, null, null, null, 707]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [600, 570, 530, 420, 320, null, null, null, 601]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [500, 470, 410, 290, null, null, null, null, 506]}
+        ]
+      },
+      {
+        "flaps": "T/O",
+        "v_y_kias": 86,
+        "weight": {"kg": 2100, "lb": 4630},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1130, 1130, 1120, 1120, 1110, 1100, 1050, 940, 1114]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1120, 1110, 1100, 1090, 1080, 1080, 1000, 890, 1092]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1090, 1080, 1070, 1060, 1060, 1030, 940, 830, 1067]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1060, 1050, 1050, 1040, 1030, 970, 880, null, 1043]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1040, 1030, 1020, 1000, 980, 900, 790, null, 1017]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1010, 990, 980, 960, 910, 800, null, null, 986]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [970, 950, 930, 900, 800, 680, null, null, 952]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [890, 870, 830, 760, 630, 510, null, null, 874]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [790, 760, 720, 610, 490, null, null, null, 777]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [670, 640, 600, 480, 370, null, null, null, 667]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [560, 530, 470, 340, null, null, null, null, 569]}
+        ]
+      },
+      {
+        "flaps": "T/O",
+        "v_y_kias": 83,
+        "weight": {"kg": 1999, "lb": 4407},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1210, 1200, 1200, 1190, 1190, 1180, 1130, 1010, 1193]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1190, 1180, 1180, 1170, 1160, 1150, 1070, 960, 1172]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1170, 1160, 1150, 1140, 1130, 1100, 1010, 900, 1146]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1140, 1130, 1120, 1110, 1100, 1040, 950, null, 1120]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1110, 1100, 1090, 1080, 1060, 970, 860, null, 1092]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1080, 1070, 1060, 1040, 980, 870, null, null, 1063]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1050, 1030, 1010, 980, 870, 740, null, null, 1030]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [970, 940, 910, 830, 700, 580, null, null, 950]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [860, 830, 790, 690, 560, null, null, null, 851]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [740, 720, 670, 550, 430, null, null, null, 741]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [630, 610, 540, 410, null, null, null, null, 644]}
+        ]
+      },
+      {
+        "flaps": "T/O",
+        "v_y_kias": 83,
+        "weight": {"kg": 1900, "lb": 4189},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1290, 1290, 1280, 1280, 1280, 1270, 1210, 1090, 1278]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1270, 1270, 1270, 1260, 1250, 1240, 1150, 1030, 1257]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1250, 1250, 1240, 1230, 1220, 1190, 1090, 970, 1230]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1230, 1220, 1210, 1200, 1190, 1120, 1020, null, 1204]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1200, 1190, 1170, 1160, 1150, 1050, 930, null, 1176]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1160, 1150, 1140, 1130, 1060, 940, null, null, 1147]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1130, 1110, 1090, 1060, 940, 810, null, null, 1113]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1050, 1020, 980, 910, 770, 630, null, null, 1029]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [930, 910, 870, 750, 620, null, null, null, 926]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [810, 790, 740, 610, 490, null, null, null, 812]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [700, 680, 600, 460, null, null, null, null, 711]}
+        ]
+      },
+      {
+        "flaps": "T/O",
+        "v_y_kias": 83,
+        "weight": {"kg": 1800, "lb": 3968},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1380, 1380, 1380, 1370, 1370, 1360, 1300, 1170, 1371]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1370, 1360, 1360, 1350, 1340, 1330, 1240, 1110, 1349]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1350, 1340, 1330, 1320, 1310, 1280, 1170, 1040, 1322]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1320, 1310, 1300, 1290, 1280, 1210, 1100, null, 1295]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1290, 1280, 1270, 1260, 1240, 1130, 1000, null, 1266]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1250, 1240, 1230, 1220, 1150, 1020, null, null, 1237]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1220, 1200, 1180, 1140, 1020, 880, null, null, 1202]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1130, 1110, 1070, 990, 840, 700, null, null, 1115]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [1020, 990, 950, 830, 690, null, null, null, 1008]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [890, 860, 810, 680, 540, null, null, null, 889]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [770, 750, 670, 520, null, null, null, null, 783]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 89,
+        "weight": {"kg": 2300, "lb": 5071},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1040, 1040, 1030, 1020, 1020, 1010, 960, 860, 1019]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1020, 1010, 1010, 1000, 990, 990, 920, 820, 1000]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1000, 990, 980, 980, 970, 940, 860, 760, 979]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [980, 970, 960, 950, 940, 890, 800, null, 958]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [950, 940, 930, 920, 900, 820, 720, null, 931]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [920, 910, 900, 880, 830, 730, null, null, 901]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [890, 870, 860, 820, 730, 620, null, null, 872]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [810, 790, 760, 690, 570, 460, null, null, 801]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [720, 690, 650, 550, 450, null, null, null, 708]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [600, 580, 540, 430, 330, null, null, null, 604]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [500, 480, 420, 300, null, null, null, null, 513]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 89,
+        "weight": {"kg": 2200, "lb": 4850},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1110, 1110, 1100, 1100, 1090, 1080, 1030, 930, 1092]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1090, 1090, 1080, 1070, 1070, 1060, 980, 880, 1073]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1070, 1060, 1060, 1050, 1040, 1020, 930, 820, 1052]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1050, 1040, 1030, 1020, 1010, 960, 870, null, 1031]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1020, 1010, 1000, 990, 970, 890, 790, null, 1003]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [990, 980, 970, 960, 900, 800, null, null, 974]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [960, 950, 930, 890, 790, 680, null, null, 944]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [880, 860, 830, 760, 630, 510, null, null, 870]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [780, 760, 720, 610, 500, null, null, null, 775]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [670, 640, 600, 490, 380, null, null, null, 667]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [560, 540, 480, 360, null, null, null, null, 573]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 89,
+        "weight": {"kg": 2100, "lb": 4630},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1190, 1190, 1180, 1170, 1170, 1160, 1110, 1000, 1171]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1170, 1160, 1160, 1150, 1150, 1140, 1060, 950, 1152]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1150, 1140, 1140, 1130, 1120, 1090, 1000, 890, 1130]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1130, 1120, 1110, 1100, 1090, 1030, 940, null, 1109]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1100, 1090, 1080, 1070, 1050, 960, 850, null, 1081]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1070, 1060, 1050, 1030, 980, 860, null, null, 1052]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1040, 1020, 1010, 970, 870, 740, null, null, 1021]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [960, 940, 900, 830, 700, 570, null, null, 945]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [860, 830, 790, 680, 560, null, null, null, 846]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [730, 710, 670, 550, 430, null, null, null, 734]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [630, 610, 540, 410, null, null, null, null, 637]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 87,
+        "weight": {"kg": 1999, "lb": 4407},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1270, 1270, 1260, 1260, 1250, 1240, 1190, 1070, 1254]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1250, 1250, 1240, 1230, 1230, 1220, 1130, 1020, 1233]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1230, 1220, 1220, 1210, 1200, 1170, 1080, 960, 1210]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1210, 1200, 1190, 1180, 1170, 1110, 1010, null, 1188]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1180, 1170, 1160, 1150, 1130, 1040, 920, null, 1164]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1150, 1140, 1130, 1110, 1050, 930, null, null, 1133]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1120, 1100, 1080, 1050, 940, 810, null, null, 1101]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1040, 1020, 980, 910, 770, 630, null, null, 1022]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [930, 910, 860, 750, 620, null, null, null, 924]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [810, 780, 740, 620, 490, null, null, null, 809]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [700, 680, 610, 470, null, null, null, null, 709]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 87,
+        "weight": {"kg": 1900, "lb": 4189},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1360, 1350, 1350, 1340, 1340, 1330, 1270, 1150, 1340]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1340, 1330, 1330, 1320, 1310, 1310, 1220, 1090, 1320]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1320, 1310, 1310, 1300, 1290, 1260, 1150, 1030, 1297]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1290, 1280, 1280, 1270, 1260, 1190, 1080, null, 1274]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1270, 1260, 1250, 1240, 1220, 1120, 990, null, 1250]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1240, 1220, 1210, 1200, 1130, 1010, null, null, 1218]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1200, 1190, 1170, 1130, 1010, 880, null, null, 1185]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1120, 1100, 1060, 980, 830, 690, null, null, 1103]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [1010, 980, 940, 820, 680, null, null, null, 1001]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [880, 850, 810, 680, 550, null, null, null, 881]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [770, 750, 670, 530, null, null, null, null, 778]}
+        ]
+      },
+      {
+        "flaps": "UP",
+        "v_y_kias": 87,
+        "weight": {"kg": 1800, "lb": 3968},
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1450, 1450, 1440, 1440, 1430, 1430, 1360, 1230, 1435]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1430, 1430, 1420, 1410, 1410, 1400, 1300, 1170, 1414]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1410, 1400, 1400, 1390, 1380, 1350, 1240, 1110, 1390]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1380, 1380, 1370, 1360, 1350, 1280, 1170, null, 1368]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1360, 1350, 1340, 1330, 1310, 1200, 1070, null, 1343]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1330, 1320, 1300, 1290, 1220, 1090, null, null, 1310]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1290, 1280, 1260, 1220, 1100, 950, null, null, 1276]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1210, 1190, 1150, 1060, 910, 760, null, null, 1192]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [1090, 1070, 1020, 890, 750, null, null, null, 1085]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [960, 930, 880, 750, 610, null, null, null, 960]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [840, 820, 740, 590, null, null, null, null, 851]}
+        ]
+      }
+    ]
+  }

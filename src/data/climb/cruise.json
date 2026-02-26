@@ -1,0 +1,138 @@
+{
+    "document_section": {
+      "section_number": "5.3.8",
+      "title": "CLIMB PERFORMANCE - CRUISE CLIMB"
+    },
+    "conditions": {
+      "power_lever": "both 95%",
+      "flaps": "UP",
+      "landing_gear": "retracted",
+      "airspeed": "according table"
+    },
+    "calculations": {
+      "description": "The climb performance tables show the rate of climb. The gradient of climb can be calculated using the following formula:",
+      "formula": "Gradient [%] = (ROC [fpm] / TAS [KTAS]) * 0.98"
+    },
+    "table_metadata": {
+      "power": "95%",
+      "gear": "retracted",
+      "flaps": "UP",
+      "rate_of_climb_unit": "ft/min",
+      "conversion_note": "For the rate of climb in [m/s] divide by 196.8 or multiply by 0.00508.",
+      "columns_index": {
+        "0": "OAT -20°C",
+        "1": "OAT -10°C",
+        "2": "OAT 0°C",
+        "3": "OAT 10°C",
+        "4": "OAT 20°C",
+        "5": "OAT 30°C",
+        "6": "OAT 40°C",
+        "7": "OAT 50°C",
+        "8": "ISA"
+      }
+    },
+    "tables": [
+      {
+        "weight": {"kg": 2300, "lb": 5071},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1050, 1040, 1040, 1030, 1030, 1020, 970, 870, 1028]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1030, 1020, 1020, 1010, 1000, 990, 920, 820, 1009]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1010, 1000, 990, 980, 970, 950, 860, 760, 985]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [980, 970, 960, 950, 940, 890, 810, null, 961]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [960, 940, 930, 920, 910, 830, 720, null, 935]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [930, 910, 900, 890, 830, 730, null, null, 909]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [890, 880, 860, 820, 730, 610, null, null, 877]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [820, 790, 760, 690, 570, 450, null, null, 799]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [710, 690, 640, 540, 430, null, null, null, 702]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [590, 570, 520, 420, 310, null, null, null, 594]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [490, 470, 400, 280, null, null, null, null, 498]}
+        ]
+      },
+      {
+        "weight": {"kg": 2200, "lb": 4850},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1120, 1110, 1110, 1100, 1100, 1090, 1040, 930, 1100]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1100, 1090, 1090, 1080, 1070, 1060, 990, 880, 1080]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1080, 1070, 1060, 1050, 1050, 1020, 930, 820, 1056]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1050, 1040, 1040, 1020, 1020, 960, 870, null, 1032]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1030, 1010, 1000, 1000, 980, 890, 780, null, 1006]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1000, 990, 970, 960, 900, 790, null, null, 979]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [960, 950, 930, 890, 790, 670, null, null, 947]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [880, 860, 820, 750, 620, 500, null, null, 867]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [770, 750, 710, 600, 480, null, null, null, 766]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [650, 630, 580, 470, 360, null, null, null, 654]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [540, 520, 460, 330, null, null, null, null, 555]}
+        ]
+      },
+      {
+        "weight": {"kg": 2100, "lb": 4630},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1200, 1190, 1180, 1180, 1170, 1170, 1110, 1000, 1177]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1180, 1170, 1170, 1160, 1150, 1140, 1060, 950, 1158]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1160, 1150, 1140, 1130, 1120, 1090, 1000, 880, 1133]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1130, 1120, 1110, 1100, 1090, 1030, 940, null, 1108]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1100, 1090, 1080, 1070, 1050, 960, 850, null, 1082]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1070, 1060, 1050, 1040, 970, 860, null, null, 1055]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1040, 1020, 1000, 970, 860, 730, null, null, 1022]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [960, 930, 890, 820, 680, 550, null, null, 939]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [840, 820, 770, 660, 540, null, null, null, 835]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [720, 690, 650, 530, 410, null, null, null, 719]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [600, 580, 510, 380, null, null, null, null, 616]}
+        ]
+      },
+      {
+        "weight": {"kg": 1999, "lb": 4407},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1280, 1270, 1270, 1260, 1260, 1250, 1200, 1080, 1261]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1260, 1250, 1250, 1240, 1240, 1230, 1140, 1020, 1242]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1240, 1230, 1230, 1220, 1210, 1180, 1080, 960, 1220]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1220, 1210, 1200, 1190, 1180, 1110, 1010, null, 1194]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1190, 1180, 1170, 1160, 1140, 1040, 930, null, 1167]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1160, 1140, 1130, 1120, 1060, 940, null, null, 1138]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1120, 1110, 1090, 1050, 940, 800, null, null, 1110]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1040, 1020, 980, 900, 760, 620, null, null, 1024]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [930, 900, 850, 740, 610, null, null, null, 917]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [800, 770, 730, 600, 470, null, null, null, 799]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [680, 660, 590, 450, null, null, null, null, 695]}
+        ]
+      },
+      {
+        "weight": {"kg": 1900, "lb": 4189},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1360, 1360, 1350, 1350, 1340, 1340, 1280, 1150, 1346]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1340, 1340, 1330, 1330, 1320, 1310, 1220, 1090, 1327]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1320, 1320, 1310, 1300, 1290, 1260, 1150, 1030, 1305]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1300, 1290, 1280, 1270, 1260, 1200, 1090, null, 1279]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1270, 1260, 1250, 1240, 1220, 1120, 1000, null, 1250]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1240, 1230, 1220, 1210, 1140, 1010, null, null, 1221]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1200, 1190, 1170, 1130, 1010, 870, null, null, 1192]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1120, 1100, 1060, 970, 820, 680, null, null, 1103]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [1000, 970, 930, 810, 670, null, null, null, 991]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [870, 840, 790, 660, 530, null, null, null, 868]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [750, 730, 650, 500, null, null, null, null, 761]}
+        ]
+      },
+      {
+        "weight": {"kg": 1800, "lb": 3968},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "roc_array": [1460, 1450, 1450, 1440, 1440, 1430, 1370, 1230, 1439]},
+          {"press_alt_ft": 2000, "press_alt_m": 610, "roc_array": [1440, 1430, 1430, 1420, 1420, 1410, 1310, 1170, 1420]},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "roc_array": [1410, 1410, 1400, 1390, 1390, 1350, 1240, 1100, 1398]},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "roc_array": [1390, 1380, 1370, 1360, 1350, 1280, 1170, null, 1370]},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "roc_array": [1360, 1350, 1340, 1330, 1310, 1200, 1070, null, 1341]},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "roc_array": [1330, 1320, 1310, 1300, 1220, 1090, null, null, 1312]},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "roc_array": [1290, 1280, 1260, 1220, 1090, 940, null, null, 1282]},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "roc_array": [1210, 1180, 1140, 1050, 890, 740, null, null, 1189]},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "roc_array": [1080, 1050, 1010, 880, 730, null, null, null, 1072]},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "roc_array": [940, 920, 860, 720, 580, null, null, null, 943]},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "roc_array": [820, 800, 710, 560, null, null, null, null, 831]}
+        ]
+      }
+    ]
+  }

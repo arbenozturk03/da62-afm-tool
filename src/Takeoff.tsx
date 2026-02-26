@@ -76,6 +76,11 @@ export default function Takeoff() {
   const effPA = runway?.pressureAltitude ?? airport?.pressureAltitude ?? t.PA;
   const effHeading = runway ? runway.heading : t.rwyHeading;
 
+  // Sync effective PA to state so Climb (and others) can use it when airport/runway is selected
+  useEffect(() => {
+    setTakeoff("PA", effPA);
+  }, [effPA, setTakeoff]);
+
   // Slope: raw value (positive = uphill, negative = downhill)
   // For takeoff correction: only positive (uphill) slopes cause penalty.
   const effSlope = runway ? runway.slopePercent : t.uphillSlope;

@@ -1,0 +1,135 @@
+{
+    "document_section": {
+      "section_number": "5.3.10",
+      "title": "TIME, FUEL & DISTANCE TO CLIMB"
+    },
+    "conditions": {
+      "power_lever": "both 95%",
+      "flaps": "UP",
+      "landing_gear": "retracted",
+      "airspeed": "Vclimb"
+    },
+    "note": "Distances shown are based on zero wind. Fuel for start, taxi and take-off not included. Add 10% to the time, fuel and distance for each 10° C (12° F) increase in OAT. The climb rates (ROC) are the average climb rates from sea level to the altitude indicated in the tables.",
+    "example": {
+      "inputs": {
+        "oat_at_take_off": "11°C (52°F)",
+        "airfield_pressure_altitude": "2000 ft (600 m)",
+        "initial_climb_weight": "1900 kg (4189 lb)",
+        "oat_at_cruise": "-17°C (2°F)",
+        "cruise_altitude": "16000 ft (4900 m)"
+      },
+      "calculations": {
+        "step_1": "Time, fuel and distance to climb at airfield: 2 min, 0.5 US gal and 2 NM (1)",
+        "step_2": "Time, fuel and distance to climb at cruise: 14 min, 4.2 US gal and 22 NM (2)",
+        "step_3_subtract_1_from_2": {
+          "time_to_cruise_altitude": "14 min - 2 min = 12 min",
+          "fuel_to_cruise_altitude": "4.2 US gal - 0.5 US gal = 3.7 US gal",
+          "distance_to_cruise_altitude": "22 NM - 2 NM = 20 NM"
+        }
+      }
+    },
+    "tables": [
+      {
+        "weight": {"kg": 2300, "lb": 5071},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 95, "roc_ft_min": 1030, "roc_m_s": 5.2, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 96, "roc_ft_min": 1015, "roc_m_s": 5.1, "time_min": 2, "fuel_us_gal": 0.7, "distance_nm": 3},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 97, "roc_ft_min": 1005, "roc_m_s": 5.1, "time_min": 4, "fuel_us_gal": 1.3, "distance_nm": 6},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 99, "roc_ft_min": 995, "roc_m_s": 5.0, "time_min": 7, "fuel_us_gal": 2.0, "distance_nm": 9},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 100, "roc_ft_min": 980, "roc_m_s": 4.9, "time_min": 9, "fuel_us_gal": 2.7, "distance_nm": 13},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 102, "roc_ft_min": 970, "roc_m_s": 4.9, "time_min": 11, "fuel_us_gal": 3.4, "distance_nm": 17},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 104, "roc_ft_min": 955, "roc_m_s": 4.8, "time_min": 13, "fuel_us_gal": 4.1, "distance_nm": 21},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 105, "roc_ft_min": 940, "roc_m_s": 4.7, "time_min": 15, "fuel_us_gal": 4.8, "distance_nm": 26},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 107, "roc_ft_min": 915, "roc_m_s": 4.6, "time_min": 18, "fuel_us_gal": 5.6, "distance_nm": 31},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 109, "roc_ft_min": 885, "roc_m_s": 4.5, "time_min": 21, "fuel_us_gal": 6.4, "distance_nm": 36},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 111, "roc_ft_min": 850, "roc_m_s": 4.3, "time_min": 24, "fuel_us_gal": 7.3, "distance_nm": 43}
+        ]
+      },
+      {
+        "weight": {"kg": 2200, "lb": 4850},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 95, "roc_ft_min": 1100, "roc_m_s": 5.6, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 96, "roc_ft_min": 1090, "roc_m_s": 5.5, "time_min": 2, "fuel_us_gal": 0.6, "distance_nm": 2},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 97, "roc_ft_min": 1075, "roc_m_s": 5.4, "time_min": 4, "fuel_us_gal": 1.2, "distance_nm": 6},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 99, "roc_ft_min": 1065, "roc_m_s": 5.4, "time_min": 6, "fuel_us_gal": 1.9, "distance_nm": 9},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 100, "roc_ft_min": 1055, "roc_m_s": 5.3, "time_min": 8, "fuel_us_gal": 2.5, "distance_nm": 12},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 102, "roc_ft_min": 1040, "roc_m_s": 5.2, "time_min": 10, "fuel_us_gal": 3.1, "distance_nm": 16},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 104, "roc_ft_min": 1025, "roc_m_s": 5.2, "time_min": 12, "fuel_us_gal": 3.8, "distance_nm": 20},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 105, "roc_ft_min": 1010, "roc_m_s": 5.1, "time_min": 14, "fuel_us_gal": 4.5, "distance_nm": 24},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 107, "roc_ft_min": 985, "roc_m_s": 5.0, "time_min": 17, "fuel_us_gal": 5.2, "distance_nm": 28},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 109, "roc_ft_min": 955, "roc_m_s": 4.8, "time_min": 19, "fuel_us_gal": 6.0, "distance_nm": 34},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 111, "roc_ft_min": 920, "roc_m_s": 4.6, "time_min": 22, "fuel_us_gal": 6.7, "distance_nm": 40}
+        ]
+      },
+      {
+        "weight": {"kg": 2100, "lb": 4630},
+        "v_climb_kias": 96,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 95, "roc_ft_min": 1175, "roc_m_s": 6.0, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 96, "roc_ft_min": 1165, "roc_m_s": 5.9, "time_min": 2, "fuel_us_gal": 0.6, "distance_nm": 2},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 97, "roc_ft_min": 1155, "roc_m_s": 5.8, "time_min": 4, "fuel_us_gal": 1.2, "distance_nm": 5},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 99, "roc_ft_min": 1140, "roc_m_s": 5.8, "time_min": 6, "fuel_us_gal": 1.7, "distance_nm": 8},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 100, "roc_ft_min": 1130, "roc_m_s": 5.7, "time_min": 8, "fuel_us_gal": 2.3, "distance_nm": 11},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 102, "roc_ft_min": 1115, "roc_m_s": 5.6, "time_min": 9, "fuel_us_gal": 2.9, "distance_nm": 15},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 104, "roc_ft_min": 1105, "roc_m_s": 5.6, "time_min": 11, "fuel_us_gal": 3.5, "distance_nm": 18},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 105, "roc_ft_min": 1085, "roc_m_s": 5.5, "time_min": 13, "fuel_us_gal": 4.2, "distance_nm": 22},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 107, "roc_ft_min": 1060, "roc_m_s": 5.4, "time_min": 16, "fuel_us_gal": 4.9, "distance_nm": 26},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 109, "roc_ft_min": 1030, "roc_m_s": 5.2, "time_min": 18, "fuel_us_gal": 5.5, "distance_nm": 31},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 111, "roc_ft_min": 995, "roc_m_s": 5.0, "time_min": 21, "fuel_us_gal": 6.2, "distance_nm": 37}
+        ]
+      },
+      {
+        "weight": {"kg": 1999, "lb": 4407},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 92, "roc_ft_min": 1260, "roc_m_s": 6.4, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 93, "roc_ft_min": 1250, "roc_m_s": 6.3, "time_min": 2, "fuel_us_gal": 0.6, "distance_nm": 2},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 94, "roc_ft_min": 1240, "roc_m_s": 6.3, "time_min": 4, "fuel_us_gal": 1.1, "distance_nm": 5},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 96, "roc_ft_min": 1230, "roc_m_s": 6.2, "time_min": 5, "fuel_us_gal": 1.6, "distance_nm": 7},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 97, "roc_ft_min": 1215, "roc_m_s": 6.1, "time_min": 7, "fuel_us_gal": 2.2, "distance_nm": 10},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 99, "roc_ft_min": 1200, "roc_m_s": 6.1, "time_min": 9, "fuel_us_gal": 2.7, "distance_nm": 13},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 100, "roc_ft_min": 1190, "roc_m_s": 6.0, "time_min": 11, "fuel_us_gal": 3.3, "distance_nm": 16},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 102, "roc_ft_min": 1170, "roc_m_s": 5.9, "time_min": 12, "fuel_us_gal": 3.9, "distance_nm": 20},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 104, "roc_ft_min": 1145, "roc_m_s": 5.8, "time_min": 14, "fuel_us_gal": 4.5, "distance_nm": 24},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 105, "roc_ft_min": 1115, "roc_m_s": 5.6, "time_min": 17, "fuel_us_gal": 5.1, "distance_nm": 28},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 107, "roc_ft_min": 1075, "roc_m_s": 5.4, "time_min": 19, "fuel_us_gal": 5.8, "distance_nm": 33}
+        ]
+      },
+      {
+        "weight": {"kg": 1900, "lb": 4189},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 92, "roc_ft_min": 1345, "roc_m_s": 6.8, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 93, "roc_ft_min": 1335, "roc_m_s": 6.7, "time_min": 2, "fuel_us_gal": 0.5, "distance_nm": 2},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 94, "roc_ft_min": 1325, "roc_m_s": 6.7, "time_min": 4, "fuel_us_gal": 1.0, "distance_nm": 4},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 96, "roc_ft_min": 1315, "roc_m_s": 6.6, "time_min": 5, "fuel_us_gal": 1.5, "distance_nm": 7},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 97, "roc_ft_min": 1300, "roc_m_s": 6.6, "time_min": 7, "fuel_us_gal": 2.0, "distance_nm": 9},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 99, "roc_ft_min": 1285, "roc_m_s": 6.5, "time_min": 8, "fuel_us_gal": 2.6, "distance_nm": 12},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 100, "roc_ft_min": 1275, "roc_m_s": 6.4, "time_min": 10, "fuel_us_gal": 3.1, "distance_nm": 15},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 102, "roc_ft_min": 1255, "roc_m_s": 6.3, "time_min": 12, "fuel_us_gal": 3.6, "distance_nm": 18},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 104, "roc_ft_min": 1230, "roc_m_s": 6.2, "time_min": 14, "fuel_us_gal": 4.2, "distance_nm": 22},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 105, "roc_ft_min": 1195, "roc_m_s": 6.0, "time_min": 16, "fuel_us_gal": 4.8, "distance_nm": 26},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 107, "roc_ft_min": 1155, "roc_m_s": 5.8, "time_min": 18, "fuel_us_gal": 5.4, "distance_nm": 30}
+        ]
+      },
+      {
+        "weight": {"kg": 1800, "lb": 3968},
+        "v_climb_kias": 93,
+        "data": [
+          {"press_alt_ft": "SL", "press_alt_m": 0, "oat_c": 15, "oat_f": 59, "tas_kt": 92, "roc_ft_min": 1440, "roc_m_s": 7.3, "time_min": 0, "fuel_us_gal": 0.0, "distance_nm": 0},
+          {"press_alt_ft": 2000, "press_alt_m": 600, "oat_c": 11, "oat_f": 52, "tas_kt": 93, "roc_ft_min": 1425, "roc_m_s": 7.2, "time_min": 2, "fuel_us_gal": 0.5, "distance_nm": 2},
+          {"press_alt_ft": 4000, "press_alt_m": 1219, "oat_c": 7, "oat_f": 45, "tas_kt": 94, "roc_ft_min": 1415, "roc_m_s": 7.2, "time_min": 3, "fuel_us_gal": 1.0, "distance_nm": 4},
+          {"press_alt_ft": 6000, "press_alt_m": 1829, "oat_c": 3, "oat_f": 38, "tas_kt": 96, "roc_ft_min": 1405, "roc_m_s": 7.1, "time_min": 5, "fuel_us_gal": 1.4, "distance_nm": 6},
+          {"press_alt_ft": 8000, "press_alt_m": 2438, "oat_c": -1, "oat_f": 30, "tas_kt": 97, "roc_ft_min": 1390, "roc_m_s": 7.0, "time_min": 6, "fuel_us_gal": 1.9, "distance_nm": 9},
+          {"press_alt_ft": 10000, "press_alt_m": 3048, "oat_c": -5, "oat_f": 23, "tas_kt": 99, "roc_ft_min": 1380, "roc_m_s": 7.0, "time_min": 8, "fuel_us_gal": 2.4, "distance_nm": 11},
+          {"press_alt_ft": 12000, "press_alt_m": 3658, "oat_c": -9, "oat_f": 16, "tas_kt": 100, "roc_ft_min": 1365, "roc_m_s": 6.9, "time_min": 9, "fuel_us_gal": 2.9, "distance_nm": 14},
+          {"press_alt_ft": 14000, "press_alt_m": 4267, "oat_c": -13, "oat_f": 9, "tas_kt": 102, "roc_ft_min": 1345, "roc_m_s": 6.8, "time_min": 11, "fuel_us_gal": 3.4, "distance_nm": 17},
+          {"press_alt_ft": 16000, "press_alt_m": 4877, "oat_c": -17, "oat_f": 2, "tas_kt": 104, "roc_ft_min": 1320, "roc_m_s": 6.7, "time_min": 13, "fuel_us_gal": 3.9, "distance_nm": 21},
+          {"press_alt_ft": 18000, "press_alt_m": 5486, "oat_c": -21, "oat_f": -5, "tas_kt": 105, "roc_ft_min": 1285, "roc_m_s": 6.5, "time_min": 15, "fuel_us_gal": 4.4, "distance_nm": 24},
+          {"press_alt_ft": 20000, "press_alt_m": 6096, "oat_c": -25, "oat_f": -12, "tas_kt": 107, "roc_ft_min": 1245, "roc_m_s": 6.3, "time_min": 17, "fuel_us_gal": 5.0, "distance_nm": 28}
+        ]
+      }
+    ]
+  }

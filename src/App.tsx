@@ -5,6 +5,7 @@ import Landing from "./Landing";
 import CgPage from "./pages/cg/CgPage";
 import ConfigPage from "./pages/config/ConfigPage";
 import FuelPage from "./pages/fuel/FuelPage";
+import ClimbCalculator from "./components/ClimbCalculator";
 import Logo from "./Logo";
 import "./App.css";
 
@@ -37,11 +38,12 @@ class ErrorBoundary extends Component<
   }
 }
 
-// Top navigation order: Config → W&B → Takeoff → Landing
+// Top navigation order: Config → W&B → Takeoff → Climb → Landing
 const NAV_ITEMS = [
   { to: "/config", label: "Config" },
   { to: "/cg", label: "W&B" },
   { to: "/takeoff", label: "Takeoff" },
+  { to: "/climb", label: "Climb" },
   { to: "/landing", label: "Landing" },
 ] as const;
 
@@ -67,6 +69,7 @@ export default function App() {
         <Route path="/config" element={<ConfigPage />} />
         <Route path="/cg" element={<CgPage />} />
         <Route path="/takeoff" element={<Takeoff />} />
+        <Route path="/climb" element={<ClimbCalculator />} />
         <Route path="/landing" element={<Landing />} />
         {/* Fuel page kept for direct URL access, but removed from top nav */}
         <Route path="/fuel" element={<FuelPage />} />
