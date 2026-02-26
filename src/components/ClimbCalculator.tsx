@@ -324,7 +324,6 @@ export default function ClimbCalculator() {
                 }}
                 onFocus={selectOnFocus}
                 style={{
-                  backgroundColor: "#ffffff",
                   border: "1px solid var(--panel-border)",
                   borderRadius: 4,
                   padding: "4px 6px",
