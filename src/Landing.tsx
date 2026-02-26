@@ -1,4 +1,4 @@
-import { useEffect, type FocusEvent } from "react";
+import { useEffect, useState, type FocusEvent } from "react";
 import { computeLanding } from "./core/landing";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
@@ -16,11 +16,14 @@ export default function Landing() {
   // ── Weight: manual entry only (no auto-fill from W&B) ─────────────
   const { state: perfState, setLanding } = usePerformance();
 
-  // ── Airport DB ────────────────────────────────────────────────
-  const { db, loading: dbLoading, error: dbError } = useAirportDb();
-
   // ── Persisted form state (survives tab switch) ─────────────────
   const L = perfState.landing;
+  const [weightInput, setWeightInput] = useState<string>(String(L.weightKg));
+  const [oatInput, setOatInput] = useState<string>(String(L.OAT));
+  const [paInput, setPaInput] = useState<string>(String(L.PA));
+
+  // ── Airport DB ────────────────────────────────────────────────
+  const { db, loading: dbLoading, error: dbError } = useAirportDb();
   const W = L.weightKg;
   const selectedAirport = L.selectedAirport;
   const selectedRunway = L.selectedRunway;
@@ -77,6 +80,18 @@ export default function Landing() {
   // For landing correction: only negative (downhill) slopes cause penalty.
   const effSlope = runway ? runway.slopePercent : L.downhillSlope;
   const effDownhillSlope = Math.max(0, -effSlope);
+
+  useEffect(() => {
+    setWeightInput(String(L.weightKg));
+  }, [L.weightKg]);
+
+  useEffect(() => {
+    setOatInput(String(L.OAT));
+  }, [L.OAT]);
+
+  useEffect(() => {
+    setPaInput(String(L.PA));
+  }, [L.PA]);
 
   // ── Derived correction values from surface selection ────────
   const effSurface = airport ? airport.surface : L.runwaySurface;
@@ -581,8 +596,21 @@ export default function Landing() {
             <input
               type="number"
               min={0}
-              value={L.weightKg}
-              onChange={(e) => setLanding("weightKg", Number(e.target.value) || 0)}
+              value={weightInput}
+              onChange={(e) => {
+                const v = e.target.value;
+                setWeightInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setLanding("weightKg", n);
+                }
+              }}
+              onBlur={() => {
+                if (weightInput.trim() === "") {
+                  setWeightInput("0");
+                  setLanding("weightKg", 0);
+                }
+              }}
               onFocus={selectOnFocus}
               style={{ width: 70 }}
             />
@@ -595,9 +623,23 @@ export default function Landing() {
           <div className="field-value">
             <input
               type="number"
-              value={effPA}
+              value={airport ? effPA : paInput}
               disabled={!!airport}
-              onChange={(e) => setLanding("PA", Number(e.target.value))}
+              onChange={(e) => {
+                if (airport) return;
+                const v = e.target.value;
+                setPaInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setLanding("PA", n);
+                }
+              }}
+              onBlur={() => {
+                if (!airport && paInput.trim() === "") {
+                  setPaInput("0");
+                  setLanding("PA", 0);
+                }
+              }}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -610,8 +652,23 @@ export default function Landing() {
           <div className="field-value">
             <input
               type="number"
-              value={L.OAT}
-              onChange={(e) => { setLanding("OAT", Number(e.target.value)); setLanding("tempDirty", true); }}
+              value={oatInput}
+              onChange={(e) => {
+                const v = e.target.value;
+                setOatInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setLanding("OAT", n);
+                  setLanding("tempDirty", true);
+                }
+              }}
+              onBlur={() => {
+                if (oatInput.trim() === "") {
+                  setOatInput("0");
+                  setLanding("OAT", 0);
+                  setLanding("tempDirty", true);
+                }
+              }}
               onFocus={selectOnFocus}
             />
           </div>

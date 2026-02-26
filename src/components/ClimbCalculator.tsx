@@ -103,6 +103,7 @@ function GradientTooltip({ active, payload }: { active?: boolean; payload?: Arra
   );
 }
 
+
 export default function ClimbCalculator() {
   const { result: cgResult } = useAircraft();
   const { state: perfState } = usePerformance();
@@ -127,17 +128,25 @@ export default function ClimbCalculator() {
   const [transitionAltitudeFt, setTransitionAltitudeFt] = useState<number>(
     takeoffPA + DEFAULT_TRANSITION_DELTA_FT,
   );
+  const [transitionAltitudeInput, setTransitionAltitudeInput] = useState<string>(
+    String(takeoffPA + DEFAULT_TRANSITION_DELTA_FT),
+  );
   const [transitionManuallySet, setTransitionManuallySet] = useState(false);
 
   useEffect(() => {
     setFieldPAft(takeoffPA);
     setFieldOATc(takeoffOAT);
+    const defAlt = takeoffPA + DEFAULT_TRANSITION_DELTA_FT;
+    setTransitionAltitudeFt(defAlt);
+    setTransitionAltitudeInput(String(defAlt));
     setTransitionManuallySet(false);
   }, [takeoffPA, takeoffOAT]);
 
   useEffect(() => {
     if (!transitionManuallySet) {
-      setTransitionAltitudeFt(fieldPAft + DEFAULT_TRANSITION_DELTA_FT);
+      const defAlt = fieldPAft + DEFAULT_TRANSITION_DELTA_FT;
+      setTransitionAltitudeFt(defAlt);
+      setTransitionAltitudeInput(String(defAlt));
     }
   }, [fieldPAft, transitionManuallySet]);
 
@@ -158,6 +167,16 @@ export default function ClimbCalculator() {
   );
 
   const chartData = useMemo(() => buildChartData(profile.segments), [profile.segments]);
+
+  const vyKias = useMemo(() => {
+    const seg = profile.segments.find((s) => s.phase === "initial" && s.speedKias != null);
+    return seg?.speedKias ?? null;
+  }, [profile.segments]);
+
+  const vclimbKias = useMemo(() => {
+    const seg = profile.segments.find((s) => s.phase === "enroute" && s.speedKias != null);
+    return seg?.speedKias ?? null;
+  }, [profile.segments]);
 
   const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) => e.target.select();
 
@@ -315,18 +334,29 @@ export default function ClimbCalculator() {
             <div className="field-value">
               <input
                 type="number"
-                value={transitionAltitudeFt}
+                value={transitionAltitudeInput}
                 onChange={(e) => {
-                  setTransitionAltitudeFt(
-                    Number(e.target.value) || fieldPAft + DEFAULT_TRANSITION_DELTA_FT,
-                  );
-                  setTransitionManuallySet(true);
+                  const v = e.target.value;
+                  setTransitionAltitudeInput(v);
+                  const asNumber = Number(v);
+                  if (v.trim() !== "" && Number.isFinite(asNumber)) {
+                    setTransitionAltitudeFt(asNumber);
+                    setTransitionManuallySet(true);
+                  }
                 }}
                 onFocus={selectOnFocus}
                 style={{
                   border: "1px solid var(--panel-border)",
                   borderRadius: 4,
                   padding: "4px 6px",
+                }}
+                onBlur={() => {
+                  if (transitionAltitudeInput.trim() === "") {
+                    const defAlt = fieldPAft + DEFAULT_TRANSITION_DELTA_FT;
+                    setTransitionManuallySet(false);
+                    setTransitionAltitudeFt(defAlt);
+                    setTransitionAltitudeInput(String(defAlt));
+                  }
                 }}
               />
             </div>
@@ -410,11 +440,15 @@ export default function ClimbCalculator() {
             backgroundColor: "var(--panel-bg)",
             padding: 8,
             minHeight: 280,
+            position: "relative",
           }}
         >
           <div style={{ fontSize: 13, fontWeight: 600, margin: "4px 8px 8px" }}>ROC vs Altitude</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={chartData}>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 24, right: 16, left: 0, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
               <XAxis
                 dataKey="altMidFt"
@@ -449,6 +483,29 @@ export default function ClimbCalculator() {
               />
             </LineChart>
           </ResponsiveContainer>
+          {(vyKias != null || vclimbKias != null) && (
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 20,
+                fontSize: 11,
+                fontFamily: "monospace",
+                color: "var(--text-primary)",
+                lineHeight: 1.7,
+                textAlign: "left",
+                pointerEvents: "none",
+                backgroundColor: "var(--panel-bg)",
+                border: "1px solid var(--panel-border)",
+                borderRadius: 4,
+                padding: "4px 8px",
+                zIndex: 2,
+              }}
+            >
+              {vyKias != null && <div>Vy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= {vyKias.toFixed(0)} KIAS</div>}
+              {vclimbKias != null && <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>}
+            </div>
+          )}
         </div>
 
         <div
@@ -458,11 +515,15 @@ export default function ClimbCalculator() {
             backgroundColor: "var(--panel-bg)",
             padding: 8,
             minHeight: 280,
+            position: "relative",
           }}
         >
           <div style={{ fontSize: 13, fontWeight: 600, margin: "4px 8px 8px" }}>Gradient vs Altitude</div>
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={chartData}>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 24, right: 16, left: 0, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
               <XAxis
                 dataKey="altMidFt"
@@ -497,6 +558,29 @@ export default function ClimbCalculator() {
               />
             </LineChart>
           </ResponsiveContainer>
+          {(vyKias != null || vclimbKias != null) && (
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 20,
+                fontSize: 11,
+                fontFamily: "monospace",
+                color: "var(--text-primary)",
+                lineHeight: 1.7,
+                textAlign: "left",
+                pointerEvents: "none",
+                backgroundColor: "var(--panel-bg)",
+                border: "1px solid var(--panel-border)",
+                borderRadius: 4,
+                padding: "4px 8px",
+                zIndex: 2,
+              }}
+            >
+              {vyKias != null && <div>Vy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= {vyKias.toFixed(0)} KIAS</div>}
+              {vclimbKias != null && <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>}
+            </div>
+          )}
         </div>
       </div>
 

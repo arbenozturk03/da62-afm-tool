@@ -1,4 +1,4 @@
-import { useEffect, type FocusEvent } from "react";
+import { useEffect, useState, type FocusEvent } from "react";
 import { computeTakeoff, type RunwayCondition, type RunwaySurface } from "./core/takeoff";
 import { applyTakeoffCorrections, type CorrectionInputs } from "./core/corrections";
 import { useMetar } from "./hooks/useMetar";
@@ -19,6 +19,10 @@ export default function Takeoff() {
   const { result: cgResult } = useAircraft();
   const { state: perfState, setTakeoff } = usePerformance();
   const t = perfState.takeoff;
+
+  const [weightInput, setWeightInput] = useState<string>(String(t.weightKg));
+  const [oatInput, setOatInput] = useState<string>(String(t.OAT));
+  const [paInput, setPaInput] = useState<string>(String(t.PA));
   const W = t.weightKg;
 
   // ── Airport DB ────────────────────────────────────────────────
@@ -132,6 +136,18 @@ export default function Takeoff() {
       : null;
 
   // ── Has any correction been applied? ───────────────────────
+  useEffect(() => {
+    setWeightInput(String(t.weightKg));
+  }, [t.weightKg]);
+
+  useEffect(() => {
+    setOatInput(String(t.OAT));
+  }, [t.OAT]);
+
+  useEffect(() => {
+    setPaInput(String(t.PA));
+  }, [t.PA]);
+
   const hasCorrections =
     corrResult?.ok === true &&
     (corrResult.breakdown.windMultiplier !== 1 ||
@@ -604,8 +620,21 @@ export default function Takeoff() {
             <input
               type="number"
               min={0}
-              value={t.weightKg}
-              onChange={(e) => setTakeoff("weightKg", Number(e.target.value) || 0)}
+              value={weightInput}
+              onChange={(e) => {
+                const v = e.target.value;
+                setWeightInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setTakeoff("weightKg", n);
+                }
+              }}
+              onBlur={() => {
+                if (weightInput.trim() === "") {
+                  setWeightInput("0");
+                  setTakeoff("weightKg", 0);
+                }
+              }}
               onFocus={selectOnFocus}
               style={{ width: 70 }}
             />
@@ -636,9 +665,23 @@ export default function Takeoff() {
           <div className="field-value">
             <input
               type="number"
-              value={effPA}
+              value={airport ? effPA : paInput}
               disabled={!!airport}
-              onChange={(e) => setTakeoff("PA", Number(e.target.value))}
+              onChange={(e) => {
+                if (airport) return;
+                const v = e.target.value;
+                setPaInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setTakeoff("PA", n);
+                }
+              }}
+              onBlur={() => {
+                if (!airport && paInput.trim() === "") {
+                  setPaInput("0");
+                  setTakeoff("PA", 0);
+                }
+              }}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />
@@ -651,8 +694,23 @@ export default function Takeoff() {
           <div className="field-value">
             <input
               type="number"
-              value={t.OAT}
-              onChange={(e) => { setTakeoff("OAT", Number(e.target.value)); setTakeoff("tempDirty", true); }}
+              value={oatInput}
+              onChange={(e) => {
+                const v = e.target.value;
+                setOatInput(v);
+                const n = Number(v);
+                if (v.trim() !== "" && Number.isFinite(n)) {
+                  setTakeoff("OAT", n);
+                  setTakeoff("tempDirty", true);
+                }
+              }}
+              onBlur={() => {
+                if (oatInput.trim() === "") {
+                  setOatInput("0");
+                  setTakeoff("OAT", 0);
+                  setTakeoff("tempDirty", true);
+                }
+              }}
               onFocus={selectOnFocus}
             />
           </div>

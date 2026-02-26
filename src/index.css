@@ -152,3 +152,15 @@ textarea {
     color: #003366;
   }
 }
+
+/* Recharts: remove yellow focus outline on chart click */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
