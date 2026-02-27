@@ -75,9 +75,11 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Minimum 16px to prevent iOS Safari auto-zoom on focus */
 input,
 select,
 textarea {
+  font-size: 16px;
   color: inherit;
   font-family: inherit;
 }
@@ -104,7 +106,7 @@ textarea {
   border: 1px solid var(--panel-border);
   border-radius: 2px;
   padding: 2px 4px;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 /* CG page layout: single column on mobile, 2-col on desktop */

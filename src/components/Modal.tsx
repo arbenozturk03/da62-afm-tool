@@ -112,7 +112,7 @@ export default function Modal({ title, value, unit = "kg", max, maxWarning, onSa
                 border: "1px solid var(--result-border)",
                 background: "var(--result-bg)",
                 color: "inherit",
-                fontSize: 18,
+                fontSize: 18, /* >= 16px prevents iOS Safari auto-zoom on focus */
                 fontFamily: "inherit",
                 textAlign: "center",
                 outline: "none",
