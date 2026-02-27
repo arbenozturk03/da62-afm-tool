@@ -8,10 +8,9 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
 import { computeClimbProfile } from "../lib/perf/climb/compute";
-import type { ClimbFlaps, ClimbProfileMode, ClimbSegment } from "../lib/perf/climb/types";
+import type { ClimbFlaps, ClimbSegment } from "../lib/perf/climb/types";
 import { useAircraft } from "../context/AircraftContext";
 import { usePerformance } from "../context/PerformanceContext";
 import { useAirportDb } from "../hooks/useAirportDb";
@@ -19,13 +18,7 @@ import { getCruiseInputsFromTOC } from "../core/cruisePerformance";
 
 const L_PER_US_GAL = 3.785411784;
 
-type UIMode = "auto" | "manual";
-
-const DEFAULT_TRANSITION_DELTA_FT = 3000;
-
 const DEFAULTS = {
-  uiMode: "auto" as UIMode,
-  manualSubMode: "manual_initial" as "manual_initial" | "manual_enroute",
   flaps: "UP" as ClimbFlaps,
   weightKg: 1900,
   fieldPAft: 2000,
@@ -123,28 +116,16 @@ export default function ClimbCalculator() {
     ? (climbAirport?.name ?? selectedIcao)
     : null;
 
-  const [uiMode, setUiMode] = useState<UIMode>(DEFAULTS.uiMode);
-  const [manualSubMode, setManualSubMode] = useState<"manual_initial" | "manual_enroute">(DEFAULTS.manualSubMode);
   const [flaps, setFlaps] = useState<ClimbFlaps>(DEFAULTS.flaps);
   const [weightKg, setWeightKg] = useState<number>(DEFAULTS.weightKg);
   const [fieldPAft, setFieldPAft] = useState<number>(takeoffPA);
   const [fieldOATc, setFieldOATc] = useState<number>(takeoffOAT);
   const [targetPAft, setTargetPAft] = useState<number>(DEFAULTS.targetPAft);
-  const [transitionAltitudeFt, setTransitionAltitudeFt] = useState<number>(
-    takeoffPA + DEFAULT_TRANSITION_DELTA_FT,
-  );
-  const [transitionAltitudeInput, setTransitionAltitudeInput] = useState<string>(
-    String(takeoffPA + DEFAULT_TRANSITION_DELTA_FT),
-  );
-  const [transitionManuallySet, setTransitionManuallySet] = useState(false);
+  const [showVyReference, setShowVyReference] = useState(false);
 
   useEffect(() => {
     setFieldPAft(takeoffPA);
     setFieldOATc(takeoffOAT);
-    const defAlt = takeoffPA + DEFAULT_TRANSITION_DELTA_FT;
-    setTransitionAltitudeFt(defAlt);
-    setTransitionAltitudeInput(String(defAlt));
-    setTransitionManuallySet(false);
   }, [takeoffPA, takeoffOAT]);
 
   useEffect(() => {
@@ -153,57 +134,54 @@ export default function ClimbCalculator() {
     }
   }, [cgResult.totalMass, weightKg]);
 
-  useEffect(() => {
-    if (!transitionManuallySet) {
-      const defAlt = fieldPAft + DEFAULT_TRANSITION_DELTA_FT;
-      setTransitionAltitudeFt(defAlt);
-      setTransitionAltitudeInput(String(defAlt));
-    }
-  }, [fieldPAft, transitionManuallySet]);
-
-  const effectiveMode: ClimbProfileMode = uiMode === "auto" ? "auto" : manualSubMode;
-
+  /** TOC from AFM 5.3.10 Time/Fuel/Distance-to-Climb (Vclimb only). */
   const profile = useMemo(
     () =>
       computeClimbProfile({
-        mode: effectiveMode,
-        flaps: effectiveMode === "manual_enroute" ? "UP" : flaps,
+        mode: "manual_enroute",
+        flaps: "UP",
         weightStartKg: weightKg,
         fieldPAft,
         fieldOATc,
         targetPAft,
-        transitionAltitudeFt: effectiveMode === "auto" ? transitionAltitudeFt : undefined,
       }),
-    [effectiveMode, flaps, weightKg, fieldPAft, fieldOATc, targetPAft, transitionAltitudeFt],
+    [weightKg, fieldPAft, fieldOATc, targetPAft],
+  );
+
+  /** Vy profile for optional Best ROC reference (ROC only; not used for TOC totals). */
+  const vyProfile = useMemo(
+    () =>
+      showVyReference
+        ? computeClimbProfile({
+            mode: "manual_initial",
+            flaps,
+            weightStartKg: weightKg,
+            fieldPAft,
+            fieldOATc,
+            targetPAft,
+          })
+        : null,
+    [showVyReference, flaps, weightKg, fieldPAft, fieldOATc, targetPAft],
   );
 
   const chartData = useMemo(() => buildChartData(profile.segments), [profile.segments]);
-
-  const vyKias = useMemo(() => {
-    const seg = profile.segments.find((s) => s.phase === "initial" && s.speedKias != null);
-    return seg?.speedKias ?? null;
-  }, [profile.segments]);
 
   const vclimbKias = useMemo(() => {
     const seg = profile.segments.find((s) => s.phase === "enroute" && s.speedKias != null);
     return seg?.speedKias ?? null;
   }, [profile.segments]);
 
+  const vyKiasReference = useMemo(() => {
+    if (!vyProfile?.segments.length) return null;
+    const seg = vyProfile.segments.find((s) => s.speedKias != null);
+    return seg?.speedKias ?? null;
+  }, [vyProfile]);
+
   const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) => e.target.select();
 
   return (
     <div style={{ padding: "16px 12px", maxWidth: 1000, margin: "0 auto" }}>
       <h1 className="perf-title">DA-62 Climb Performance</h1>
-      <p
-        style={{
-          margin: "0 0 10px",
-          fontSize: 12,
-          color: "#60a5fa",
-          fontWeight: 600,
-        }}
-      >
-        Weight and airport inputs are auto-filled here after configuring W&amp;B and Takeoff.
-      </p>
 
       {/* Inputs — single flow */}
       <div
@@ -234,7 +212,7 @@ export default function ClimbCalculator() {
         </div>
 
         <div className="field">
-          <span className="field-label">Field PA (ft)</span>
+          <span className="field-label">Field Elev. (ft)</span>
           <div className="field-value">
             <input
               type="number"
@@ -268,25 +246,20 @@ export default function ClimbCalculator() {
         </div>
 
         <div className="field">
-          <span className="field-label">Flaps (initial climb)</span>
+          <span className="field-label">Flaps (for Best ROC reference)</span>
           <div className="field-value">
             <select
               value={flaps}
               onChange={(e) => setFlaps(e.target.value as ClimbFlaps)}
-              disabled={effectiveMode === "manual_enroute"}
-              style={effectiveMode === "manual_enroute" ? { opacity: 0.7 } : undefined}
             >
               <option value="UP">UP</option>
               <option value="T/O">T/O</option>
             </select>
-            {effectiveMode === "manual_enroute" && (
-              <span style={{ fontSize: 11, marginLeft: 6, color: "var(--text-muted)" }}>En-route: UP only</span>
-            )}
           </div>
         </div>
 
         <div className="field">
-          <span className="field-label">Target PA (ft)</span>
+          <span className="field-label">Target Altitude (ft)</span>
           <div className="field-value">
             <input
               type="number"
@@ -298,102 +271,16 @@ export default function ClimbCalculator() {
         </div>
       </div>
 
-      {/* Mode: Auto vs Manual (Advanced) */}
-      <div
+      <p
         style={{
-          marginBottom: 16,
-          padding: "10px 14px",
-          border: "1px solid var(--panel-border)",
-          borderRadius: 8,
-          backgroundColor: "var(--panel-bg)",
+          margin: "-10px 1px 5px",
+          fontSize: 12,
+          color: "#60a5fa",
+          fontWeight: 600,
         }}
       >
-        <div className="field" style={{ marginBottom: 8 }}>
-          <span className="field-label">Mode</span>
-          <div className="field-value">
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 8, marginRight: 16 }}>
-              <input
-                type="radio"
-                name="climbMode"
-                checked={uiMode === "auto"}
-                onChange={() => setUiMode("auto")}
-              />
-              <span>Auto (Recommended): Vy → Vclimb</span>
-            </label>
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <input
-                type="radio"
-                name="climbMode"
-                checked={uiMode === "manual"}
-                onChange={() => setUiMode("manual")}
-              />
-              <span>Manual (Advanced)</span>
-            </label>
-          </div>
-        </div>
-        {uiMode === "auto" && (
-          <div className="field" style={{ paddingLeft: 20, borderLeft: "3px solid var(--panel-border)" }}>
-            <span className="field-label">Acceleration altitude (ft)</span>
-            <div className="field-value">
-              <input
-                type="number"
-                value={transitionAltitudeInput}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setTransitionAltitudeInput(v);
-                  const asNumber = Number(v);
-                  if (v.trim() !== "" && Number.isFinite(asNumber)) {
-                    setTransitionAltitudeFt(asNumber);
-                    setTransitionManuallySet(true);
-                  }
-                }}
-                onFocus={selectOnFocus}
-                style={{
-                  border: "1px solid var(--panel-border)",
-                  borderRadius: 4,
-                  padding: "4px 6px",
-                }}
-                onBlur={() => {
-                  if (transitionAltitudeInput.trim() === "") {
-                    const defAlt = fieldPAft + DEFAULT_TRANSITION_DELTA_FT;
-                    setTransitionManuallySet(false);
-                    setTransitionAltitudeFt(defAlt);
-                    setTransitionAltitudeInput(String(defAlt));
-                  }
-                }}
-              />
-            </div>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-              Default: Acceleration altitude = Field PA + 3000 ft
-            </span>
-          </div>
-        )}
-        {uiMode === "manual" && (
-          <div className="field" style={{ paddingLeft: 20, borderLeft: "3px solid var(--panel-border)" }}>
-            <span className="field-label">Manual climb</span>
-            <div className="field-value">
-              <label style={{ display: "inline-flex", alignItems: "center", gap: 8, marginRight: 12 }}>
-                <input
-                  type="radio"
-                  name="manualSub"
-                  checked={manualSubMode === "manual_initial"}
-                  onChange={() => setManualSubMode("manual_initial")}
-                />
-                <span>Initial climb only (Vy)</span>
-              </label>
-              <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="radio"
-                  name="manualSub"
-                  checked={manualSubMode === "manual_enroute"}
-                  onChange={() => setManualSubMode("manual_enroute")}
-                />
-                <span>En-route climb only (Vclimb)</span>
-              </label>
-            </div>
-          </div>
-        )}
-      </div>
+        Weight and airport inputs are auto-filled here after configuring W&amp;B and Takeoff.
+      </p>
 
       {/* ISA note */}
       <p
@@ -518,15 +405,6 @@ export default function ClimbCalculator() {
                 label={{ value: "ROC (ft/min)", angle: -90, position: "insideLeft", offset: 10, fill: "var(--text-secondary)", fontSize: 11 }}
               />
               <Tooltip content={<RocTooltip />} />
-              {uiMode === "auto" && (
-                <ReferenceLine
-                  x={transitionAltitudeFt}
-                  stroke="#f97316"
-                  strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  label={{ value: "Vy → Vclimb", position: "top", fill: "#f97316", fontSize: 11 }}
-                />
-              )}
               <Line
                 type="monotone"
                 dataKey="rocFpm"
@@ -539,7 +417,7 @@ export default function ClimbCalculator() {
               />
             </LineChart>
           </ResponsiveContainer>
-          {(vyKias != null || vclimbKias != null) && (
+          {vclimbKias != null && (
             <div
               style={{
                 position: "absolute",
@@ -558,8 +436,7 @@ export default function ClimbCalculator() {
                 zIndex: 2,
               }}
             >
-              {vyKias != null && <div>Vy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= {vyKias.toFixed(0)} KIAS</div>}
-              {vclimbKias != null && <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>}
+              <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>
             </div>
           )}
         </div>
@@ -593,15 +470,6 @@ export default function ClimbCalculator() {
                 label={{ value: "Gradient (%)", angle: -90, position: "insideLeft", offset: 10, fill: "var(--text-secondary)", fontSize: 11 }}
               />
               <Tooltip content={<GradientTooltip />} />
-              {uiMode === "auto" && (
-                <ReferenceLine
-                  x={transitionAltitudeFt}
-                  stroke="#f97316"
-                  strokeDasharray="4 4"
-                  strokeWidth={1.5}
-                  label={{ value: "Vy → Vclimb", position: "top", fill: "#f97316", fontSize: 11 }}
-                />
-              )}
               <Line
                 type="monotone"
                 dataKey="gradientPercent"
@@ -614,7 +482,7 @@ export default function ClimbCalculator() {
               />
             </LineChart>
           </ResponsiveContainer>
-          {(vyKias != null || vclimbKias != null) && (
+          {vclimbKias != null && (
             <div
               style={{
                 position: "absolute",
@@ -633,11 +501,188 @@ export default function ClimbCalculator() {
                 zIndex: 2,
               }}
             >
-              {vyKias != null && <div>Vy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= {vyKias.toFixed(0)} KIAS</div>}
-              {vclimbKias != null && <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>}
+              <div>Vclimb = {vclimbKias.toFixed(0)} KIAS</div>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Best Rate of Climb (Vy) – Reference (optional; ROC only, does not affect TOC totals) */}
+      <div
+        style={{
+          marginBottom: 20,
+          border: "1px solid var(--panel-border)",
+          borderRadius: 8,
+          backgroundColor: "var(--panel-bg)",
+          overflow: "hidden",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setShowVyReference((v) => !v)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            textAlign: "left",
+            border: "none",
+            background: "transparent",
+            color: "inherit",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>Best Rate of Climb (Vy) – Reference</span>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>{showVyReference ? "−" : "+"}</span>
+        </button>
+        {showVyReference && (
+          <div style={{ padding: "0 14px 14px", borderTop: "1px solid var(--panel-border)" }}>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "8px 0 10px", fontStyle: "italic" }}>
+              Vy table provides ROC only. AFM does not provide fuel/distance for Vy, so TOC fuel/distance totals are not recomputed.
+            </p>
+            {vyProfile && vyProfile.segments.length > 0 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: 16,
+                }}
+              >
+                <div
+                  style={{
+                    borderRadius: 8,
+                    border: "1px solid var(--panel-border)",
+                    backgroundColor: "var(--panel-bg)",
+                    padding: 8,
+                    minHeight: 260,
+                    position: "relative",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, margin: "4px 8px 8px" }}>ROC vs Altitude (Vy)</div>
+                  {vyKiasReference != null && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 20,
+                        fontSize: 11,
+                        fontFamily: "monospace",
+                        color: "var(--text-primary)",
+                        lineHeight: 1.7,
+                        textAlign: "left",
+                        pointerEvents: "none",
+                        backgroundColor: "var(--panel-bg)",
+                        border: "1px solid var(--panel-border)",
+                        borderRadius: 4,
+                        padding: "4px 8px",
+                        zIndex: 2,
+                      }}
+                    >
+                      <div>Vy = {vyKiasReference.toFixed(0)} KIAS</div>
+                    </div>
+                  )}
+                  <ResponsiveContainer width="100%" height={240}>
+                    <LineChart
+                      data={buildChartData(vyProfile.segments)}
+                      margin={{ top: 24, right: 16, left: 0, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
+                      <XAxis
+                        dataKey="altMidFt"
+                        type="number"
+                        tickFormatter={(v) => `${v}`}
+                        label={{ value: "Altitude (ft)", position: "insideBottom", offset: -4, fill: "var(--text-secondary)", fontSize: 11 }}
+                      />
+                      <YAxis
+                        dataKey="rocFpm"
+                        tickFormatter={(v) => `${v}`}
+                        label={{ value: "ROC (ft/min)", angle: -90, position: "insideLeft", offset: 10, fill: "var(--text-secondary)", fontSize: 11 }}
+                      />
+                      <Tooltip content={<RocTooltip />} />
+                      <Line
+                        type="monotone"
+                        dataKey="rocFpm"
+                        name="ROC"
+                        stroke="#22c55e"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                        connectNulls={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div
+                  style={{
+                    borderRadius: 8,
+                    border: "1px solid var(--panel-border)",
+                    backgroundColor: "var(--panel-bg)",
+                    padding: 8,
+                    minHeight: 260,
+                    position: "relative",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, margin: "4px 8px 8px" }}>Gradient vs Altitude (Vy)</div>
+                  {vyKiasReference != null && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 20,
+                        fontSize: 11,
+                        fontFamily: "monospace",
+                        color: "var(--text-primary)",
+                        lineHeight: 1.7,
+                        textAlign: "left",
+                        pointerEvents: "none",
+                        backgroundColor: "var(--panel-bg)",
+                        border: "1px solid var(--panel-border)",
+                        borderRadius: 4,
+                        padding: "4px 8px",
+                        zIndex: 2,
+                      }}
+                    >
+                      <div>Vy = {vyKiasReference.toFixed(0)} KIAS</div>
+                    </div>
+                  )}
+                  <ResponsiveContainer width="100%" height={240}>
+                    <LineChart
+                      data={buildChartData(vyProfile.segments)}
+                      margin={{ top: 24, right: 16, left: 0, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
+                      <XAxis
+                        dataKey="altMidFt"
+                        type="number"
+                        tickFormatter={(v) => `${v}`}
+                        label={{ value: "Altitude (ft)", position: "insideBottom", offset: -4, fill: "var(--text-secondary)", fontSize: 11 }}
+                      />
+                      <YAxis
+                        dataKey="gradientPercent"
+                        tickFormatter={(v) => `${v}`}
+                        label={{ value: "Gradient (%)", angle: -90, position: "insideLeft", offset: 10, fill: "var(--text-secondary)", fontSize: 11 }}
+                      />
+                      <Tooltip content={<GradientTooltip />} />
+                      <Line
+                        type="monotone"
+                        dataKey="gradientPercent"
+                        name="Gradient"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={false}
+                        isAnimationActive={false}
+                        connectNulls={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
     </div>

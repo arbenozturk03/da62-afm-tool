@@ -50,14 +50,15 @@ const resultRow: React.CSSProperties = {
 type FuelDisplayMode = "liters" | "gallons";
 
 const L_PER_US_GAL = 3.785411784;
+const FUEL_MAX_L = 189;
 
 export default function CruisePage() {
   const { state: perfState } = usePerformance();
   const cruisePrefill = perfState.cruisePrefill;
 
-  const [pressureAltInput, setPressureAltInput] = useState<string>("");
-  const [oatInput, setOatInput] = useState<string>("0");
-  const [weightInput, setWeightInput] = useState<string>("");
+  const [pressureAltInput, setPressureAltInput] = useState<string>("16000");
+  const [oatInput, setOatInput] = useState<string>("15");
+  const [weightInput, setWeightInput] = useState<string>("1600");
   const [fuelInput, setFuelInput] = useState<string>("");
   const [setting, setSetting] = useState<CruiseSetting>("MED");
   const [fuelMode, setFuelMode] = useState<FuelDisplayMode>("liters");
@@ -136,22 +137,12 @@ export default function CruisePage() {
       <h1 className="perf-title" style={{ marginBottom: 16 }}>
         DA-62 Cruise Performance
       </h1>
-      <p
-        style={{
-          margin: "0 0 10px",
-          fontSize: 12,
-          color: "#60a5fa",
-          fontWeight: 600,
-        }}
-      >
-        All inputs are auto-filled from TOC data after configuring the Climb page.
-      </p>
 
       <div style={cardStyle}>
         <div style={sectionTitle}>Inputs</div>
 
         <div style={fieldStyle}>
-          <span style={labelStyle}>Pressure Altitude (ft)</span>
+          <span style={labelStyle}>Cruise Altitude (ft)</span>
           <input
             type="number"
             value={pressureAltInput}
@@ -245,7 +236,26 @@ export default function CruisePage() {
             <input
               type="number"
               value={fuelInput}
-              onChange={(e) => setFuelInput(e.target.value)}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw.trim() === "") {
+                  setFuelInput("");
+                  return;
+                }
+                const n = Number(raw);
+                if (!Number.isFinite(n)) {
+                  setFuelInput(raw);
+                  return;
+                }
+                if (fuelMode === "liters") {
+                  const clamped = Math.max(0, Math.min(FUEL_MAX_L, n));
+                  setFuelInput(clamped.toString());
+                } else {
+                  const maxGal = FUEL_MAX_L / L_PER_US_GAL;
+                  const clamped = Math.max(0, Math.min(maxGal, n));
+                  setFuelInput(clamped.toFixed(1).replace(/\.0$/, ""));
+                }
+              }}
               onFocus={selectOnFocus}
               style={inputStyle}
               min={0}
@@ -253,6 +263,17 @@ export default function CruisePage() {
           </div>
         </div>
       </div>
+
+      <p
+        style={{
+          margin: "-10px 1px 5px",
+          fontSize: 12,
+          color: "#60a5fa",
+          fontWeight: 600,
+        }}
+      >
+        All inputs are auto-filled from TOC data after configuring the Climb page.
+      </p>
 
       {err && (
         <div
