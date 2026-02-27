@@ -89,17 +89,27 @@ export const initialLandingState: LandingFormState = {
 
 /* ── Performance state ───────────────────────────────────────── */
 
+export interface CruisePrefillState {
+  tocPressureAltFt: number;
+  tocOatC: number | null;
+  tocIsaDeviationC: number | null;
+  tocWeightKg: number;
+  fuelRemainingGal: number | null;
+}
+
 export interface PerformanceState {
   /** Weight (kg) used for takeoff/landing. null = use live W&B totalMass. */
   perfWeight: number | null;
   takeoff: TakeoffFormState;
   landing: LandingFormState;
+  cruisePrefill: CruisePrefillState | null;
 }
 
 const initialState: PerformanceState = {
   perfWeight: null,
   takeoff: initialTakeoffState,
   landing: initialLandingState,
+  cruisePrefill: null,
 };
 
 /* ── Actions ─────────────────────────────────────────────────── */
@@ -107,7 +117,8 @@ const initialState: PerformanceState = {
 type Action =
   | { type: "UPLINK_WEIGHT"; kg: number }
   | { type: "SET_TAKEOFF"; field: keyof TakeoffFormState; value: TakeoffFormState[keyof TakeoffFormState] }
-  | { type: "SET_LANDING"; field: keyof LandingFormState; value: LandingFormState[keyof LandingFormState] };
+  | { type: "SET_LANDING"; field: keyof LandingFormState; value: LandingFormState[keyof LandingFormState] }
+  | { type: "SET_CRUISE_PREFILL"; payload: CruisePrefillState | null };
 
 function reducer(state: PerformanceState, action: Action): PerformanceState {
   switch (action.type) {
@@ -123,6 +134,11 @@ function reducer(state: PerformanceState, action: Action): PerformanceState {
         ...state,
         landing: { ...state.landing, [action.field]: action.value },
       };
+    case "SET_CRUISE_PREFILL":
+      return {
+        ...state,
+        cruisePrefill: action.payload,
+      };
     default:
       return state;
   }
@@ -135,6 +151,7 @@ interface PerformanceContextValue {
   uplinkWeight: (kg: number) => void;
   setTakeoff: <K extends keyof TakeoffFormState>(field: K, value: TakeoffFormState[K]) => void;
   setLanding: <K extends keyof LandingFormState>(field: K, value: LandingFormState[K]) => void;
+  setCruisePrefill: (payload: CruisePrefillState | null) => void;
 }
 
 const PerformanceContext = createContext<PerformanceContextValue | null>(null);
@@ -154,9 +171,14 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const setCruisePrefill = useCallback(
+    (payload: CruisePrefillState | null) => dispatch({ type: "SET_CRUISE_PREFILL", payload }),
+    [],
+  );
+
   const value = useMemo(
-    () => ({ state, uplinkWeight, setTakeoff, setLanding }),
-    [state, uplinkWeight, setTakeoff, setLanding],
+    () => ({ state, uplinkWeight, setTakeoff, setLanding, setCruisePrefill }),
+    [state, uplinkWeight, setTakeoff, setLanding, setCruisePrefill],
   );
 
   return (

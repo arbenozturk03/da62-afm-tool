@@ -17,7 +17,16 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        // Allow test globals (Vitest) without a separate env config.
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+      },
     },
   },
 ])

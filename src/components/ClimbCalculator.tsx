@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Line,
   LineChart,
@@ -14,6 +15,9 @@ import type { ClimbFlaps, ClimbProfileMode, ClimbSegment } from "../lib/perf/cli
 import { useAircraft } from "../context/AircraftContext";
 import { usePerformance } from "../context/PerformanceContext";
 import { useAirportDb } from "../hooks/useAirportDb";
+import { getCruiseInputsFromTOC } from "../core/cruisePerformance";
+
+const L_PER_US_GAL = 3.785411784;
 
 type UIMode = "auto" | "manual";
 
@@ -105,11 +109,12 @@ function GradientTooltip({ active, payload }: { active?: boolean; payload?: Arra
 
 
 export default function ClimbCalculator() {
-  const { result: cgResult } = useAircraft();
-  const { state: perfState } = usePerformance();
+  const { result: cgResult, state: aircraftState } = useAircraft();
+  const { state: perfState, setCruisePrefill } = usePerformance();
   const takeoffState = perfState.takeoff;
   const takeoffPA = takeoffState.PA;
   const takeoffOAT = takeoffState.OAT;
+  const navigate = useNavigate();
 
   const { db: airportDb } = useAirportDb();
   const selectedIcao = takeoffState.selectedAirport;
@@ -141,6 +146,12 @@ export default function ClimbCalculator() {
     setTransitionAltitudeInput(String(defAlt));
     setTransitionManuallySet(false);
   }, [takeoffPA, takeoffOAT]);
+
+  useEffect(() => {
+    if (cgResult.totalMass > 0 && (weightKg === 0 || weightKg === DEFAULTS.weightKg)) {
+      setWeightKg(Math.round(cgResult.totalMass));
+    }
+  }, [cgResult.totalMass, weightKg]);
 
   useEffect(() => {
     if (!transitionManuallySet) {
@@ -183,6 +194,16 @@ export default function ClimbCalculator() {
   return (
     <div style={{ padding: "16px 12px", maxWidth: 1000, margin: "0 auto" }}>
       <h1 className="perf-title">DA-62 Climb Performance</h1>
+      <p
+        style={{
+          margin: "0 0 10px",
+          fontSize: 12,
+          color: "#60a5fa",
+          fontWeight: 600,
+        }}
+      >
+        Weight and airport inputs are auto-filled here after configuring W&amp;B and Takeoff.
+      </p>
 
       {/* Inputs — single flow */}
       <div
@@ -200,7 +221,7 @@ export default function ClimbCalculator() {
       >
         <div className="field">
           <span className="field-label">Weight (kg)</span>
-          <div className="field-value" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="field-value">
             <input
               type="number"
               min={0}
@@ -209,24 +230,6 @@ export default function ClimbCalculator() {
               onFocus={selectOnFocus}
               style={{ width: 80 }}
             />
-            <button
-              type="button"
-              onClick={() => setWeightKg(Math.round(cgResult.totalMass))}
-              style={{
-                padding: "6px 10px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "1px solid var(--panel-border)",
-                borderRadius: 6,
-                background: "var(--panel-bg)",
-                color: "var(--text-primary)",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-              title="Use current W&B takeoff weight"
-            >
-              From W&B
-            </button>
           </div>
         </div>
 
@@ -404,7 +407,7 @@ export default function ClimbCalculator() {
         Temperature aloft estimated using ISA lapse rate (~2°C/1000 ft). OAT correction (+10% time/fuel/distance per 10°C above ISA) is applied by default.
       </p>
 
-      {/* Summary totals */}
+      {/* Summary totals / TOC parameters */}
       <div
         style={{
           marginBottom: 20,
@@ -414,14 +417,67 @@ export default function ClimbCalculator() {
           backgroundColor: "var(--result-bg)",
           display: "flex",
           flexWrap: "wrap",
-          gap: 20,
+          alignItems: "center",
+          gap: 16,
           fontSize: 14,
         }}
       >
-        <div><strong>Total time:</strong> {profile.totals.totalTimeMin.toFixed(1)} min</div>
-        <div><strong>Total fuel:</strong> {profile.totals.totalFuelUsGal.toFixed(2)} US gal</div>
-        <div><strong>Total distance:</strong> {profile.totals.totalDistanceNm.toFixed(1)} NM</div>
-        <div><strong>Final weight:</strong> {profile.totals.finalWeightKg.toFixed(0)} kg</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--text-secondary)" }}>
+            TOC Parameters
+          </span>
+          <span style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
+            Still-air (no-wind) assumption for climb segment
+          </span>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+          <div><strong>Total time:</strong> {profile.totals.totalTimeMin.toFixed(1)} min</div>
+          <div><strong>Total fuel:</strong> {profile.totals.totalFuelUsGal.toFixed(2)} US gal</div>
+          <div><strong>Total distance:</strong> {profile.totals.totalDistanceNm.toFixed(1)} NM</div>
+          <div><strong>Final weight:</strong> {profile.totals.finalWeightKg.toFixed(0)} kg</div>
+        </div>
+        {profile.segments.length > 0 && (
+          <div style={{ marginLeft: "auto" }}>
+            <button
+              type="button"
+              onClick={() => {
+                const lastSeg = profile.segments[profile.segments.length - 1];
+                const tocPressureAltFt = profile.inputs.targetPAft;
+                const tocOatC = lastSeg?.oatEndC ?? null;
+                const tocWeightKg = profile.totals.finalWeightKg;
+                const cruiseInputs = getCruiseInputsFromTOC({
+                  tocPressureAltFt,
+                  tocOatC,
+                  tocIsaDeviationC: null,
+                  tocWeightKg,
+                });
+                const totalFuelL = aircraftState.mainFuelL + aircraftState.auxFuelL;
+                const totalFuelUsGal = totalFuelL / L_PER_US_GAL;
+                const fuelRemainingGal = Math.max(0, totalFuelUsGal - profile.totals.totalFuelUsGal);
+                setCruisePrefill({
+                  tocPressureAltFt: cruiseInputs.pressureAltitudeFt,
+                  tocOatC,
+                  tocIsaDeviationC: cruiseInputs.isaDeviationC,
+                  tocWeightKg: cruiseInputs.weightKg,
+                  fuelRemainingGal,
+                });
+                navigate("/cruise");
+              }}
+              style={{
+                padding: "6px 12px",
+                fontSize: 13,
+                fontWeight: 600,
+                borderRadius: 6,
+                border: "1px solid var(--panel-border)",
+                backgroundColor: "var(--panel-bg)",
+                color: "var(--text-primary)",
+                cursor: "pointer",
+              }}
+            >
+              Continue to Cruise
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Charts */}

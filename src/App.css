@@ -8,12 +8,27 @@
 /* ── App header: logo + tabs in one row ────────────── */
 .app-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding: 10px 12px 0;
+  padding: 8px 12px 4px;
   max-width: 1440px;
   margin: 0 auto;
-  border-bottom: 1px solid var(--panel-border);
+  border-bottom: none;
+}
+
+.app-header-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 /* ── TAI Logo (inline SVG) ─────────────────────────── */
@@ -23,7 +38,7 @@
   max-height: 40px;
   flex-shrink: 0;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 0;
 }
 
 /* Dark mode: white text */
@@ -43,6 +58,53 @@
   display: flex;
   gap: 0;
   margin-bottom: -1px;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  flex-direction: column;
+  background: var(--panel-bg);
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  padding: 4px 0;
+  z-index: 20;
+  min-width: 150px;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.35);
+}
+
+.menu-dropdown a {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.menu-dropdown a:last-child {
+  border-bottom: none;
+}
+
+.nav-toggle {
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  padding: 0;
+  background: var(--panel-bg);
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+
+.nav-toggle-line {
+  width: 16px;
+  height: 2px;
+  border-radius: 999px;
+  background-color: var(--text-secondary);
 }
 
 .page-nav a,

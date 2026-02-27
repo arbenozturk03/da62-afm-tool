@@ -1,0 +1,130 @@
+{
+    "cruise_performance": [
+      {
+        "weight_category": "up to 1999 kg (4407 lb)",
+        "data": [
+          { "press_alt_ft": 2000, "press_alt_m": 610, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 172}, "isa": {"pwr": 95, "ff": 19.3, "tas": 174}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 176}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 177}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 179} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 156}, "isa": {"pwr": 75, "ff": 14.8, "tas": 158}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 160}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 162}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 163} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 143}, "isa": {"pwr": 60, "ff": 11.8, "tas": 145}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 146}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 148}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 149} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 126}, "isa": {"pwr": 45, "ff": 9.0, "tas": 127}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 128}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 130}, "isa_p30": {"pwr": 45, "ff": 9.0, "tas": 131} }
+          ]},
+          { "press_alt_ft": 4000, "press_alt_m": 1219, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 175}, "isa": {"pwr": 95, "ff": 19.3, "tas": 177}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 179}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 181}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 182} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 159}, "isa": {"pwr": 75, "ff": 14.8, "tas": 161}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 163}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 165}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 166} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 146}, "isa": {"pwr": 60, "ff": 11.8, "tas": 147}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 149}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 150}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 152} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 128}, "isa": {"pwr": 45, "ff": 9.0, "tas": 129}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 131}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 132}, "isa_p30": {"pwr": 45, "ff": 9.0, "tas": 133} }
+          ]},
+          { "press_alt_ft": 6000, "press_alt_m": 1829, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 178}, "isa": {"pwr": 95, "ff": 19.3, "tas": 180}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 182}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 184}, "isa_p30": {"pwr": 95, "ff": 19.3, "tas": 186} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 162}, "isa": {"pwr": 75, "ff": 14.8, "tas": 164}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 166}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 168}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 170} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 148}, "isa": {"pwr": 60, "ff": 11.8, "tas": 150}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 152}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 153}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 155} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 130}, "isa": {"pwr": 45, "ff": 9.0, "tas": 132}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 133}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 134}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 143} }
+          ]},
+          { "press_alt_ft": 8000, "press_alt_m": 2438, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 182}, "isa": {"pwr": 95, "ff": 19.3, "tas": 184}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 186}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 188}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 190} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 166}, "isa": {"pwr": 75, "ff": 14.8, "tas": 168}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 169}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 171}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 173} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 151}, "isa": {"pwr": 60, "ff": 11.8, "tas": 153}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 155}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 156}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 158} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 133}, "isa": {"pwr": 45, "ff": 9.0, "tas": 134}, "isa_p10": {"pwr": 50, "ff": 9.8, "tas": 142}, "isa_p20": {"pwr": 50, "ff": 9.8, "tas": 144}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 145} }
+          ]},
+          { "press_alt_ft": 10000, "press_alt_m": 3048, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 185}, "isa": {"pwr": 95, "ff": 19.3, "tas": 188}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 190}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 191}, "isa_p30": {"pwr": 95, "ff": 18.8, "tas": 192} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 169}, "isa": {"pwr": 75, "ff": 14.8, "tas": 171}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 173}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 175}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 176} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 154}, "isa": {"pwr": 60, "ff": 11.8, "tas": 156}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 157}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 159}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 161} },
+            { "isa_m10": {"pwr": 45, "ff": 8.9, "tas": 135}, "isa": {"pwr": 50, "ff": 9.8, "tas": 144}, "isa_p10": {"pwr": 50, "ff": 9.8, "tas": 145}, "isa_p20": {"pwr": 50, "ff": 9.8, "tas": 146}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 148} }
+          ]},
+          { "press_alt_ft": 12000, "press_alt_m": 3658, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 189}, "isa": {"pwr": 95, "ff": 19.3, "tas": 191}, "isa_p10": {"pwr": 95, "ff": 19.2, "tas": 193}, "isa_p20": {"pwr": 95, "ff": 18.8, "tas": 194}, "isa_p30": {"pwr": 95, "ff": 18.1, "tas": 194} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 172}, "isa": {"pwr": 75, "ff": 14.8, "tas": 174}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 176}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 178}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 180} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 157}, "isa": {"pwr": 60, "ff": 11.8, "tas": 159}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 160}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 162}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 164} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 145}, "isa": {"pwr": 50, "ff": 9.7, "tas": 146}, "isa_p10": {"pwr": 50, "ff": 9.7, "tas": 148}, "isa_p20": {"pwr": 50, "ff": 9.7, "tas": 149}, "isa_p30": {"pwr": 50, "ff": 9.7, "tas": 150} }
+          ]},
+          { "press_alt_ft": 14000, "press_alt_m": 4267, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 18.7, "tas": 190}, "isa": {"pwr": 95, "ff": 18.5, "tas": 192}, "isa_p10": {"pwr": 95, "ff": 18.1, "tas": 193}, "isa_p20": {"pwr": 85, "ff": 16.7, "tas": 191}, "isa_p30": {"pwr": 80, "ff": 15.6, "tas": 188} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 175}, "isa": {"pwr": 75, "ff": 14.8, "tas": 177}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 179}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 181}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 183} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 160}, "isa": {"pwr": 60, "ff": 11.8, "tas": 162}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 163}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 165}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 167} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 147}, "isa": {"pwr": 50, "ff": 9.7, "tas": 149}, "isa_p10": {"pwr": 50, "ff": 9.7, "tas": 150}, "isa_p20": {"pwr": 50, "ff": 9.7, "tas": 152}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 160} }
+          ]},
+          { "press_alt_ft": 16000, "press_alt_m": 4877, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 17.3, "tas": 190}, "isa": {"pwr": 87, "ff": 17.1, "tas": 192}, "isa_p10": {"pwr": 85, "ff": 16.7, "tas": 192}, "isa_p20": {"pwr": 80, "ff": 15.7, "tas": 190}, "isa_p30": {"pwr": null, "ff": null, "tas": null} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 179}, "isa": {"pwr": 75, "ff": 14.8, "tas": 181}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 183}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 185}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 187} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 163}, "isa": {"pwr": 60, "ff": 11.8, "tas": 165}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 166}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 168}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 170} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 150}, "isa": {"pwr": 50, "ff": 9.7, "tas": 151}, "isa_p10": {"pwr": 55, "ff": 10.7, "tas": 160}, "isa_p20": {"pwr": 55, "ff": 10.7, "tas": 162}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 163} }
+          ]},
+          { "press_alt_ft": 18000, "press_alt_m": 5486, "rows": [
+            { "isa_m10": {"pwr": 80, "ff": 15.7, "tas": 187}, "isa": {"pwr": 80, "ff": 15.7, "tas": 189}, "isa_p10": {"pwr": 80, "ff": 15.7, "tas": 191}, "isa_p20": {"pwr": null, "ff": null, "tas": null}, "isa_p30": {"pwr": null, "ff": null, "tas": null} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 182}, "isa": {"pwr": 75, "ff": 14.8, "tas": 184}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 186}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 188}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 190} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 166}, "isa": {"pwr": 60, "ff": 11.8, "tas": 168}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 170}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 171}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 173} },
+            { "isa_m10": {"pwr": 55, "ff": 10.7, "tas": 159}, "isa": {"pwr": 55, "ff": 10.7, "tas": 161}, "isa_p10": {"pwr": 55, "ff": 10.7, "tas": 163}, "isa_p20": {"pwr": 55, "ff": 10.7, "tas": 164}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 166} }
+          ]},
+          { "press_alt_ft": 20000, "press_alt_m": 6096, "rows": [
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 186}, "isa": {"pwr": 75, "ff": 14.8, "tas": 188}, "isa_p10": {"pwr": 70, "ff": 13.9, "tas": 185}, "isa_p20": {"pwr": 70, "ff": 13.9, "tas": 187}, "isa_p30": {"pwr": 70, "ff": 13.9, "tas": 189} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 169}, "isa": {"pwr": 60, "ff": 11.8, "tas": 171}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 173}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 174}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 176} }
+          ]}
+        ]
+      },
+      {
+        "weight_category": "above 1999 kg (4407 lb) up to 2300 kg (5071 lb)",
+        "data": [
+          { "press_alt_ft": 2000, "press_alt_m": 610, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 170}, "isa": {"pwr": 95, "ff": 19.3, "tas": 172}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 174}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 176}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 177} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 154}, "isa": {"pwr": 75, "ff": 14.8, "tas": 156}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 158}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 159}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 161} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 140}, "isa": {"pwr": 60, "ff": 11.8, "tas": 142}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 143}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 145}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 146} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 121}, "isa": {"pwr": 45, "ff": 9.0, "tas": 122}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 124}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 125}, "isa_p30": {"pwr": 45, "ff": 9.0, "tas": 126} }
+          ]},
+          { "press_alt_ft": 4000, "press_alt_m": 1219, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 173}, "isa": {"pwr": 95, "ff": 19.3, "tas": 175}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 177}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 179}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 180} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 157}, "isa": {"pwr": 75, "ff": 14.8, "tas": 159}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 161}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 162}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 164} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 143}, "isa": {"pwr": 60, "ff": 11.8, "tas": 144}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 146}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 147}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 148} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 123}, "isa": {"pwr": 45, "ff": 9.0, "tas": 124}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 125}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 127}, "isa_p30": {"pwr": 45, "ff": 9.0, "tas": 128} }
+          ]},
+          { "press_alt_ft": 6000, "press_alt_m": 1829, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 176}, "isa": {"pwr": 95, "ff": 19.3, "tas": 179}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 180}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 182}, "isa_p30": {"pwr": 95, "ff": 19.3, "tas": 184} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 160}, "isa": {"pwr": 75, "ff": 14.8, "tas": 162}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 164}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 165}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 167} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 145}, "isa": {"pwr": 60, "ff": 11.8, "tas": 147}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 148}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 150}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 151} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 125}, "isa": {"pwr": 45, "ff": 9.0, "tas": 126}, "isa_p10": {"pwr": 45, "ff": 9.0, "tas": 127}, "isa_p20": {"pwr": 45, "ff": 9.0, "tas": 128}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 138} }
+          ]},
+          { "press_alt_ft": 8000, "press_alt_m": 2438, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 180}, "isa": {"pwr": 95, "ff": 19.3, "tas": 182}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 184}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 186}, "isa_p30": {"pwr": 95, "ff": 19.2, "tas": 187} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 163}, "isa": {"pwr": 75, "ff": 14.8, "tas": 165}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 167}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 168}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 170} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 148}, "isa": {"pwr": 60, "ff": 11.8, "tas": 149}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 151}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 152}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 154} },
+            { "isa_m10": {"pwr": 45, "ff": 9.0, "tas": 127}, "isa": {"pwr": 45, "ff": 9.0, "tas": 128}, "isa_p10": {"pwr": 50, "ff": 9.8, "tas": 137}, "isa_p20": {"pwr": 50, "ff": 9.8, "tas": 139}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 140} }
+          ]},
+          { "press_alt_ft": 10000, "press_alt_m": 3048, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 183}, "isa": {"pwr": 95, "ff": 19.3, "tas": 185}, "isa_p10": {"pwr": 95, "ff": 19.3, "tas": 187}, "isa_p20": {"pwr": 95, "ff": 19.3, "tas": 189}, "isa_p30": {"pwr": 95, "ff": 18.8, "tas": 189} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 166}, "isa": {"pwr": 75, "ff": 14.8, "tas": 168}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 170}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 171}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 173} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 150}, "isa": {"pwr": 60, "ff": 11.8, "tas": 152}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 153}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 155}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 156} },
+            { "isa_m10": {"pwr": 45, "ff": 8.9, "tas": 129}, "isa": {"pwr": 50, "ff": 9.8, "tas": 138}, "isa_p10": {"pwr": 50, "ff": 9.8, "tas": 140}, "isa_p20": {"pwr": 50, "ff": 9.8, "tas": 141}, "isa_p30": {"pwr": 50, "ff": 9.8, "tas": 142} }
+          ]},
+          { "press_alt_ft": 12000, "press_alt_m": 3658, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 19.3, "tas": 187}, "isa": {"pwr": 95, "ff": 19.3, "tas": 189}, "isa_p10": {"pwr": 95, "ff": 19.2, "tas": 191}, "isa_p20": {"pwr": 95, "ff": 18.8, "tas": 191}, "isa_p30": {"pwr": 95, "ff": 18.1, "tas": 191} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 169}, "isa": {"pwr": 75, "ff": 14.8, "tas": 171}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 173}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 175}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 176} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 153}, "isa": {"pwr": 60, "ff": 11.8, "tas": 154}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 156}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 157}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 159} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 139}, "isa": {"pwr": 50, "ff": 9.7, "tas": 140}, "isa_p10": {"pwr": 50, "ff": 9.7, "tas": 142}, "isa_p20": {"pwr": 50, "ff": 9.7, "tas": 143}, "isa_p30": {"pwr": 50, "ff": 9.7, "tas": 144} }
+          ]},
+          { "press_alt_ft": 14000, "press_alt_m": 4267, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 18.7, "tas": 188}, "isa": {"pwr": 95, "ff": 18.5, "tas": 190}, "isa_p10": {"pwr": 95, "ff": 18.1, "tas": 191}, "isa_p20": {"pwr": 85, "ff": 16.7, "tas": 187}, "isa_p30": {"pwr": 80, "ff": 15.6, "tas": 184} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 172}, "isa": {"pwr": 75, "ff": 14.8, "tas": 174}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 176}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 178}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 179} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 155}, "isa": {"pwr": 60, "ff": 11.8, "tas": 157}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 159}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 160}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 161} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 141}, "isa": {"pwr": 50, "ff": 9.7, "tas": 142}, "isa_p10": {"pwr": 50, "ff": 9.7, "tas": 144}, "isa_p20": {"pwr": 50, "ff": 9.7, "tas": 145}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 154} }
+          ]},
+          { "press_alt_ft": 16000, "press_alt_m": 4877, "rows": [
+            { "isa_m10": {"pwr": 95, "ff": 17.3, "tas": 187}, "isa": {"pwr": 87, "ff": 17.1, "tas": 189}, "isa_p10": {"pwr": 85, "ff": 16.7, "tas": 189}, "isa_p20": {"pwr": 80, "ff": 15.7, "tas": 186}, "isa_p30": {"pwr": null, "ff": null, "tas": null} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 175}, "isa": {"pwr": 75, "ff": 14.8, "tas": 177}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 179}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 181}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 182} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 158}, "isa": {"pwr": 60, "ff": 11.8, "tas": 160}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 161}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 163}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 164} },
+            { "isa_m10": {"pwr": 50, "ff": 9.7, "tas": 143}, "isa": {"pwr": 50, "ff": 9.7, "tas": 144}, "isa_p10": {"pwr": 55, "ff": 10.7, "tas": 154}, "isa_p20": {"pwr": 55, "ff": 10.7, "tas": 155}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 156} }
+          ]},
+          { "press_alt_ft": 18000, "press_alt_m": 5486, "rows": [
+            { "isa_m10": {"pwr": 80, "ff": 15.7, "tas": 184}, "isa": {"pwr": 80, "ff": 15.7, "tas": 186}, "isa_p10": {"pwr": 80, "ff": 15.7, "tas": 188}, "isa_p20": {"pwr": null, "ff": null, "tas": null}, "isa_p30": {"pwr": null, "ff": null, "tas": null} },
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 178}, "isa": {"pwr": 75, "ff": 14.8, "tas": 180}, "isa_p10": {"pwr": 75, "ff": 14.8, "tas": 182}, "isa_p20": {"pwr": 75, "ff": 14.8, "tas": 184}, "isa_p30": {"pwr": 75, "ff": 14.8, "tas": 186} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 161}, "isa": {"pwr": 60, "ff": 11.8, "tas": 162}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 164}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 165}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 166} },
+            { "isa_m10": {"pwr": 55, "ff": 10.7, "tas": 153}, "isa": {"pwr": 55, "ff": 10.7, "tas": 155}, "isa_p10": {"pwr": 55, "ff": 10.7, "tas": 157}, "isa_p20": {"pwr": 55, "ff": 10.7, "tas": 157}, "isa_p30": {"pwr": 55, "ff": 10.7, "tas": 158} }
+          ]},
+          { "press_alt_ft": 20000, "press_alt_m": 6096, "rows": [
+            { "isa_m10": {"pwr": 75, "ff": 14.8, "tas": 182}, "isa": {"pwr": 75, "ff": 14.8, "tas": 184}, "isa_p10": {"pwr": 70, "ff": 13.9, "tas": 180}, "isa_p20": {"pwr": 70, "ff": 13.9, "tas": 181}, "isa_p30": {"pwr": 70, "ff": 13.9, "tas": 183} },
+            { "isa_m10": {"pwr": 60, "ff": 11.8, "tas": 163}, "isa": {"pwr": 60, "ff": 11.8, "tas": 165}, "isa_p10": {"pwr": 60, "ff": 11.8, "tas": 166}, "isa_p20": {"pwr": 60, "ff": 11.8, "tas": 167}, "isa_p30": {"pwr": 60, "ff": 11.8, "tas": 169} }
+          ]}
+        ]
+      }
+    ]
+  }
