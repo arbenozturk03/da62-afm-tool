@@ -103,8 +103,9 @@ function GradientTooltip({ active, payload }: { active?: boolean; payload?: Arra
 
 export default function ClimbCalculator() {
   const { result: cgResult, state: aircraftState } = useAircraft();
-  const { state: perfState, setCruisePrefill } = usePerformance();
+  const { state: perfState, setCruisePrefill, setClimbWeight } = usePerformance();
   const takeoffState = perfState.takeoff;
+  const climbWeightStored = perfState.climbWeightKg;
   const takeoffPA = takeoffState.PA;
   const takeoffOAT = takeoffState.OAT;
   const navigate = useNavigate();
@@ -117,7 +118,9 @@ export default function ClimbCalculator() {
     : null;
 
   const [flaps, setFlaps] = useState<ClimbFlaps>(DEFAULTS.flaps);
-  const [weightKg, setWeightKg] = useState<number>(DEFAULTS.weightKg);
+  const weightKg =
+    climbWeightStored ??
+    (aircraftState.wbModified ? Math.round(cgResult.totalMass) : DEFAULTS.weightKg);
   const [fieldPAft, setFieldPAft] = useState<number>(takeoffPA);
   const [fieldOATc, setFieldOATc] = useState<number>(takeoffOAT);
   const [targetPAft, setTargetPAft] = useState<number>(DEFAULTS.targetPAft);
@@ -127,12 +130,6 @@ export default function ClimbCalculator() {
     setFieldPAft(takeoffPA);
     setFieldOATc(takeoffOAT);
   }, [takeoffPA, takeoffOAT]);
-
-  useEffect(() => {
-    if (cgResult.totalMass > 0 && (weightKg === 0 || weightKg === DEFAULTS.weightKg)) {
-      setWeightKg(Math.round(cgResult.totalMass));
-    }
-  }, [cgResult.totalMass, weightKg]);
 
   /** TOC from AFM 5.3.10 Time/Fuel/Distance-to-Climb (Vclimb only). */
   const profile = useMemo(
@@ -177,6 +174,39 @@ export default function ClimbCalculator() {
     return seg?.speedKias ?? null;
   }, [vyProfile]);
 
+  /** Keep cruise prefill in sync with climb so Cruise page is always up to date without "Continue to Cruise". */
+  useEffect(() => {
+    if (profile.segments.length === 0) return;
+    const lastSeg = profile.segments[profile.segments.length - 1];
+    const tocPressureAltFt = profile.inputs.targetPAft;
+    const tocOatC = lastSeg?.oatEndC ?? null;
+    const tocWeightKg = profile.totals.finalWeightKg;
+    const cruiseInputs = getCruiseInputsFromTOC({
+      tocPressureAltFt,
+      tocOatC,
+      tocIsaDeviationC: null,
+      tocWeightKg,
+    });
+    const totalFuelL = aircraftState.mainFuelL + aircraftState.auxFuelL;
+    const totalFuelUsGal = totalFuelL / L_PER_US_GAL;
+    const fuelRemainingGal = Math.max(0, totalFuelUsGal - profile.totals.totalFuelUsGal);
+    setCruisePrefill({
+      tocPressureAltFt: cruiseInputs.pressureAltitudeFt,
+      tocOatC,
+      tocIsaDeviationC: cruiseInputs.isaDeviationC,
+      tocWeightKg: cruiseInputs.weightKg,
+      fuelRemainingGal,
+    });
+  }, [
+    profile.segments,
+    profile.totals.finalWeightKg,
+    profile.totals.totalFuelUsGal,
+    profile.inputs.targetPAft,
+    aircraftState.mainFuelL,
+    aircraftState.auxFuelL,
+    setCruisePrefill,
+  ]);
+
   const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) => e.target.select();
 
   return (
@@ -204,7 +234,10 @@ export default function ClimbCalculator() {
               type="number"
               min={0}
               value={weightKg}
-              onChange={(e) => setWeightKg(Number(e.target.value) || 0)}
+              onChange={(e) => {
+                const v = Number(e.target.value) || 0;
+                setClimbWeight(v || null);
+              }}
               onFocus={selectOnFocus}
               style={{ width: 80 }}
             />
@@ -291,7 +324,7 @@ export default function ClimbCalculator() {
           fontStyle: "italic",
         }}
       >
-        Temperature aloft estimated using ISA lapse rate (~2°C/1000 ft). OAT correction (+10% time/fuel/distance per 10°C above ISA) is applied by default.
+        Temperature aloft estimated using ISA lapse rate (~2°C/1000 ft).
       </p>
 
       {/* Summary totals / TOC parameters */}

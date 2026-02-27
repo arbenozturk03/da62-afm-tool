@@ -38,6 +38,8 @@ export interface AircraftState {
 
   cabinSection: string;
   cabinScrollTop: number;
+  /** True after user changes any weight-related field from default (cleared on RESET). */
+  wbModified: boolean;
 }
 
 const initialState: AircraftState = {
@@ -67,6 +69,7 @@ const initialState: AircraftState = {
 
   cabinSection: "nose",
   cabinScrollTop: -1,
+  wbModified: false,
 };
 
 /* ── Actions ──────────────────────────────────────────────── */
@@ -78,8 +81,13 @@ type Action =
 
 function reducer(state: AircraftState, action: Action): AircraftState {
   switch (action.type) {
-    case "SET_FIELD":
-      return { ...state, [action.field]: action.value };
+    case "SET_FIELD": {
+      const next = { ...state, [action.field]: action.value };
+      if (action.field !== "cabinSection" && action.field !== "cabinScrollTop" && action.field !== "showDebugLabels" && action.field !== "debugZones") {
+        next.wbModified = true;
+      }
+      return next;
+    }
     case "SET_MODE": {
       const next = { ...state, mode: action.mode };
       if (action.mode === "cargo") {

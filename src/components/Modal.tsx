@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type KeyboardEvent, type FormEvent } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent, type FormEvent, type RefObject } from "react";
 
 interface ModalProps {
   title: string;
@@ -8,9 +8,11 @@ interface ModalProps {
   maxWarning?: string;
   onSave: (v: number) => void;
   onClose: () => void;
+  /** Ref attached to inner content div so scroll lock can allow touch inside modal. */
+  contentRef?: RefObject<HTMLDivElement | null>;
 }
 
-export default function Modal({ title, value, unit = "kg", max, maxWarning, onSave, onClose }: ModalProps) {
+export default function Modal({ title, value, unit = "kg", max, maxWarning, onSave, onClose, contentRef }: ModalProps) {
   const [local, setLocal] = useState(value);
   const [hitLimit, setHitLimit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,11 +57,13 @@ export default function Modal({ title, value, unit = "kg", max, maxWarning, onSa
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
         padding: 20,
+        touchAction: "none",
       }}
       onClick={onClose}
       onKeyDown={handleKey}
     >
       <div
+        ref={contentRef}
         style={{
           width: "100%",
           maxWidth: 240,

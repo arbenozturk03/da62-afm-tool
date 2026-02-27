@@ -1,6 +1,7 @@
 import { useCallback, useRef, useMemo, useEffect, useState } from "react";
 import { useAircraft, type AircraftState } from "../context/AircraftContext";
 import { aircraftConfig } from "../data/aircraftConfig";
+import { useLockBodyScroll } from "../hooks/useLockBodyScroll";
 import Modal from "./Modal";
 
 const SVG_W = 1063;
@@ -90,6 +91,8 @@ export default function CabinSvg() {
   const { state, dispatch } = useAircraft();
   const [hovered, setHovered] = useState<string | null>(null);
   const [editingZone, setEditingZone] = useState<{ stateKey: keyof AircraftState; label: string; max?: number; maxWarning?: string } | null>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
+  useLockBodyScroll(!!editingZone, { modalContentRef });
   const [cabinImageLoaded, setCabinImageLoaded] = useState(false);
   const activeSection = state.cabinSection;
   const viewScrollTop = state.cabinScrollTop;
@@ -291,7 +294,9 @@ export default function CabinSvg() {
                 <g key={s.id} style={{ cursor: disabled ? "not-allowed" : "pointer" }}
                   onMouseEnter={() => setHovered(s.id)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     if (!disabled) {
                       const rowLimit = ROW_LIMITS[s.row];
                       setEditingZone({
@@ -346,7 +351,11 @@ export default function CabinSvg() {
                 <g key={b.id} style={{ cursor: "pointer" }}
                   onMouseEnter={() => setHovered(b.id)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => setEditingZone(b)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setEditingZone(b);
+                  }}
                 >
                   <rect x={cardX} y={cardY} width={CW} height={CH}
                     fill="transparent" pointerEvents="all" />
@@ -438,6 +447,7 @@ export default function CabinSvg() {
           maxWarning={editingZone.maxWarning}
           onSave={handleSave}
           onClose={() => setEditingZone(null)}
+          contentRef={modalContentRef}
         />
       )}
     </>

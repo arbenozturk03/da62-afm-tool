@@ -100,6 +100,8 @@ export interface CruisePrefillState {
 export interface PerformanceState {
   /** Weight (kg) used for takeoff/landing. null = use live W&B totalMass. */
   perfWeight: number | null;
+  /** Climb weight (kg) when user has set it on Climb page; null = derive from W&B or default. */
+  climbWeightKg: number | null;
   takeoff: TakeoffFormState;
   landing: LandingFormState;
   cruisePrefill: CruisePrefillState | null;
@@ -107,6 +109,7 @@ export interface PerformanceState {
 
 const initialState: PerformanceState = {
   perfWeight: null,
+  climbWeightKg: null,
   takeoff: initialTakeoffState,
   landing: initialLandingState,
   cruisePrefill: null,
@@ -116,6 +119,7 @@ const initialState: PerformanceState = {
 
 type Action =
   | { type: "UPLINK_WEIGHT"; kg: number }
+  | { type: "SET_CLIMB_WEIGHT"; kg: number | null }
   | { type: "SET_TAKEOFF"; field: keyof TakeoffFormState; value: TakeoffFormState[keyof TakeoffFormState] }
   | { type: "SET_LANDING"; field: keyof LandingFormState; value: LandingFormState[keyof LandingFormState] }
   | { type: "SET_CRUISE_PREFILL"; payload: CruisePrefillState | null };
@@ -124,6 +128,8 @@ function reducer(state: PerformanceState, action: Action): PerformanceState {
   switch (action.type) {
     case "UPLINK_WEIGHT":
       return { ...state, perfWeight: action.kg };
+    case "SET_CLIMB_WEIGHT":
+      return { ...state, climbWeightKg: action.kg };
     case "SET_TAKEOFF":
       return {
         ...state,
@@ -149,6 +155,7 @@ function reducer(state: PerformanceState, action: Action): PerformanceState {
 interface PerformanceContextValue {
   state: PerformanceState;
   uplinkWeight: (kg: number) => void;
+  setClimbWeight: (kg: number | null) => void;
   setTakeoff: <K extends keyof TakeoffFormState>(field: K, value: TakeoffFormState[K]) => void;
   setLanding: <K extends keyof LandingFormState>(field: K, value: LandingFormState[K]) => void;
   setCruisePrefill: (payload: CruisePrefillState | null) => void;
@@ -160,6 +167,10 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const uplinkWeight = useCallback((kg: number) => dispatch({ type: "UPLINK_WEIGHT", kg }), []);
+  const setClimbWeight = useCallback(
+    (kg: number | null) => dispatch({ type: "SET_CLIMB_WEIGHT", kg }),
+    [],
+  );
   const setTakeoff = useCallback(
     <K extends keyof TakeoffFormState>(field: K, value: TakeoffFormState[K]) =>
       dispatch({ type: "SET_TAKEOFF", field, value }),
@@ -177,8 +188,8 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ state, uplinkWeight, setTakeoff, setLanding, setCruisePrefill }),
-    [state, uplinkWeight, setTakeoff, setLanding, setCruisePrefill],
+    () => ({ state, uplinkWeight, setClimbWeight, setTakeoff, setLanding, setCruisePrefill }),
+    [state, uplinkWeight, setClimbWeight, setTakeoff, setLanding, setCruisePrefill],
   );
 
   return (
