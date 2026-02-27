@@ -27,16 +27,18 @@ export function useLockBodyScroll(
     document.body.style.width = "100%";
     document.body.style.overflow = "hidden";
 
-    const handleTouchMove = (e: TouchEvent) => {
+    const handleTouchMove: EventListener = (e) => {
+      const ev = e as TouchEvent;
       const modalContent = options?.modalContentRef?.current;
-      if (modalContent?.contains(e.target as Node)) return;
-      e.preventDefault();
+      if (modalContent?.contains(ev.target as Node)) return;
+      ev.preventDefault();
     };
 
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    const opts: AddEventListenerOptions = { passive: false };
+    document.addEventListener("touchmove", handleTouchMove, opts);
 
     return () => {
-      document.removeEventListener("touchmove", handleTouchMove, { passive: false });
+      document.removeEventListener("touchmove", handleTouchMove, opts);
       document.body.style.position = prevPosition;
       document.body.style.top = prevTop;
       document.body.style.width = prevWidth;
