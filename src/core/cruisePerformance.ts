@@ -342,7 +342,7 @@ function computeForWeightTable(
 }
 
 export function computeCruisePerformance(inputs: CruisePerformanceInputs): CruisePerformanceResult {
-  const { pressureAltitudeFt, isaDeviationC, weightKg, cruiseSetting } = inputs;
+  const { pressureAltitudeFt, isaDeviationC, weightKg } = inputs;
 
   if (pressureAltitudeFt < 2000 || pressureAltitudeFt > 20000) {
     return { ok: false, error: "Altitude out of AFM range" };
