@@ -33,7 +33,7 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid var(--panel-border)",
   borderRadius: 2,
   padding: "2px 4px",
-  fontSize: 13,
+  fontSize: 16,
   width: 100,
   background: "transparent",
   color: "inherit",
