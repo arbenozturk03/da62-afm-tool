@@ -1,6 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePerformance } from "../../context/PerformanceContext";
+import type { CruisePrefillState } from "../../context/PerformanceContext";
 import { computeCruisePerformance, type CruiseSetting } from "../../core/cruisePerformance";
+import { parseDecimalInput } from "../../utils/decimalInput";
+
+/** OAT display: tam sayıda .0 gösterme (-17), ondalık varsa göster (17.5). */
+function formatOatDisplay(c: number): string {
+  return c.toFixed(1).replace(/\.0$/, "");
+}
+
+function oatStringFromPrefill(p: CruisePrefillState | null): string {
+  if (!p) return "15";
+  if (p.tocOatC != null) return formatOatDisplay(p.tocOatC);
+  if (p.tocIsaDeviationC != null) {
+    const isa = 15 - 1.98 * (p.tocPressureAltFt / 1000);
+    return formatOatDisplay(isa + p.tocIsaDeviationC);
+  }
+  return formatOatDisplay(15 - 1.98 * (p.tocPressureAltFt / 1000));
+}
 
 const cardStyle: React.CSSProperties = {
   border: "1px solid var(--panel-border)",
@@ -56,9 +73,13 @@ export default function CruisePage() {
   const { state: perfState } = usePerformance();
   const cruisePrefill = perfState.cruisePrefill;
 
-  const [pressureAltInput, setPressureAltInput] = useState<string>("16000");
-  const [oatInput, setOatInput] = useState<string>("15");
-  const [weightInput, setWeightInput] = useState<string>("1600");
+  const [pressureAltInput, setPressureAltInput] = useState<string>(() =>
+    cruisePrefill ? String(Math.round(cruisePrefill.tocPressureAltFt)) : "16000",
+  );
+  const [oatInput, setOatInput] = useState<string>(() => oatStringFromPrefill(cruisePrefill));
+  const [weightInput, setWeightInput] = useState<string>(() =>
+    cruisePrefill ? cruisePrefill.tocWeightKg.toFixed(0) : "1600",
+  );
   const [fuelInput, setFuelInput] = useState<string>("");
   const [setting, setSetting] = useState<CruiseSetting>("MED");
   const [fuelMode, setFuelMode] = useState<FuelDisplayMode>("liters");
@@ -67,13 +88,7 @@ export default function CruisePage() {
     if (!cruisePrefill) return;
 
     setPressureAltInput(String(Math.round(cruisePrefill.tocPressureAltFt)));
-    if (cruisePrefill.tocOatC != null) {
-      setOatInput(cruisePrefill.tocOatC.toFixed(1));
-    } else if (cruisePrefill.tocIsaDeviationC != null) {
-      const isaTempC = 15 - 1.98 * (cruisePrefill.tocPressureAltFt / 1000);
-      const oatAtToc = isaTempC + cruisePrefill.tocIsaDeviationC;
-      setOatInput(oatAtToc.toFixed(1));
-    }
+    setOatInput(oatStringFromPrefill(cruisePrefill));
     setWeightInput(cruisePrefill.tocWeightKg.toFixed(0));
     if (cruisePrefill.fuelRemainingGal != null) {
       const fuelGal = cruisePrefill.fuelRemainingGal;
@@ -95,10 +110,10 @@ export default function CruisePage() {
   const parsed = useMemo(() => {
     if (!hasRequiredInputs) return null;
 
-    const pressureAltitudeFt = Number(pressureAltInput);
-    const oatC = Number(oatInput);
-    const weightKg = Number(weightInput);
-    const rawFuel = fuelInput.trim() === "" ? undefined : Number(fuelInput);
+    const pressureAltitudeFt = parseDecimalInput(pressureAltInput);
+    const oatC = parseDecimalInput(oatInput);
+    const weightKg = parseDecimalInput(weightInput);
+    const rawFuel = fuelInput.trim() === "" ? undefined : parseDecimalInput(fuelInput);
 
     if (
       !Number.isFinite(pressureAltitudeFt) ||
@@ -144,9 +159,10 @@ export default function CruisePage() {
         <div style={fieldStyle}>
           <span style={labelStyle}>Cruise Altitude (ft)</span>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={pressureAltInput}
-            onChange={(e) => setPressureAltInput(e.target.value)}
+            onChange={(e) => setPressureAltInput(e.target.value.replace(/,/g, "."))}
             onFocus={selectOnFocus}
             style={inputStyle}
           />
@@ -157,9 +173,10 @@ export default function CruisePage() {
             OAT at altitude (°C)
           </span>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={oatInput}
-            onChange={(e) => setOatInput(e.target.value)}
+            onChange={(e) => setOatInput(e.target.value.replace(/,/g, "."))}
             onFocus={selectOnFocus}
             style={inputStyle}
           />
@@ -171,9 +188,10 @@ export default function CruisePage() {
         <div style={fieldStyle}>
           <span style={labelStyle}>Weight at TOC (kg)</span>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={weightInput}
-            onChange={(e) => setWeightInput(e.target.value)}
+            onChange={(e) => setWeightInput(e.target.value.replace(/,/g, "."))}
             onFocus={selectOnFocus}
             style={inputStyle}
           />
@@ -234,15 +252,16 @@ export default function CruisePage() {
               ))}
             </div>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={fuelInput}
               onChange={(e) => {
-                const raw = e.target.value;
+                const raw = e.target.value.replace(/,/g, ".");
                 if (raw.trim() === "") {
                   setFuelInput("");
                   return;
                 }
-                const n = Number(raw);
+                const n = parseDecimalInput(raw);
                 if (!Number.isFinite(n)) {
                   setFuelInput(raw);
                   return;
@@ -258,7 +277,6 @@ export default function CruisePage() {
               }}
               onFocus={selectOnFocus}
               style={inputStyle}
-              min={0}
             />
           </div>
         </div>
@@ -315,8 +333,14 @@ export default function CruisePage() {
             <span style={{ color: "var(--text-secondary)" }}>Fuel Flow</span>
             <span style={{ fontWeight: 600 }}>
               {ok.fuelFlowGph.toFixed(1)}
-              <span style={{ marginLeft: 4, fontSize: 11, color: "var(--text-muted)" }}>
+              <span style={{ marginLeft: 4, fontSize: 11, color: "var(--text-muted)", fontWeight: 400 }}>
                 US gal/h
+              </span>
+              <span style={{ marginLeft: 12, fontWeight: 600 }}>
+                {(ok.fuelFlowGph * L_PER_US_GAL).toFixed(1)}
+              </span>
+              <span style={{ marginLeft: 4, fontSize: 11, color: "var(--text-muted)", fontWeight: 400 }}>
+                L/h
               </span>
             </span>
           </div>

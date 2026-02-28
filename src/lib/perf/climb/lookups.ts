@@ -51,7 +51,8 @@ function getRocFromTable(
   const iOatLow = OAT_AXIS.indexOf(oatBounds.low);
   const iOatHigh = OAT_AXIS.indexOf(oatBounds.high);
 
-  // Bilinear grid: x = OAT, y = PA. q11=(OAT_low,PA_low), q21=(OAT_high,PA_low), q12=(OAT_low,PA_high), q22=(OAT_high,PA_high)
+  // Bilinear grid: x = OAT, y = PA. Columns 0–7 = OAT -20°C to 50°C (table_metadata).
+  // q11=(OAT_low,PA_low), q21=(OAT_high,PA_low), q12=(OAT_low,PA_high), q22=(OAT_high,PA_high)
   const q11 = rowLow.roc_array[iOatLow] ?? null;
   const q21 = rowLow.roc_array[iOatHigh] ?? null;
   const q12 = rowHigh.roc_array[iOatLow] ?? null;
@@ -195,7 +196,6 @@ export function lookupGridSpeed(
 
   const { low, high, clamped } = selectWeightTables(tables, weightKg);
 
-  // Vy / Vclimb are fixed per table — no interpolation; use nearest weight table's speed
   const vLow =
     "v_y_kias" in low ? (low as TakeoffRocTable).v_y_kias : (low as CruiseRocTable).v_climb_kias;
   const vHigh =

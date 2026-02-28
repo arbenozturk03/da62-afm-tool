@@ -341,18 +341,35 @@ function computeForWeightTable(
   };
 }
 
+const ISA_DEVIATION_MIN = -10;
+const ISA_DEVIATION_MAX = 30;
+/** Tolerans: tablo dışında 2°C’ye kadar clamp edip kullan, daha fazlaysa out of range say. */
+const ISA_DEVIATION_TOLERANCE = 2;
+
 export function computeCruisePerformance(inputs: CruisePerformanceInputs): CruisePerformanceResult {
   const { pressureAltitudeFt, isaDeviationC, weightKg } = inputs;
 
   if (pressureAltitudeFt < 2000 || pressureAltitudeFt > 20000) {
     return { ok: false, error: "Altitude out of AFM range" };
   }
-  if (isaDeviationC < -10 || isaDeviationC > 30) {
-    return { ok: false, error: "ΔISA out of AFM range" };
-  }
   if (weightKg <= 0 || weightKg > 2300) {
     return { ok: false, error: "Weight out of AFM range" };
   }
+
+  const minAllowed = ISA_DEVIATION_MIN - ISA_DEVIATION_TOLERANCE;
+  const maxAllowed = ISA_DEVIATION_MAX + ISA_DEVIATION_TOLERANCE;
+  if (isaDeviationC < minAllowed || isaDeviationC > maxAllowed) {
+    return { ok: false, error: "ΔISA out of AFM range" };
+  }
+
+  const clampedIsaDeviationC = Math.max(
+    ISA_DEVIATION_MIN,
+    Math.min(ISA_DEVIATION_MAX, isaDeviationC),
+  );
+  const effectiveInputs: CruisePerformanceInputs = {
+    ...inputs,
+    isaDeviationC: clampedIsaDeviationC,
+  };
 
   const lowWeightTable = cruiseAfmData.cruise_performance[0];
   const highWeightTable = cruiseAfmData.cruise_performance[1];
@@ -367,19 +384,19 @@ export function computeCruisePerformance(inputs: CruisePerformanceInputs): Cruis
   // power settings that do not exist in the AFM tables.
 
   if (weightKg <= 1999) {
-    return computeForWeightTable(lowWeightTable, inputs);
+    return computeForWeightTable(lowWeightTable, effectiveInputs);
   }
 
   if (weightKg >= 2300) {
-    return computeForWeightTable(highWeightTable, inputs);
+    return computeForWeightTable(highWeightTable, effectiveInputs);
   }
 
   const ratio = (weightKg - 1999) / (2300 - 1999);
 
-  const lowRes = computeForWeightTable(lowWeightTable, inputs);
+  const lowRes = computeForWeightTable(lowWeightTable, effectiveInputs);
   if (!lowRes.ok) return lowRes;
 
-  const highRes = computeForWeightTable(highWeightTable, inputs);
+  const highRes = computeForWeightTable(highWeightTable, effectiveInputs);
   if (!highRes.ok) return highRes;
 
   const tasKt = lowRes.tasKt * (1 - ratio) + highRes.tasKt * ratio;
@@ -392,14 +409,14 @@ export function computeCruisePerformance(inputs: CruisePerformanceInputs): Cruis
 
   let enduranceHr: number | undefined;
   let rangeNm: number | undefined;
-  if (inputs.fuelRemainingGal != null && inputs.fuelRemainingGal > 0) {
-    enduranceHr = inputs.fuelRemainingGal / fuelFlowGph;
+  if (effectiveInputs.fuelRemainingGal != null && effectiveInputs.fuelRemainingGal > 0) {
+    enduranceHr = effectiveInputs.fuelRemainingGal / fuelFlowGph;
     rangeNm = enduranceHr * tasKt;
   }
 
   return {
     ok: true,
-    inputs,
+    inputs: effectiveInputs,
     tasKt,
     fuelFlowGph,
     pwrPercent,

@@ -15,6 +15,7 @@ import { useAircraft } from "../context/AircraftContext";
 import { usePerformance } from "../context/PerformanceContext";
 import { useAirportDb } from "../hooks/useAirportDb";
 import { getCruiseInputsFromTOC } from "../core/cruisePerformance";
+import { parseDecimalInput, toDecimalString } from "../utils/decimalInput";
 
 const L_PER_US_GAL = 3.785411784;
 
@@ -118,17 +119,42 @@ export default function ClimbCalculator() {
     : null;
 
   const [flaps, setFlaps] = useState<ClimbFlaps>(DEFAULTS.flaps);
-  const weightKg =
-    climbWeightStored ??
-    (aircraftState.wbModified ? Math.round(cgResult.totalMass) : DEFAULTS.weightKg);
-  const [fieldPAft, setFieldPAft] = useState<number>(takeoffPA);
-  const [fieldOATc, setFieldOATc] = useState<number>(takeoffOAT);
-  const [targetPAft, setTargetPAft] = useState<number>(DEFAULTS.targetPAft);
+  const derivedWeightKg =
+    aircraftState.wbModified ? Math.round(cgResult.totalMass) : DEFAULTS.weightKg;
+  const weightKg = climbWeightStored ?? derivedWeightKg;
+  const [weightInputStr, setWeightInputStr] = useState(() => toDecimalString(weightKg, 0));
+  useEffect(() => {
+    if (weightInputStr === "") return;
+    if (climbWeightStored != null) return;
+    setWeightInputStr(toDecimalString(weightKg, 0));
+  }, [weightKg, climbWeightStored, weightInputStr]);
+  const effectiveWeightKg =
+    weightInputStr.trim() !== "" ? parseDecimalInput(weightInputStr) : weightKg;
+
+  const [fieldPAftInput, setFieldPAftInput] = useState<string>(() =>
+    toDecimalString(takeoffPA, 0),
+  );
+  const [fieldOATcInput, setFieldOATcInput] = useState<string>(() =>
+    toDecimalString(takeoffOAT, 1),
+  );
+  const [targetPAftInput, setTargetPAftInput] = useState<string>(() =>
+    String(DEFAULTS.targetPAft),
+  );
   const [showVyReference, setShowVyReference] = useState(false);
 
+  const effectiveFieldPAft =
+    fieldPAftInput.trim() === "" ? takeoffPA : parseDecimalInput(fieldPAftInput);
+  const effectiveFieldOATc =
+    fieldOATcInput.trim() === "" ? takeoffOAT : parseDecimalInput(fieldOATcInput);
+  const effectiveTargetPAft =
+    targetPAftInput.trim() === ""
+      ? DEFAULTS.targetPAft
+      : parseDecimalInput(targetPAftInput);
+
+  /** Sync field PA/OAT from Takeoff when they change so Climb reflects Takeoff (e.g. after filling Takeoff). */
   useEffect(() => {
-    setFieldPAft(takeoffPA);
-    setFieldOATc(takeoffOAT);
+    setFieldPAftInput(toDecimalString(takeoffPA, 0));
+    setFieldOATcInput(toDecimalString(takeoffOAT, 1));
   }, [takeoffPA, takeoffOAT]);
 
   /** TOC from AFM 5.3.10 Time/Fuel/Distance-to-Climb (Vclimb only). */
@@ -137,12 +163,12 @@ export default function ClimbCalculator() {
       computeClimbProfile({
         mode: "manual_enroute",
         flaps: "UP",
-        weightStartKg: weightKg,
-        fieldPAft,
-        fieldOATc,
-        targetPAft,
+        weightStartKg: effectiveWeightKg,
+        fieldPAft: effectiveFieldPAft,
+        fieldOATc: effectiveFieldOATc,
+        targetPAft: effectiveTargetPAft,
       }),
-    [weightKg, fieldPAft, fieldOATc, targetPAft],
+    [effectiveWeightKg, effectiveFieldPAft, effectiveFieldOATc, effectiveTargetPAft],
   );
 
   /** Vy profile for optional Best ROC reference (ROC only; not used for TOC totals). */
@@ -152,13 +178,20 @@ export default function ClimbCalculator() {
         ? computeClimbProfile({
             mode: "manual_initial",
             flaps,
-            weightStartKg: weightKg,
-            fieldPAft,
-            fieldOATc,
-            targetPAft,
+            weightStartKg: effectiveWeightKg,
+            fieldPAft: effectiveFieldPAft,
+            fieldOATc: effectiveFieldOATc,
+            targetPAft: effectiveTargetPAft,
           })
         : null,
-    [showVyReference, flaps, weightKg, fieldPAft, fieldOATc, targetPAft],
+    [
+      showVyReference,
+      flaps,
+      effectiveWeightKg,
+      effectiveFieldPAft,
+      effectiveFieldOATc,
+      effectiveTargetPAft,
+    ],
   );
 
   const chartData = useMemo(() => buildChartData(profile.segments), [profile.segments]);
@@ -176,23 +209,35 @@ export default function ClimbCalculator() {
 
   /** Keep cruise prefill in sync with climb so Cruise page is always up to date without "Continue to Cruise". */
   useEffect(() => {
-    if (profile.segments.length === 0) return;
-    const lastSeg = profile.segments[profile.segments.length - 1];
     const tocPressureAltFt = profile.inputs.targetPAft;
-    const tocOatC = lastSeg?.oatEndC ?? null;
-    const tocWeightKg = profile.totals.finalWeightKg;
+    const tocWeightKg =
+      profile.segments.length > 0
+        ? profile.totals.finalWeightKg
+        : effectiveWeightKg;
+    const totalFuelUsGal =
+      profile.segments.length > 0 ? profile.totals.totalFuelUsGal : 0;
+    const LAPSE_C_PER_1000FT = 2.0;
+    const tocOatC =
+      profile.segments.length > 0
+        ? (profile.segments[profile.segments.length - 1]?.oatEndC ?? null)
+        : effectiveFieldOATc -
+          (LAPSE_C_PER_1000FT / 1000) *
+            Math.max(0, profile.inputs.targetPAft - profile.inputs.fieldPAft);
     const cruiseInputs = getCruiseInputsFromTOC({
       tocPressureAltFt,
-      tocOatC,
+      tocOatC: tocOatC ?? undefined,
       tocIsaDeviationC: null,
       tocWeightKg,
     });
     const totalFuelL = aircraftState.mainFuelL + aircraftState.auxFuelL;
-    const totalFuelUsGal = totalFuelL / L_PER_US_GAL;
-    const fuelRemainingGal = Math.max(0, totalFuelUsGal - profile.totals.totalFuelUsGal);
+    const totalFuelUsGalFromTanks = totalFuelL / L_PER_US_GAL;
+    const fuelRemainingGal = Math.max(
+      0,
+      totalFuelUsGalFromTanks - totalFuelUsGal,
+    );
     setCruisePrefill({
       tocPressureAltFt: cruiseInputs.pressureAltitudeFt,
-      tocOatC,
+      tocOatC: tocOatC ?? null,
       tocIsaDeviationC: cruiseInputs.isaDeviationC,
       tocWeightKg: cruiseInputs.weightKg,
       fuelRemainingGal,
@@ -202,6 +247,8 @@ export default function ClimbCalculator() {
     profile.totals.finalWeightKg,
     profile.totals.totalFuelUsGal,
     profile.inputs.targetPAft,
+    effectiveWeightKg,
+    effectiveFieldOATc,
     aircraftState.mainFuelL,
     aircraftState.auxFuelL,
     setCruisePrefill,
@@ -231,15 +278,21 @@ export default function ClimbCalculator() {
           <span className="field-label">Weight (kg)</span>
           <div className="field-value">
             <input
-              type="number"
-              min={0}
-              value={weightKg}
+              type="text"
+              inputMode="decimal"
+              value={weightInputStr}
               onChange={(e) => {
-                const v = Number(e.target.value) || 0;
-                setClimbWeight(v || null);
+                const v = e.target.value.replace(/,/g, ".");
+                setWeightInputStr(v);
+                if (v.trim() === "") {
+                  setClimbWeight(null);
+                } else {
+                  setClimbWeight(parseDecimalInput(v));
+                }
               }}
               onFocus={selectOnFocus}
               style={{ width: 80 }}
+              placeholder=""
             />
           </div>
         </div>
@@ -248,10 +301,12 @@ export default function ClimbCalculator() {
           <span className="field-label">Field Elev. (ft)</span>
           <div className="field-value">
             <input
-              type="number"
-              value={fieldPAft}
-              onChange={(e) => setFieldPAft(Number(e.target.value) || 0)}
+              type="text"
+              inputMode="decimal"
+              value={fieldPAftInput}
+              onChange={(e) => setFieldPAftInput(e.target.value.replace(/,/g, "."))}
               onFocus={selectOnFocus}
+              placeholder=""
             />
           </div>
           {airportLabel && (
@@ -265,10 +320,12 @@ export default function ClimbCalculator() {
           <span className="field-label">Field OAT (°C)</span>
           <div className="field-value">
             <input
-              type="number"
-              value={fieldOATc}
-              onChange={(e) => setFieldOATc(Number(e.target.value) || 0)}
+              type="text"
+              inputMode="decimal"
+              value={fieldOATcInput}
+              onChange={(e) => setFieldOATcInput(e.target.value.replace(/,/g, "."))}
               onFocus={selectOnFocus}
+              placeholder=""
             />
           </div>
           {airportLabel && (
@@ -295,10 +352,12 @@ export default function ClimbCalculator() {
           <span className="field-label">Target Altitude (ft)</span>
           <div className="field-value">
             <input
-              type="number"
-              value={targetPAft}
-              onChange={(e) => setTargetPAft(Number(e.target.value) || 0)}
+              type="text"
+              inputMode="decimal"
+              value={targetPAftInput}
+              onChange={(e) => setTargetPAftInput(e.target.value.replace(/,/g, "."))}
               onFocus={selectOnFocus}
+              placeholder=""
             />
           </div>
         </div>

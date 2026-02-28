@@ -3,6 +3,7 @@ import { computeLanding } from "./core/landing";
 import { useMetar } from "./hooks/useMetar";
 import { useAirportDb } from "./hooks/useAirportDb";
 import { usePerformance } from "./context/PerformanceContext";
+import { parseDecimalInput, toDecimalString } from "./utils/decimalInput";
 import MetarCard from "./MetarCard";
 import AirportSearch from "./AirportSearch";
 
@@ -573,11 +574,10 @@ export default function Landing() {
             <span className="field-label">Grass Length (cm)</span>
             <div className="field-value">
               <input
-                type="number"
-                min={0}
-                max={30}
-                value={L.grassLengthCm}
-                onChange={(e) => setLanding("grassLengthCm", Number(e.target.value))}
+                type="text"
+                inputMode="decimal"
+                value={toDecimalString(L.grassLengthCm, 0)}
+                onChange={(e) => setLanding("grassLengthCm", parseDecimalInput(e.target.value))}
                 onFocus={selectOnFocus}
               />
               {L.grassLengthCm === 0 && (
@@ -594,13 +594,13 @@ export default function Landing() {
           <span className="field-label">Weight (kg)</span>
           <div className="field-value">
             <input
-              type="number"
-              min={0}
+              type="text"
+              inputMode="decimal"
               value={weightInput}
               onChange={(e) => {
-                const v = e.target.value;
+                const v = e.target.value.replace(/,/g, ".");
                 setWeightInput(v);
-                const n = Number(v);
+                const n = parseDecimalInput(v);
                 if (v.trim() !== "" && Number.isFinite(n)) {
                   setLanding("weightKg", n);
                 }
@@ -622,14 +622,15 @@ export default function Landing() {
           <span className="field-label">Press. Alt (ft)</span>
           <div className="field-value">
             <input
-              type="number"
-              value={airport ? effPA : paInput}
+              type="text"
+              inputMode="decimal"
+              value={airport ? toDecimalString(effPA, 0) : paInput}
               disabled={!!airport}
               onChange={(e) => {
                 if (airport) return;
-                const v = e.target.value;
+                const v = e.target.value.replace(/,/g, ".");
                 setPaInput(v);
-                const n = Number(v);
+                const n = parseDecimalInput(v);
                 if (v.trim() !== "" && Number.isFinite(n)) {
                   setLanding("PA", n);
                 }
@@ -651,12 +652,13 @@ export default function Landing() {
           <span className="field-label">OAT (°C)</span>
           <div className="field-value">
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={oatInput}
               onChange={(e) => {
-                const v = e.target.value;
+                const v = e.target.value.replace(/,/g, ".");
                 setOatInput(v);
-                const n = Number(v);
+                const n = parseDecimalInput(v);
                 if (v.trim() !== "" && Number.isFinite(n)) {
                   setLanding("OAT", n);
                   setLanding("tempDirty", true);
@@ -679,20 +681,19 @@ export default function Landing() {
           <span className="field-label">Wind</span>
           <div className="field-value">
             <input
-              type="number"
-              min={0}
-              value={L.windSpeed}
-              onChange={(e) => { setLanding("windSpeed", Number(e.target.value)); setLanding("windSpeedDirty", true); }}
+              type="text"
+              inputMode="decimal"
+              value={toDecimalString(L.windSpeed, 0)}
+              onChange={(e) => { setLanding("windSpeed", parseDecimalInput(e.target.value)); setLanding("windSpeedDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
             <span>kt /</span>
             <input
-              type="number"
-              min={0}
-              max={360}
-              value={L.windDir}
-              onChange={(e) => { setLanding("windDir", Number(e.target.value)); setLanding("windDirDirty", true); }}
+              type="text"
+              inputMode="decimal"
+              value={toDecimalString(L.windDir, 0)}
+              onChange={(e) => { setLanding("windDir", parseDecimalInput(e.target.value)); setLanding("windDirDirty", true); }}
               onFocus={selectOnFocus}
               style={{ width: 55 }}
             />
@@ -723,11 +724,10 @@ export default function Landing() {
             <span className="field-label">Rwy Heading (°)</span>
             <div className="field-value">
               <input
-                type="number"
-                min={0}
-                max={360}
-                value={L.rwyHeading}
-                onChange={(e) => setLanding("rwyHeading", Number(e.target.value))}
+                type="text"
+                inputMode="decimal"
+                value={toDecimalString(L.rwyHeading, 0)}
+                onChange={(e) => setLanding("rwyHeading", parseDecimalInput(e.target.value))}
                 onFocus={selectOnFocus}
               />
             </div>
@@ -739,11 +739,11 @@ export default function Landing() {
           <span className="field-label">Slope (%)</span>
           <div className="field-value">
             <input
-              type="number"
-              step={0.5}
-              value={effSlope}
+              type="text"
+              inputMode="decimal"
+              value={toDecimalString(effSlope, 1)}
               disabled={!!airport}
-              onChange={(e) => setLanding("downhillSlope", Number(e.target.value))}
+              onChange={(e) => setLanding("downhillSlope", parseDecimalInput(e.target.value))}
               onFocus={selectOnFocus}
               style={airport ? { opacity: 0.6 } : undefined}
             />

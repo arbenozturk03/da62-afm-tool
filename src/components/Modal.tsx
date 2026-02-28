@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type KeyboardEvent, type FormEvent, type RefObject } from "react";
+import { parseDecimalInput, toDecimalString } from "../utils/decimalInput";
 
 interface ModalProps {
   title: string;
@@ -96,13 +97,10 @@ export default function Modal({ title, value, unit = "kg", max, maxWarning, onSa
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <input
               ref={inputRef}
-              type="number"
+              type="text"
               inputMode="decimal"
-              min={0}
-              max={max}
-              step={0.1}
-              value={local}
-              onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
+              value={toDecimalString(local, 1)}
+              onChange={(e) => handleChange(parseDecimalInput(e.target.value))}
               onFocus={(e) => e.target.select()}
               style={{
                 flex: 1,

@@ -3,6 +3,7 @@ import CabinSvg from "../../components/CabinSvg";
 import EnvelopeChart from "../../components/EnvelopeChart";
 import { useAircraft } from "../../context/AircraftContext";
 import { aircraftConfig } from "../../data/aircraftConfig";
+import { parseDecimalInput, toDecimalString } from "../../utils/decimalInput";
 
 type FuelMode = "metric" | "imperial";
 const FUEL_DENSITY = aircraftConfig.densities.fuel;
@@ -155,16 +156,14 @@ export default function CgPage() {
                   </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
-                      type="number"
-                      value={state.mainFuelL === 0 ? "" : parseFloat(state.mainFuelL.toFixed(1))}
-                      min={0}
-                      max={MAIN_FUEL_MAX_L}
-                      step={1}
+                      type="text"
+                      inputMode="decimal"
+                      value={state.mainFuelL === 0 ? "" : toDecimalString(state.mainFuelL, 1)}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "mainFuelL",
-                          value: clampFuelLiters(parseFloat(e.target.value) || 0, MAIN_FUEL_MAX_L),
+                          value: clampFuelLiters(parseDecimalInput(e.target.value), MAIN_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -186,16 +185,14 @@ export default function CgPage() {
                   </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
-                      type="number"
-                      value={state.auxFuelL === 0 ? "" : parseFloat(state.auxFuelL.toFixed(1))}
-                      min={0}
-                      max={AUX_FUEL_MAX_L}
-                      step={1}
+                      type="text"
+                      inputMode="decimal"
+                      value={state.auxFuelL === 0 ? "" : toDecimalString(state.auxFuelL, 1)}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "auxFuelL",
-                          value: clampFuelLiters(parseFloat(e.target.value) || 0, AUX_FUEL_MAX_L),
+                          value: clampFuelLiters(parseDecimalInput(e.target.value), AUX_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -233,16 +230,14 @@ export default function CgPage() {
                   </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       value={state.mainFuelL === 0 ? "" : displayMainFuelGal(state.mainFuelL)}
-                      min={0}
-                      max={MAIN_FUEL_MAX_GAL}
-                      step={0.1}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "mainFuelL",
-                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseFloat(e.target.value) || 0), MAIN_FUEL_MAX_GAL)), MAIN_FUEL_MAX_L),
+                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseDecimalInput(e.target.value)), MAIN_FUEL_MAX_GAL)), MAIN_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}
@@ -264,16 +259,14 @@ export default function CgPage() {
                   </span>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <input
-                      type="number"
-                      value={state.auxFuelL === 0 ? "" : parseFloat(litersToGal(state.auxFuelL).toFixed(1))}
-                      min={0}
-                      max={AUX_FUEL_MAX_GAL}
-                      step={0.1}
+                      type="text"
+                      inputMode="decimal"
+                      value={state.auxFuelL === 0 ? "" : toDecimalString(litersToGal(state.auxFuelL), 1)}
                       onChange={(e) =>
                         dispatch({
                           type: "SET_FIELD",
                           field: "auxFuelL",
-                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseFloat(e.target.value) || 0), AUX_FUEL_MAX_GAL)), AUX_FUEL_MAX_L),
+                          value: clampFuelLiters(galToLiters(Math.min(Math.max(0, parseDecimalInput(e.target.value)), AUX_FUEL_MAX_GAL)), AUX_FUEL_MAX_L),
                         })
                       }
                       onFocus={(e) => e.target.select()}

@@ -1,5 +1,6 @@
 import { useAircraft } from "../../context/AircraftContext";
 import { aircraftConfig } from "../../data/aircraftConfig";
+import { parseDecimalInput, toDecimalString } from "../../utils/decimalInput";
 
 const cardStyle: React.CSSProperties = {
   border: "1px solid var(--panel-border)",
@@ -52,20 +53,11 @@ const outputRow: React.CSSProperties = {
   fontSize: 13,
 };
 
-/** Normalize decimal separator to period so iOS/locale shows "2.43" not "2,43" */
-function parseDecimal(s: string): number {
-  const normalized = s.trim().replace(",", ".");
-  return parseFloat(normalized) || 0;
-}
-
 function Field({
   label,
   value,
   onChange,
   unit,
-  step = 1,
-  min,
-  max,
   decimalPlaces,
 }: {
   label: string;
@@ -75,26 +67,20 @@ function Field({
   step?: number;
   min?: number;
   max?: number;
-  /** If set, use text input with fixed decimals so iOS shows "2.43" not "2,43" */
+  /** If set, use fixed decimals so display always uses dot (e.g. 2.43 not 2,43) */
   decimalPlaces?: number;
 }) {
-  const isDecimal = decimalPlaces != null;
-  const displayValue = isDecimal ? value.toFixed(decimalPlaces) : String(value);
+  const displayValue = decimalPlaces != null ? toDecimalString(value, decimalPlaces) : toDecimalString(value, 0);
 
   return (
     <div style={fieldStyle}>
       <span style={labelStyle}>{label}</span>
       <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
         <input
-          type={isDecimal ? "text" : "number"}
-          inputMode={isDecimal ? "decimal" : "numeric"}
+          type="text"
+          inputMode="decimal"
           value={displayValue}
-          step={step}
-          min={min}
-          max={max}
-          onChange={(e) =>
-            onChange(isDecimal ? parseDecimal(e.target.value) : parseFloat(e.target.value) || 0)
-          }
+          onChange={(e) => onChange(parseDecimalInput(e.target.value))}
           onFocus={(e) => e.target.select()}
           style={inputStyle}
         />
